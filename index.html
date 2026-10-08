@@ -78,6 +78,8 @@ select{color:var(--ink)}
 .bigStop:disabled{background:var(--tab);border-color:var(--line);color:var(--faint)}
 .resRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 0;border-bottom:1px solid var(--tab)}
 .resRow:last-child{border-bottom:none}
+.resRow.mine .ans{color:var(--ink-dim)}
+#rMine{opacity:.8}
 .resRow small{color:var(--fn);font-size:13px}
 .resRow .ans{font-size:17px;overflow-wrap:anywhere;color:var(--str)}
 .pts{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;align-self:center}
@@ -239,6 +241,7 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
     <h1 style="font-size:46px" id="rTitle">¡STOP!</h1>
     <p class="muted" id="rMsg">La profe está revisando las respuestas…</p>
   </div>
+  <div class="panel" id="rMine" hidden><h2>Sus respuestas</h2><div id="rMineList"></div></div>
   <div class="panel" id="rBox" hidden></div>
   <div class="panel" id="rBoardBox" hidden><h2>Tabla de posiciones</h2><div class="board" id="rBoard"></div></div>
 </section>
@@ -305,7 +308,7 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
         <h2 style="margin:0" id="tRevTitle">Revisión de la ronda</h2>
         <button class="go" id="tConfirm">Confirmar puntos y enviar</button>
       </div>
-      <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía o con otra letra. <b>Toque una casilla</b> para cambiar los puntos (100 → 50 → 0) si usted ve que la respuesta está bien o mal.</p>
+      <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía, de una sola letra o con otra letra. <b>Toque una casilla</b> para cambiar los puntos (100 → 50 → 0) si usted ve que la respuesta está bien o mal.</p>
       <div class="tableWrap"><table id="tTable"></table></div>
     </section>
 
@@ -423,7 +426,7 @@ function baseFold(s){
     .replace(/\u0001/g,"ñ").replace(/\u0002/g,"Ñ");
 }
 function norm(s){ return baseFold(s).toLowerCase().replace(/[^a-z0-9ñ]+/g," ").trim(); }
-function startsOk(ans, letter){ const n = norm(ans); return n.length > 0 && n[0] === baseFold(letter).toLowerCase(); }
+function startsOk(ans, letter){ const n = norm(ans); return n.replace(/ /g,"").length >= 2 && n[0] === baseFold(letter).toLowerCase(); }
 function autoScore(answersBy, letter, nCats){
   const ids = Object.keys(answersBy), out = {};
   ids.forEach(id => out[id] = new Array(nCats).fill(0));
@@ -458,6 +461,8 @@ function teacherInit(){
   T.s = saved && saved.code ? saved : freshState(newCode());
   if(!Array.isArray(T.s.mine)) T.s.mine = [];
   if(T.s.round.status === "playing") T.s.round.status = "review";
+  // jugadores de una clase anterior (más de 30 min sin conectarse) se borran solos
+  Object.keys(T.s.players).forEach(id => { const p = T.s.players[id]; if(!p.lastAt || Date.now() - p.lastAt > 30*60*1000) delete T.s.players[id]; });
   $("tDur").value = String(T.s.dur); $("tHard").checked = !!T.s.hard;
   tSave(); tStartPeer(); tRenderAll();
 
@@ -559,7 +564,7 @@ function tOnData(c, d){
       }
     }
     if(T.conns[cid] && T.conns[cid] !== c){ const old = T.conns[cid]; T.conns[cid] = null; try{ old.close(); }catch(e){} }
-    c.open = true; c._cid = cid; T.conns[cid] = c; p.seen = Date.now();
+    c.open = true; c._cid = cid; T.conns[cid] = c; p.seen = Date.now(); p.lastAt = Date.now();
     tSave();
     c.send({ t:"welcome", name:p.name });
     tRenderPlayers(); tRenderStage(); tBroadcast();
@@ -569,7 +574,7 @@ function tOnData(c, d){
   }
   const cid = c._cid; if(!cid || !T.s.players[cid]) return;
   const p = T.s.players[cid];
-  const wasOn = isOn(p); p.seen = Date.now();
+  const wasOn = isOn(p); p.seen = Date.now(); p.lastAt = Date.now();
   if(!wasOn){ tRenderPlayers(); tBroadcast(); }
   if(d.t === "ping") return;
   if(d.t === "answers"){
@@ -925,6 +930,9 @@ function sOnState(d){
     $("rTitle").textContent = "¡STOP!";
     $("rMsg").textContent = (d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo. " : "¡STOP! lo dijo " + d.stoppedBy + ". ") + "La profe está revisando las respuestas…";
     $("rBox").hidden = true;
+    const cats = d.cats || [];
+    $("rMineList").innerHTML = cats.map((c,i) => `<div class="resRow mine"><div><small>${esc(c)}</small><div class="ans">${S.answers[i] ? esc(S.answers[i]) : "<span class='muted'>vacío</span>"}</div></div></div>`).join("");
+    $("rMine").hidden = !(d.round === S.round && cats.length);
     if($("vRes").hidden) beep(220,400);
     show("vRes");
   } else if(d.status === "done"){
@@ -936,7 +944,7 @@ function sOnState(d){
 function sBuildForm(d){
   $("pLetter").textContent = d.letter;
   $("pLetter").classList.remove("pop"); void $("pLetter").offsetWidth; $("pLetter").classList.add("pop");
-  $("pForm").innerHTML = d.cats.map((c,i) => `<div class="field ${colorOf(i)}"><label for="a${i}" data-n="[${i+1}]">${esc(c)}</label><input id="a${i}" data-i="${i}" maxlength="40" autocapitalize="sentences" autocomplete="off" spellcheck="false" placeholder="${esc(d.letter)}…" value="${esc(S.answers[i])}"></div>`).join("");
+  $("pForm").innerHTML = d.cats.map((c,i) => `<div class="field ${colorOf(i)}"><label for="a${i}" data-n="[${i+1}]">${esc(c)}</label><input id="a${i}" data-i="${i}" maxlength="40" autocapitalize="sentences" autocomplete="off" spellcheck="false" placeholder="Escriba aquí" value="${esc(S.answers[i])}"></div>`).join("");
   $("pForm").onsubmit = e => e.preventDefault();
   $("pForm").querySelectorAll("input").forEach(inp => {
     inp.oninput = () => {
@@ -970,6 +978,7 @@ function sStartTick(){
   paint(); S.tick = setInterval(paint, 250);
 }
 function sShowResult(d){
+  $("rMine").hidden = true;
   const rows = d.rows.map(r => `<div class="resRow"><div><small>${esc(r.cat)}</small><div class="ans">${r.ans?esc(r.ans):"<span class='muted'>vacío</span>"}</div></div><div class="pts p${r.pts}">${r.pts}</div></div>`).join("");
   $("rTitle").textContent = "+" + d.roundPts;
   $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--pink)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
