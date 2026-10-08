@@ -3,139 +3,193 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>¡Stop! en clase</title>
+<title>STOP de la profe Ericka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
 <style>
-/* Pizarra de aula: letra gigante, tarjetas de tiza, marcador lateral */
+/* Arcade retro: pantalla de neón sobre cuadrícula morada; Press Start 2P para títulos/números, VT323 para leer */
 :root{
-  --board:#16332c; --board-2:#1d4038; --board-3:#24493f; --chalk:#eef3ea; --chalk-dim:#a9bdb3;
-  --yellow:#f5cf4a; --red:#ef5b4c; --green:#6fd08c; --line:#2f5a50;
-  --display:"Bowlby One","Arial Black",Impact,sans-serif;
-  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#0d0221; --grid:#241047; --panel:rgba(13,2,33,.92); --panel-2:#1a0938; --line:#3d1f73;
+  --ink:#f4f4ff; --ink-dim:#a99ad6;
+  --cy:#00f0ff; --mg:#ff2a6d; --ye:#fffc40; --gr:#05ffa1;
+  --ok:#05ffa1; --mid:#fffc40; --bad:#ff2a6d;
+  --gold:#fffc40; --silver:#cfd8ff; --bronze:#ff9e5e;
+  --px:"Press Start 2P","Courier New",monospace;
+  --body:"VT323","Courier New",monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--board);color:var(--chalk);font-family:var(--body);font-size:16px;padding:20px 16px 48px;min-height:100vh;
-  background-image:radial-gradient(circle at 20% 10%,rgba(255,255,255,.04),transparent 50%),radial-gradient(circle at 80% 90%,rgba(255,255,255,.03),transparent 40%)}
+html{background:var(--bg)}
+body{font-family:var(--body);font-size:21px;line-height:1.25;color:var(--ink);padding:20px 16px 48px;min-height:100vh;background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 1px,transparent 1px 3px)}
 [hidden]{display:none!important}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);margin:0;color:var(--yellow);letter-spacing:.02em}
-h1 span{color:var(--chalk)}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--chalk-dim);margin:0 0 10px;font-weight:800}
-p{line-height:1.5}
-.muted{color:var(--chalk-dim)}
-.panel{background:var(--board-2);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
-button{font:inherit;cursor:pointer;border-radius:10px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);padding:10px 16px;font-weight:800}
-button:hover{background:rgba(255,255,255,.08)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
-button:disabled{opacity:.35;cursor:not-allowed}
-.primary{background:var(--yellow);border-color:var(--yellow);color:#1b1b14}
-.primary:hover{background:#ffe07a}
-.danger{background:var(--red);border-color:var(--red);color:#fff}
-.danger:hover{background:#ff7466}
-.small{padding:4px 10px;font-size:14px;border-width:1.5px}
-input,select{font:inherit;background:var(--board);color:var(--chalk);border:2px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
-input::placeholder{color:#7f978c}
+h1{font-family:var(--px);font-weight:400;font-size:clamp(16px,2.6vw,26px);margin:0;color:var(--ye);text-shadow:3px 3px 0 var(--mg);line-height:1.4}
+h1 span{color:var(--cy);text-shadow:3px 3px 0 #3a0d6b}
+h2{font-family:var(--px);font-size:11px;color:var(--cy);margin:0 0 12px;font-weight:400;letter-spacing:.04em;line-height:1.6}
+h2::before{content:"> ";color:var(--mg)}
+p{line-height:1.3}
+.muted{color:var(--ink-dim)}
+.panel{background:var(--panel);border:3px solid var(--cy);padding:18px;min-width:0;box-shadow:6px 6px 0 var(--mg)}
+button{font-family:var(--px);font-size:11px;line-height:1.5;cursor:pointer;border:3px solid var(--ink);background:var(--bg);color:var(--ink);padding:10px 14px;border-radius:0;box-shadow:3px 3px 0 var(--line)}
+button:hover{border-color:var(--ye);color:var(--ye)}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ye);outline-offset:2px}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+button:disabled:hover{border-color:var(--ink);color:var(--ink)}
+.primary,.go{background:var(--gr);border-color:var(--gr);color:var(--bg)}
+.primary:hover,.go:hover{background:var(--ye);border-color:var(--ye);color:var(--bg)}
+.danger{background:var(--mg);border-color:var(--mg);color:#fff}
+.danger:hover{background:#ff5c90;border-color:#ff5c90;color:#fff}
+.small{padding:6px 9px;font-size:9px}
+input,select{font-family:var(--body);font-size:22px;background:var(--bg);color:var(--gr);border:3px solid var(--cy);border-radius:0;padding:6px 10px;min-width:0}
+input::placeholder{color:#5d4a8c}
+select{color:var(--ink)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .center{justify-content:center;text-align:center}
-.letter{font-family:var(--display);line-height:1;color:var(--yellow);text-shadow:4px 4px 0 rgba(0,0,0,.25)}
-.letter.spin{color:var(--chalk)}
-.pop{animation:pop .45s ease-out}
-@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
-.clock{font-family:var(--display);font-variant-numeric:tabular-nums;line-height:1}
-.clock.low{color:var(--red)}
-.bar{height:10px;border-radius:6px;background:var(--board);overflow:hidden;border:1px solid var(--line)}
-.bar i{display:block;height:100%;background:var(--yellow);width:100%;transition:width .25s linear}
-.err{color:#ffb3aa;font-weight:700;min-height:1.5em}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
-.dot.off{background:#5d726a}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+.letter{font-family:var(--px);line-height:1.1;color:var(--ye);text-shadow:6px 6px 0 var(--mg)}
+.letter.spin{color:var(--cy);text-shadow:6px 6px 0 #3a0d6b}
+.pop{animation:pop .35s steps(4)}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+.clock{font-family:var(--px);font-variant-numeric:tabular-nums;line-height:1.2;color:var(--gr)}
+.clock.low{color:var(--mg);animation:blink .5s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.bar{height:12px;background:var(--bg);border:2px solid var(--cy);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;transition:width .25s steps(8);background:repeating-linear-gradient(90deg,var(--gr) 0 10px,transparent 10px 13px)}
+.err{color:var(--mg);min-height:1.3em;font-size:20px}
+.dot{display:inline-block;width:10px;height:10px;background:var(--gr);flex:none;box-shadow:0 0 8px var(--gr)}
+.dot.off{background:#4b3a74;box-shadow:none}
+.chip{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);padding:3px 10px;font-size:19px}
+.c0,.c1,.c2,.c3,.c4,.c5,.c6,.c7{--c:var(--cy)}
 
-/* ---------- Inicio / estudiante ---------- */
-.narrow{max-width:520px;margin:0 auto;display:grid;gap:18px}
-.join input{width:100%;font-size:20px;padding:14px}
-.join label{font-weight:800;display:block;margin:12px 0 6px}
-.join .codeIn{font-family:var(--display);letter-spacing:.2em;text-align:center;font-size:30px}
-.sPlayHead{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
-.sPlayHead .letter{font-size:96px}
-.sPlayHead .clock{font-size:44px;text-align:right}
-.field{display:grid;gap:6px}
-.field label{font-weight:800;font-size:15px}
-.field input{font-size:19px;padding:12px}
-.field input.ok{border-color:var(--green)}
-.field input.bad{border-color:var(--red)}
-.bigStop{width:100%;font-family:var(--display);font-weight:400;font-size:34px;padding:14px;letter-spacing:.05em}
-.resRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+/* ---------- Estudiante ---------- */
+.narrow{max-width:520px;margin:0 auto;display:grid;gap:20px}
+.join input{width:100%;font-size:26px;padding:10px 12px}
+.join label{font-family:var(--px);font-size:10px;display:block;margin:16px 0 8px;color:var(--cy)}
+.join .codeIn{font-family:var(--px);letter-spacing:.3em;text-align:center;font-size:28px;color:var(--ye);padding:14px}
+.sPlayHead{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.sPlayHead .letter{font-size:76px}
+.sPlayHead .clock{font-size:24px;text-align:right}
+.field{display:grid;gap:4px}
+.field label{font-size:21px;color:var(--cy)}
+.field label::before{content:"> ";color:var(--mg)}
+.field input{font-size:24px;padding:6px 10px;text-transform:uppercase}
+.field input.ok{border-color:var(--gr)}
+.field input.bad{border-color:var(--mg)}
+.bigStop{width:100%;font-size:24px;padding:16px;box-shadow:5px 5px 0 var(--ye)}
+.bigStop:disabled{background:var(--bg);border-color:#5d4a8c;color:#5d4a8c;box-shadow:none}
+.resRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:8px 0;border-bottom:2px dashed var(--line)}
 .resRow:last-child{border-bottom:none}
-.resRow small{color:var(--chalk-dim);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
-.resRow .ans{font-weight:800;font-size:18px;overflow-wrap:anywhere}
-.pts{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;align-self:center}
-.p100{color:var(--green)}.p50{color:var(--yellow)}.p0{color:#ff8c80}
+.resRow small{color:var(--cy);font-size:17px}
+.resRow .ans{font-size:23px;overflow-wrap:anywhere;text-transform:uppercase}
+.pts{font-family:var(--px);font-size:15px;font-variant-numeric:tabular-nums;align-self:center}
+.p100{color:var(--ok)}.p50{color:var(--mid)}.p0{color:var(--bad)}
+.board{display:grid}
+.bRow{display:grid;grid-template-columns:2.4em minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;border-bottom:2px dashed var(--line);font-size:22px}
+.bRow:last-child{border-bottom:none}
+.bRow .pos{font-family:var(--px);font-size:11px;color:var(--ink-dim)}
+.bRow .nm{overflow-wrap:anywhere;text-transform:uppercase}
+.bRow .tt{font-family:var(--px);font-size:12px;color:var(--ye);font-variant-numeric:tabular-nums}
+.bRow.me{background:rgba(255,42,109,.18);border:2px solid var(--mg)}
+.bRow.me .nm::after{content:" ◄ TÚ";color:var(--mg)}
+.bRow.p1 .pos{color:var(--gold)}.bRow.p2 .pos{color:var(--silver)}.bRow.p3 .pos{color:var(--bronze)}
+.gap{text-align:center;color:var(--ink-dim)}
+.bigStat{font-family:var(--px);font-size:48px;color:var(--ye);line-height:1.2;text-shadow:5px 5px 0 var(--mg)}
 
 /* ---------- Docente ---------- */
-.tWrap{max-width:1280px;margin:0 auto;display:grid;gap:18px;grid-template-columns:minmax(0,1fr) 340px}
-@media (max-width:960px){.tWrap{grid-template-columns:minmax(0,1fr)}}
-.tHead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;border-bottom:2px dashed var(--line);padding-bottom:14px}
-.salaBox{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.salaCode{font-family:var(--display);font-size:30px;color:var(--yellow);letter-spacing:.12em}
-.linkTxt{font-weight:700;color:var(--chalk-dim);font-size:14px;overflow-wrap:anywhere;max-width:340px}
-.tMain{display:grid;gap:18px;min-width:0}
-.stage{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:center}
+.tWrap{max-width:1320px;margin:0 auto;display:grid;gap:22px;grid-template-columns:minmax(0,1fr) 360px}
+@media (max-width:980px){.tWrap{grid-template-columns:minmax(0,1fr)}}
+.tHead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;justify-content:space-between}
+.salaBox{display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:var(--panel);border:3px solid var(--ye);padding:10px 16px;box-shadow:5px 5px 0 var(--mg)}
+.salaCode{font-family:var(--px);font-size:30px;color:var(--ye);letter-spacing:.14em;cursor:pointer;line-height:1.2}
+.linkTxt{color:var(--ink-dim);font-size:18px;overflow-wrap:anywhere;max-width:330px}
+.tMain{display:grid;gap:22px;min-width:0}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px;align-items:center}
 @media (max-width:700px){.stage{grid-template-columns:minmax(0,1fr)}}
-.stage .letter{font-size:clamp(120px,18vw,220px);text-align:center;min-height:1em}
-.stage .clock{font-size:64px;text-align:center}
-.used{color:var(--chalk-dim);font-weight:700;font-size:14px;letter-spacing:.12em;text-align:center;margin-top:8px;overflow-wrap:anywhere}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
-.cat{display:flex;align-items:center;justify-content:space-between;gap:8px;border:2px solid var(--chalk);border-radius:10px;padding:8px 10px 8px 12px;font-weight:800;min-width:0}
-.cat span{overflow-wrap:anywhere}
-.cat button{border:none;padding:2px 8px;color:var(--chalk-dim);font-size:18px}
-.cat button:hover{color:var(--red)}
-.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-.tools input{flex:1 1 180px}
-.check{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--chalk-dim);font-size:14px}
-.tableWrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
-table{border-collapse:collapse;width:100%;font-size:15px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--chalk-dim);background:var(--board-3);position:sticky;top:0}
-td.name{font-weight:800;white-space:nowrap}
-td.cell{cursor:pointer;min-width:120px;border-left:1px solid var(--line)}
-td.cell:hover{background:rgba(255,255,255,.05)}
-td.cell .a{display:block;font-weight:700;overflow-wrap:anywhere}
-td.cell .a.empty{color:#6f857b;font-style:italic;font-weight:500}
-td.cell .b{display:inline-block;margin-top:4px;font-weight:800;font-size:13px;border-radius:6px;padding:1px 7px}
-.b100{background:rgba(111,208,140,.18);color:var(--green)}
-.b50{background:rgba(245,207,74,.18);color:var(--yellow)}
-.b0{background:rgba(239,91,76,.2);color:#ff8c80}
-td.cell .m{font-size:11px;color:var(--chalk-dim);margin-left:4px}
-td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
-.pl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.stage .letter{font-size:clamp(110px,15vw,190px);text-align:center;min-height:1.1em}
+.stage .clock{font-size:42px;text-align:center}
+.used{color:var(--ink-dim);font-size:20px;text-align:center;margin-top:14px;overflow-wrap:anywhere;letter-spacing:.08em}
+.check{display:flex;align-items:center;gap:8px;color:var(--ink-dim);font-size:19px}
+.statusLine{margin:16px 0 0;font-size:21px;text-align:center;border:2px dashed var(--line);padding:6px 12px;color:var(--gr)}
+.statusLine::before{content:"> ";color:var(--mg)}
+
+.selCats{display:flex;flex-wrap:wrap;gap:10px;min-height:44px}
+.selCat{display:inline-flex;align-items:center;gap:6px;background:var(--cy);color:var(--bg);padding:3px 4px 3px 12px;font-size:21px;max-width:100%;box-shadow:3px 3px 0 var(--mg)}
+.selCat span{overflow-wrap:anywhere;text-transform:uppercase}
+.selCat button{background:transparent;border:none;box-shadow:none;color:var(--bg);width:26px;height:26px;padding:0;font-size:12px}
+.selCat button:hover{color:var(--mg)}
+.pickGroup{margin-top:18px}
+.pickGroup h3{font-family:var(--px);font-size:9px;margin:0 0 10px;color:var(--mg);font-weight:400}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick button{font-family:var(--body);font-size:20px;background:transparent;border:2px solid var(--line);color:var(--ink-dim);padding:2px 10px;box-shadow:none;text-transform:uppercase}
+.pick button:hover{color:var(--cy);border-color:var(--cy)}
+.pick button.on{border-color:var(--cy);color:var(--cy);background:rgba(0,240,255,.12)}
+.pick button.on::before{content:"✓ "}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.tools input{flex:1 1 200px}
+.emptyCats{color:var(--ink-dim);align-self:center}
+
+.tableWrap{overflow-x:auto;border:3px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:20px}
+th,td{padding:6px 10px;border-bottom:2px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--px);font-size:9px;font-weight:400;color:var(--bg);background:var(--cy);position:sticky;top:0;line-height:1.5}
+td.name{white-space:nowrap;text-transform:uppercase;color:var(--ye)}
+td.cell{cursor:pointer;min-width:120px;border-left:2px solid var(--line)}
+td.cell:hover{background:var(--panel-2)}
+td.cell .a{display:block;overflow-wrap:anywhere;text-transform:uppercase}
+td.cell .a.empty{color:#5d4a8c}
+td.cell .b{display:inline-block;margin-top:2px;font-family:var(--px);font-size:9px;padding:2px 5px;border:2px solid currentColor}
+.b100{color:var(--ok)}.b50{color:var(--mid)}.b0{color:var(--bad)}
+td.cell .m{font-size:15px;color:var(--ink-dim);margin-left:4px}
+td.tot{font-family:var(--px);font-size:14px;color:var(--ye);text-align:right;font-variant-numeric:tabular-nums}
+
+.pl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:8px 0;border-bottom:2px dashed var(--line)}
 .pl:last-child{border-bottom:none}
-.pl .rk{font-weight:800;color:var(--chalk-dim);width:1.6em;text-align:right;font-variant-numeric:tabular-nums}
-.pl .nm{font-weight:800;display:flex;align-items:center;gap:8px;min-width:0}
-.pl .nm b{overflow-wrap:anywhere;font-weight:800}
-.pl .sc{font-family:var(--display);font-size:22px;color:var(--yellow);font-variant-numeric:tabular-nums}
+.pl .rk{font-family:var(--px);font-size:11px;color:var(--ink-dim);width:2.2em;text-align:right}
+.pl:nth-child(1) .rk{color:var(--gold)}.pl:nth-child(2) .rk{color:var(--silver)}.pl:nth-child(3) .rk{color:var(--bronze)}
+.pl .nm{display:flex;align-items:center;gap:8px;min-width:0}
+.pl .nm b{overflow-wrap:anywhere;font-weight:400;text-transform:uppercase;font-size:22px}
+.pl .sc{font-family:var(--px);font-size:14px;color:var(--ye);font-variant-numeric:tabular-nums}
 .pl .act{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px}
-.done{color:var(--green);font-size:13px;font-weight:800}
-.rules{font-size:14px;color:var(--chalk-dim);line-height:1.5;margin:10px 0 0}
-.rules b{color:var(--chalk)}
+.done{color:var(--bg);background:var(--gr);padding:0 6px;font-size:17px}
+.onCount{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.rules{font-size:19px;color:var(--ink-dim);line-height:1.3;margin:10px 0 0}
+.rules b{color:var(--ye);font-weight:400}
 
 /* overlays */
-.overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:20;text-align:center;padding:16px;cursor:pointer}
-.overlay.red{background:rgba(239,91,76,.96)}
-.overlay.dark{background:rgba(10,24,20,.94)}
-.overlay h3{font-family:var(--display);font-weight:400;font-size:clamp(90px,22vw,240px);margin:0;color:#fff;line-height:1;animation:pop .5s ease-out}
-.overlay p{color:#fff;font-weight:800;font-size:22px;margin:10px 0 0}
-.pinBig{font-family:var(--display);font-size:clamp(110px,24vw,280px);line-height:1;color:#fff;letter-spacing:.12em;margin:10px 0 20px;font-variant-numeric:tabular-nums}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--chalk);color:#14261f;font-weight:800;padding:10px 18px;border-radius:999px;z-index:30}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:20;text-align:center;padding:16px;background:var(--bg);overflow:auto;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+.overlay.red,.overlay.dark{cursor:pointer}
+.overlay h3{font-family:var(--px);font-weight:400;font-size:clamp(60px,14vw,170px);margin:0;color:var(--mg);line-height:1.2;animation:pop .35s steps(4);text-shadow:8px 8px 0 var(--ye)}
+.overlay p{color:var(--ink);font-size:30px;margin:14px 0 0}
+.pinBig{font-family:var(--px);font-size:clamp(70px,16vw,200px);line-height:1.2;color:var(--ye);letter-spacing:.12em;margin:14px 0 24px;text-shadow:8px 8px 0 var(--mg)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--gr);color:var(--bg);font-family:var(--px);font-size:11px;padding:12px 16px;z-index:30;box-shadow:4px 4px 0 var(--mg)}
+
+/* podio */
+.podWrap{width:min(920px,100%)}
+.podTitle{font-family:var(--px);font-size:clamp(20px,4vw,40px);color:var(--ye);margin:0 0 56px;text-shadow:4px 4px 0 var(--mg);line-height:1.4}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end}
+.podCol{display:grid;gap:8px;justify-items:center;min-width:0;animation:rise .6s steps(6) both}
+.podCol .who{font-size:clamp(22px,3.2vw,36px);overflow-wrap:anywhere;color:var(--ink);text-transform:uppercase}
+.podCol .sc{font-family:var(--px);font-size:clamp(10px,1.4vw,14px);color:var(--c)}
+.podCol .blk{width:100%;border:4px solid var(--c);border-bottom:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 4px,transparent 4px 8px);display:grid;place-items:start center;padding-top:14px;font-family:var(--px);font-size:clamp(34px,6vw,70px);color:var(--c);text-shadow:4px 4px 0 var(--mg)}
+.podCol.g1{--c:var(--gold);animation-delay:1.2s}.podCol.g1 .blk{height:clamp(160px,26vh,260px)}
+.podCol.g2{--c:var(--silver);animation-delay:.6s}.podCol.g2 .blk{height:clamp(110px,18vh,180px)}
+.podCol.g3{--c:var(--bronze);animation-delay:0s}.podCol.g3 .blk{height:clamp(80px,13vh,130px)}
+.podCol.empty{visibility:hidden}
+@keyframes rise{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:none}}
+.podRest{margin:26px auto 0;max-width:520px;text-align:left;border:3px solid var(--line);background:var(--panel)}
+.podBtns{margin-top:24px;justify-content:center}
+.crown{font-size:40px;line-height:1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<!-- ================= INICIO / UNIRSE (estudiante) ================= -->
+<!-- ================= UNIRSE (estudiante) ================= -->
 <section id="vJoin" class="narrow" hidden>
-  <div class="center"><h1>¡STOP! <span>en clase</span></h1></div>
+  <div class="center"><h1>STOP <span>de la profe Ericka</span></h1></div>
   <div class="panel join">
     <h2>Entrar al juego</h2>
     <form id="joinForm" autocomplete="off">
@@ -144,21 +198,22 @@ td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:
       <label for="inName">Su nombre y apellido</label>
       <input id="inName" maxlength="24" placeholder="Ej. Ana Mora" required>
       <p class="err" id="joinErr"></p>
-      <button class="primary" style="width:100%;font-size:20px" id="joinBtn">Entrar</button>
+      <button class="go" style="width:100%;font-size:22px;padding:14px" id="joinBtn">¡Entrar!</button>
     </form>
   </div>
-  <p class="muted center" style="font-size:14px">¿Es docente? <a href="?profe" style="color:var(--yellow)">Abrir modo docente</a></p>
+  <p class="center" style="font-size:14px;color:#fff">¿Es docente? <a href="?profe" style="color:var(--yellow);font-weight:700">Abrir modo docente</a></p>
 </section>
 
 <!-- ================= ESTUDIANTE: esperando ================= -->
 <section id="vWait" class="narrow center" hidden>
-  <h1>¡STOP! <span>en clase</span></h1>
+  <h1>STOP <span>de la profe Ericka</span></h1>
   <div class="panel">
-    <p style="font-size:20px;margin:0">Hola, <b id="wName"></b> 👋</p>
+    <p style="font-size:22px;margin:0">¡Hola, <b id="wName"></b>! 🎉</p>
     <p class="muted" id="wMsg">Ya está dentro. Espere a que la profe sortee la letra.</p>
     <p class="chip" style="margin:0 auto"><span class="dot" id="wDot"></span><span id="wCount">—</span></p>
   </div>
   <div class="panel" id="wLast" hidden></div>
+  <div class="panel" id="wBoardBox" hidden style="text-align:left"><h2>Tabla de posiciones</h2><div class="board" id="wBoard"></div></div>
 </section>
 
 <!-- ================= ESTUDIANTE: jugando ================= -->
@@ -172,35 +227,47 @@ td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:
       </div>
     </div>
   </div>
-  <form class="panel" id="pForm" autocomplete="off" style="display:grid;gap:14px"></form>
+  <form class="panel" id="pForm" autocomplete="off" style="display:grid;gap:16px"></form>
   <button class="danger bigStop" id="pStop" disabled>¡STOP!</button>
-  <p class="muted center" id="pHint" style="margin:0;font-size:14px">Llene todas las casillas para poder decir ¡STOP!</p>
+  <p class="center" id="pHint" style="margin:0;font-size:15px;color:#fff;font-weight:600">Llene todas las casillas para poder decir ¡STOP!</p>
 </section>
 
-<!-- ================= ESTUDIANTE: revisión / resultados ================= -->
+<!-- ================= ESTUDIANTE: resultados ================= -->
 <section id="vRes" class="narrow" hidden>
   <div class="panel center">
-    <h1 style="font-size:40px" id="rTitle">¡STOP!</h1>
+    <h1 style="font-size:46px" id="rTitle">¡STOP!</h1>
     <p class="muted" id="rMsg">La profe está revisando las respuestas…</p>
   </div>
   <div class="panel" id="rBox" hidden></div>
+  <div class="panel" id="rBoardBox" hidden><h2>Tabla de posiciones</h2><div class="board" id="rBoard"></div></div>
+</section>
+
+<!-- ================= ESTUDIANTE: podio ================= -->
+<section id="vPodium" class="narrow center" hidden>
+  <div class="panel">
+    <h2 style="text-align:left">GAME OVER</h2>
+    <div class="crown" id="podMeIcon">🏆</div>
+    <div class="bigStat" id="podMePos">1°</div>
+    <p style="margin:6px 0 0;font-size:18px" id="podMeTxt"></p>
+  </div>
+  <div class="panel" style="text-align:left"><h2>Podio final</h2><div class="board" id="podBoard"></div></div>
 </section>
 
 <!-- ================= DOCENTE ================= -->
 <div id="vTeacher" class="tWrap" hidden>
   <header class="tHead">
-    <h1>¡STOP! <span>en clase</span></h1>
+    <h1>STOP <span>de la profe Ericka</span></h1>
     <div class="salaBox">
       <div>
-        <div class="muted" style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">PIN del juego</div>
-        <div class="salaCode" id="tCode">····</div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)">PIN del juego</div>
+        <div class="salaCode" id="tCode" title="Proyectar PIN">····</div>
       </div>
       <div style="display:grid;gap:6px">
         <span class="linkTxt" id="tLink">Conectando…</span>
         <div class="row">
+          <button class="small primary" id="tQrBtn">Proyectar PIN</button>
           <button class="small" id="tCopy">Copiar enlace</button>
-          <button class="small" id="tQrBtn">Proyectar PIN</button>
-          <button class="small" id="tNew">Sala nueva</button>
+          <button class="small" id="tNew">Juego nuevo</button>
         </div>
       </div>
     </div>
@@ -216,7 +283,7 @@ td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:
         <div style="display:grid;gap:12px">
           <div class="clock" id="tClock">1:30</div>
           <div class="bar"><i id="tBar"></i></div>
-          <button class="primary" id="tDraw">Sortear letra y empezar</button>
+          <button class="go" id="tDraw" style="font-size:18px">Sortear letra y empezar</button>
           <button class="danger" id="tStop" disabled>¡STOP! (terminar ronda)</button>
           <div class="row">
             <select id="tDur" aria-label="Duración">
@@ -226,49 +293,56 @@ td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:
             <label class="check"><input type="checkbox" id="tHard"> Ñ K Q W X Y Z</label>
           </div>
           <button class="small" id="tResetLetters">Reiniciar letras</button>
+          <button id="tPodium">🏆 Terminar y ver podio</button>
         </div>
       </div>
-      <p class="muted center" id="tStatus" style="margin:12px 0 0;font-weight:700">Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.</p>
+      <p class="statusLine" id="tStatus">Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.</p>
     </section>
 
     <section class="panel" id="tReview" hidden>
       <div class="row" style="justify-content:space-between;margin-bottom:10px">
         <h2 style="margin:0" id="tRevTitle">Revisión de la ronda</h2>
-        <button class="primary" id="tConfirm">Confirmar puntos y enviar</button>
+        <button class="go" id="tConfirm">Confirmar puntos y enviar</button>
       </div>
       <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía o con otra letra. <b>Toque una casilla</b> para cambiar los puntos (100 → 50 → 0) si usted ve que la respuesta está bien o mal.</p>
       <div class="tableWrap"><table id="tTable"></table></div>
     </section>
 
     <section class="panel" id="tCatsPanel">
-      <h2>Categorías</h2>
-      <div class="cats" id="tCats"></div>
-      <div class="tools">
-        <input id="tNewCat" placeholder="Nueva categoría (ej. Protocolo de red)" maxlength="40">
-        <button id="tAddCat">Agregar</button>
-        <select id="tPreset" aria-label="Juego de categorías">
-          <option value="">Cargar juego de categorías…</option>
-          <option value="clasico">Clásico</option>
-          <option value="tec">Tecnología</option>
-          <option value="ciber">Ciberseguridad</option>
-          <option value="web">Desarrollo Web</option>
-          <option value="mixto">Mixto (clásico + tecno)</option>
-        </select>
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Categorías del juego <span id="tCatCount"></span></h2>
+        <button class="small" id="tClearCats">Quitar todas</button>
       </div>
+      <p class="rules" style="margin:4px 0 12px">Toque las categorías de abajo para agregarlas o quitarlas (máximo 12). También puede escribir las suyas.</p>
+      <div class="selCats" id="tCats"></div>
+      <div class="tools">
+        <input id="tNewCat" placeholder="Escriba su propia categoría (ej. Protocolo de red)" maxlength="40">
+        <button class="primary" id="tAddCat">Agregar</button>
+      </div>
+      <div class="pickGroup"><h3>Las 20 más comunes</h3><div class="pick" id="pickCommon"></div></div>
+      <div class="pickGroup"><h3>Tecnología e informática</h3><div class="pick" id="pickTec"></div></div>
+      <div class="pickGroup" id="pickMineBox" hidden><h3>Mis categorías</h3><div class="pick" id="pickMine"></div></div>
     </section>
   </main>
 
   <aside class="panel" style="align-self:start">
     <div class="row" style="justify-content:space-between;margin-bottom:6px">
-      <h2 style="margin:0">Jugadores <span id="tCount">(0)</span></h2>
+      <h2 style="margin:0">Jugadores</h2>
       <button class="small" id="tZero">Marcador en 0</button>
     </div>
+    <div class="onCount"><span class="chip"><span class="dot"></span><span id="tOnline">0 en línea</span></span><span class="chip" id="tTotal">0 en total</span></div>
     <div id="tPlayers"><p class="rules">Todavía no ha entrado nadie. Los nombres aparecen aquí apenas los chicos entran.</p></div>
   </aside>
 </div>
 
 <div class="overlay red" id="ovStop" hidden><div><h3>¡STOP!</h3><p id="ovStopMsg">Lápices abajo</p></div></div>
-<div class="overlay dark" id="ovQr" hidden><div><p style="font-size:24px;margin:0 0 6px">Entre a</p><p id="ovQrLink" style="font-size:clamp(20px,3.4vw,40px);margin:0 0 28px;color:var(--yellow);overflow-wrap:anywhere"></p><p style="font-size:24px;margin:0">y escriba el PIN</p><div class="pinBig" id="ovPin"></div><p class="muted" style="font-size:16px">Toque para cerrar</p></div></div>
+<div class="overlay dark" id="ovQr" hidden><div><p style="font-size:24px;margin:0 0 6px">Entre a</p><p id="ovQrLink" style="font-size:clamp(20px,3.4vw,40px);margin:0 0 28px;color:#fff;font-weight:700;overflow-wrap:anywhere"></p><p style="font-size:24px;margin:0">y escriba el PIN</p><div class="pinBig" id="ovPin"></div><p style="font-size:16px;opacity:.8">Toque para cerrar</p></div></div>
+<div class="overlay" id="ovPod" hidden><div class="podWrap">
+  <p class="podTitle">GAME OVER · PODIO</p>
+  <div class="podium" id="podCols"></div>
+  <div class="podRest board" id="podRest"></div>
+  <div class="row podBtns"><button id="podClose">Cerrar</button><button class="primary" id="podAgain">Seguir jugando</button></div>
+</div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -277,18 +351,28 @@ td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:
 /* ============================================================
    ¡STOP! en clase — multijugador sin cuentas (PeerJS)
    La computadora de la docente es la "central"; los celulares
-   se conectan a ella con el código de sala.
+   se conectan a ella con el PIN.
    ============================================================ */
 const PREFIX = "ctpmn-stop-v1-";
-const PRESETS = {
-  clasico:["Nombre","Apellido","País o ciudad","Animal","Fruta o verdura","Color","Cosa"],
-  tec:["Lenguaje de programación","Marca tecnológica","Componente de hardware","App o sitio web","Término informático","Profesión TI"],
-  ciber:["Tipo de ataque","Herramienta de seguridad","Término de ciberseguridad","Protocolo","Buena práctica","Dispositivo de red"],
-  web:["Etiqueta HTML","Propiedad CSS","Palabra de JavaScript","Framework o librería","Término web","Sitio famoso"],
-  mixto:["Nombre","País o ciudad","Animal","Lenguaje de programación","Marca tecnológica","Término informático","Cosa"]
-};
+// Servidores para que los celulares se conecten aunque estén en otra red (datos móviles, wifi del cole)
+const PEER_OPTS = { debug: 0, config: { iceServers: [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:global.stun.twilio.com:3478" },
+  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+]}};
+const COMMON = ["Nombre","Apellido","País","Ciudad","Animal","Fruta","Verdura","Color","Cosa","Comida",
+  "Marca","Profesión u oficio","Deporte","Cantante o banda","Película o serie","Parte del cuerpo",
+  "Objeto de la casa","Flor o planta","Personaje famoso","Lugar de Costa Rica"];
+const TEC = ["Lenguaje de programación","Marca tecnológica","Componente de hardware","App o sitio web","Término informático",
+  "Tipo de ataque","Herramienta de seguridad","Etiqueta HTML","Propiedad CSS","Videojuego"];
+const DEFAULT_CATS = ["Nombre","Apellido","País","Animal","Fruta","Color","Cosa"];
 const EASY = "ABCDEFGHIJLMNOPRSTUV".split("");
 const HARD = "ÑKQWXYZ".split("");
+const MAX_CATS = 12;
+const ONLINE_MS = 12000;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -297,15 +381,19 @@ const ls = {
   set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
   del(k){ try{ localStorage.removeItem(k); }catch(e){} }
 };
+const ss = {
+  get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ sessionStorage.setItem(k, v); }catch(e){} }
+};
 const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
-function show(id){ ["vJoin","vWait","vPlay","vRes","vTeacher"].forEach(v => $(v).hidden = (v !== id)); }
+function show(id){ ["vJoin","vWait","vPlay","vRes","vPodium","vTeacher"].forEach(v => $(v).hidden = (v !== id)); }
 let toastT;
-function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2200); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2400); }
 let audio=null;
 function beep(f,ms){ try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); const o=audio.createOscillator(), g=audio.createGain(); o.type="square"; o.frequency.value=f; g.gain.value=.07; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+ms/1000); }catch(e){} }
+const colorOf = i => "c" + (i % 8);
 
 /* ---------- Calificación ---------- */
-// Quita tildes (pero conserva la Ñ) para comparar
 function baseFold(s){
   return String(s||"").replace(/ñ/g,"\u0001").replace(/Ñ/g,"\u0002")
     .normalize("NFD").replace(/[̀-ͯ]/g,"")
@@ -313,7 +401,6 @@ function baseFold(s){
 }
 function norm(s){ return baseFold(s).toLowerCase().replace(/[^a-z0-9ñ]+/g," ").trim(); }
 function startsOk(ans, letter){ const n = norm(ans); return n.length > 0 && n[0] === baseFold(letter).toLowerCase(); }
-/** answersBy: {id:[...]}; returns {id:[pts...]} automático */
 function autoScore(answersBy, letter, nCats){
   const ids = Object.keys(answersBy), out = {};
   ids.forEach(id => out[id] = new Array(nCats).fill(0));
@@ -328,23 +415,25 @@ function autoScore(answersBy, letter, nCats){
 /* ============================================================
    MODO DOCENTE (central)
    ============================================================ */
-const T = {
-  peer:null, conns:{}, tick:null,
-  s: null
-};
+const T = { peer:null, conns:{}, tick:null, s:null, lastOnlineKey:"" };
 function freshState(code){
-  return { code, cats:[...PRESETS.mixto], dur:90, hard:false, used:[], players:{},
+  return { code, cats:[...DEFAULT_CATS], mine:[], dur:90, hard:false, used:[], players:{},
     round:{ n:0, status:"idle", letter:"", cats:[], endsAt:0, answers:{}, finals:{}, over:{}, stoppedBy:"", dur:90 } };
 }
 function newCode(){ return String(Math.floor(1000 + Math.random()*9000)); }
-function tSave(){ ls.set("stop_host", T.s); }
+function tSave(){
+  // "seen" no se guarda: al recargar todos empiezan desconectados hasta que vuelvan a avisar
+  const copy = JSON.parse(JSON.stringify(T.s));
+  Object.values(copy.players).forEach(p => delete p.seen);
+  ls.set("stop_host", copy);
+}
+const isOn = p => !!p.seen && (Date.now() - p.seen) < ONLINE_MS;
 
 function teacherInit(){
   show("vTeacher");
   const saved = ls.get("stop_host", null);
   T.s = saved && saved.code ? saved : freshState(newCode());
-  Object.values(T.s.players).forEach(p => p.online = false);
-  // si se recargó durante una ronda, se pasa directo a revisión
+  if(!Array.isArray(T.s.mine)) T.s.mine = [];
   if(T.s.round.status === "playing") T.s.round.status = "review";
   $("tDur").value = String(T.s.dur); $("tHard").checked = !!T.s.hard;
   tSave(); tStartPeer(); tRenderAll();
@@ -355,29 +444,48 @@ function teacherInit(){
   $("tResetLetters").onclick = () => { T.s.used=[]; tSave(); tRenderStage(); };
   $("tDur").onchange = e => { T.s.dur = +e.target.value; tSave(); tRenderStage(); };
   $("tHard").onchange = e => { T.s.hard = e.target.checked; tSave(); };
-  $("tAddCat").onclick = () => { const v=$("tNewCat").value.trim(); if(v && T.s.cats.length<12){ T.s.cats.push(v); $("tNewCat").value=""; tSave(); tRenderCats(); } };
+  $("tAddCat").onclick = () => {
+    const v = $("tNewCat").value.replace(/\s+/g," ").trim(); if(!v) return;
+    if(T.s.cats.length >= MAX_CATS){ toast("Máximo " + MAX_CATS + " categorías"); return; }
+    if(!T.s.cats.some(c => c.toLowerCase() === v.toLowerCase())) T.s.cats.push(v);
+    const known = COMMON.concat(TEC, T.s.mine).some(c => c.toLowerCase() === v.toLowerCase());
+    if(!known) T.s.mine.push(v);
+    $("tNewCat").value = ""; tSave(); tRenderCats();
+  };
   $("tNewCat").onkeydown = e => { if(e.key==="Enter") $("tAddCat").click(); };
-  $("tPreset").onchange = e => { if(PRESETS[e.target.value]){ T.s.cats=[...PRESETS[e.target.value]]; tSave(); tRenderCats(); } e.target.value=""; };
-  $("tZero").onclick = () => { if($("tZero").dataset.armed){ Object.values(T.s.players).forEach(p=>p.total=0); tSave(); tRenderPlayers(); tBroadcast(); delete $("tZero").dataset.armed; $("tZero").textContent="Marcador en 0"; } else { $("tZero").dataset.armed="1"; $("tZero").textContent="¿Seguro? Toque otra vez"; setTimeout(()=>{ delete $("tZero").dataset.armed; $("tZero").textContent="Marcador en 0"; },3000); } };
-  $("tNew").onclick = () => { if($("tNew").dataset.armed){ ls.del("stop_host"); location.reload(); } else { $("tNew").dataset.armed="1"; $("tNew").textContent="¿Borrar todo? Toque otra vez"; setTimeout(()=>{ delete $("tNew").dataset.armed; $("tNew").textContent="Sala nueva"; },3000); } };
+  $("tClearCats").onclick = () => { T.s.cats = []; tSave(); tRenderCats(); };
+  armButton($("tZero"), "Marcador en 0", () => { Object.values(T.s.players).forEach(p=>p.total=0); tSave(); tRenderPlayers(); tBroadcast(); });
+  armButton($("tNew"), "Juego nuevo", () => { ls.del("stop_host"); location.reload(); }, "¿Borrar todo? Toque otra vez");
   $("tCopy").onclick = () => { const l=tLinkUrl(); (navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast("Enlace copiado")).catch(()=>toast(l)); };
-  $("tQrBtn").onclick = tShowQr; $("tCode").onclick = tShowQr; $("tCode").style.cursor = "pointer";
+  $("tQrBtn").onclick = tShowPin; $("tCode").onclick = tShowPin;
   $("ovQr").onclick = () => $("ovQr").hidden = true;
   $("ovStop").onclick = () => $("ovStop").hidden = true;
-  document.addEventListener("keydown", e => { if(e.key==="Escape"){ $("ovQr").hidden=true; $("ovStop").hidden=true; } });
-  setInterval(tPing, 5000);
+  $("tPodium").onclick = tPodiumClick;
+  $("podClose").onclick = () => $("ovPod").hidden = true;
+  $("podAgain").onclick = () => { T.s.podium = null; tSave(); $("ovPod").hidden = true; tSendPodium(); tBroadcast(); toast("Listo para otra ronda"); };
+  document.addEventListener("keydown", e => { if(e.key==="Escape"){ $("ovQr").hidden=true; $("ovStop").hidden=true; $("ovPod").hidden=true; } });
+  // revisa cada 3 s quién sigue en línea
+  setInterval(() => {
+    const key = Object.entries(T.s.players).filter(([,p]) => isOn(p)).map(([id]) => id).sort().join(",");
+    if(key !== T.lastOnlineKey){ T.lastOnlineKey = key; tRenderPlayers(); tRenderStage(); tBroadcast(); }
+  }, 3000);
 }
-function tLinkUrl(){ return location.origin + location.pathname + "?sala=" + T.s.code; }
+function armButton(btn, label, action, armedLabel){
+  btn.onclick = () => {
+    if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent = label; action(); return; }
+    btn.dataset.armed = "1"; btn.textContent = armedLabel || "¿Seguro? Toque otra vez";
+    setTimeout(() => { if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent = label; } }, 3000);
+  };
+}
+function tLinkUrl(){ return location.origin + location.pathname; }
 
 function tStartPeer(){
   $("tCode").textContent = T.s.code;
   $("tLink").textContent = "Conectando…";
   if(T.peer){ try{ T.peer.destroy(); }catch(e){} }
-  const peer = new Peer(PREFIX + T.s.code);
+  const peer = new Peer(PREFIX + T.s.code, PEER_OPTS);
   T.peer = peer;
-  peer.on("open", () => {
-    $("tLink").textContent = tLinkUrl();
-  });
+  peer.on("open", () => { $("tLink").textContent = "Listo ✓ " + location.host + location.pathname; });
   peer.on("connection", c => {
     c.on("data", d => tOnData(c, d));
     c.on("close", () => tOnClose(c));
@@ -386,43 +494,58 @@ function tStartPeer(){
   peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
   peer.on("error", e => {
     if(e.type === "unavailable-id"){
-      // Otra pestaña tiene este PIN abierto, o el servidor aún la recuerda: usar código nuevo
       T.s.code = newCode(); tSave(); setTimeout(tStartPeer, 300);
-    } else if(e.type === "network" || e.type === "server-error" || e.type === "socket-error" || e.type === "socket-closed"){
+    } else if(["network","server-error","socket-error","socket-closed"].includes(e.type)){
       $("tLink").textContent = "Sin conexión al servidor. Revise el internet; reintentando…";
       setTimeout(() => { try{ if(peer.destroyed) tStartPeer(); else peer.reconnect(); }catch(err){ tStartPeer(); } }, 3000);
     }
   });
 }
 
-function tCidOf(c){ return c && c._cid; }
 function tOnClose(c){
-  const cid = tCidOf(c);
-  if(cid && T.conns[cid] === c){ delete T.conns[cid]; if(T.s.players[cid]){ T.s.players[cid].online = false; tRenderPlayers(); tBroadcast(); } }
+  const cid = c && c._cid;
+  if(cid && T.conns[cid] === c){
+    delete T.conns[cid];
+    const p = T.s.players[cid]; if(p){ p.seen = 0; tRenderPlayers(); tBroadcast(); }
+  }
 }
-function tPing(){ Object.entries(T.conns).forEach(([cid,c]) => { if(!c.open){ tOnClose(c); } }); }
 
 function tOnData(c, d){
   if(!d || typeof d !== "object") return;
   if(d.t === "join"){
-    let name = String(d.name||"").replace(/\s+/g," ").trim().slice(0,24);
-    const cid = String(d.cid||"").slice(0,40);
+    const name = String(d.name||"").replace(/\s+/g," ").trim().slice(0,24);
+    let cid = String(d.cid||"").slice(0,40);
     if(!name || !cid){ c.send({t:"rejected", msg:"Escriba su nombre para entrar."}); return; }
     let p = T.s.players[cid];
     if(!p){
-      const taken = new Set(Object.values(T.s.players).map(x => x.name.toLowerCase()));
-      let nm = name, k = 2; while(taken.has(nm.toLowerCase())) nm = name + " " + (k++);
-      p = T.s.players[cid] = { name: nm, total: 0, online: true };
+      // ¿ya existía alguien con ese nombre y está desconectado? → es la misma persona que volvió
+      const same = Object.entries(T.s.players).find(([id,x]) => x.name.toLowerCase() === name.toLowerCase() && !isOn(x));
+      if(same){
+        const [oldId, rec] = same;
+        delete T.s.players[oldId]; T.s.players[cid] = rec; p = rec;
+        const r = T.s.round;
+        [r.answers, r.finals, r.over].forEach(o => { if(o && o[oldId] !== undefined){ o[cid] = o[oldId]; delete o[oldId]; } });
+        if(T.conns[oldId]){ try{ T.conns[oldId].close(); }catch(e){} delete T.conns[oldId]; }
+      } else {
+        const taken = new Set(Object.values(T.s.players).map(x => x.name.toLowerCase()));
+        let nm = name, k = 2; while(taken.has(nm.toLowerCase())) nm = name + " " + (k++);
+        p = T.s.players[cid] = { name: nm, total: 0 };
+      }
     }
-    if(T.conns[cid] && T.conns[cid] !== c){ try{ T.conns[cid].close(); }catch(e){} }
-    c._cid = cid; T.conns[cid] = c; p.online = true;
+    if(T.conns[cid] && T.conns[cid] !== c){ const old = T.conns[cid]; T.conns[cid] = null; try{ old.close(); }catch(e){} }
+    c._cid = cid; T.conns[cid] = c; p.seen = Date.now();
     tSave();
     c.send({ t:"welcome", name:p.name });
-    tRenderPlayers(); tBroadcast();
+    tRenderPlayers(); tRenderStage(); tBroadcast();
     if(p.last) c.send({ t:"result", ...p.last });
+    if(T.s.podium) c.send({ t:"podium", list:T.s.podium, me:p.name });
     return;
   }
-  const cid = tCidOf(c); if(!cid || !T.s.players[cid]) return;
+  const cid = c._cid; if(!cid || !T.s.players[cid]) return;
+  const p = T.s.players[cid];
+  const wasOn = isOn(p); p.seen = Date.now();
+  if(!wasOn){ tRenderPlayers(); tBroadcast(); }
+  if(d.t === "ping") return;
   if(d.t === "answers"){
     const r = T.s.round;
     if(d.round !== r.n) return;
@@ -431,10 +554,9 @@ function tOnData(c, d){
     if(r.status === "playing"){
       r.answers[cid] = clean;
       if(d.final) r.finals[cid] = true;
-      if(d.stop && clean.every(a => a.trim())) { tEndRound(T.s.players[cid].name); return; }
+      if(d.stop && clean.every(a => a.trim())) { tEndRound(p.name); return; }
       tSave(); tRenderPlayers();
     } else if(r.status === "review" && !r.finals[cid]){
-      // respuesta final que llega justo después del STOP
       r.answers[cid] = clean; r.finals[cid] = true; tSave(); tRenderReview(); tRenderPlayers();
     }
   }
@@ -442,12 +564,11 @@ function tOnData(c, d){
 
 function tStateMsg(){
   const r = T.s.round;
-  const players = Object.entries(T.s.players).map(([cid,p]) => ({ name:p.name, total:p.total, online:!!p.online }))
-    .sort((a,b) => b.total - a.total);
+  const players = Object.values(T.s.players).map(p => ({ name:p.name, total:p.total, online:isOn(p) })).sort((a,b) => b.total - a.total);
   return { t:"state", status:r.status, round:r.n, letter:r.letter, cats:r.cats,
     remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players };
 }
-function tBroadcast(){ const m = tStateMsg(); Object.values(T.conns).forEach(c => { try{ if(c.open) c.send(m); }catch(e){} }); }
+function tBroadcast(){ const m = tStateMsg(); Object.values(T.conns).forEach(c => { try{ if(c && c.open) c.send(m); }catch(e){} }); }
 
 function tDraw(){
   if(T.s.round.status === "playing") return;
@@ -456,7 +577,7 @@ function tDraw(){
     setTimeout(() => { delete $("tDraw").dataset.armed; tRenderStage(); }, 3500); return;
   }
   delete $("tDraw").dataset.armed;
-  if(!T.s.cats.length){ toast("Agregue al menos una categoría"); return; }
+  if(!T.s.cats.length){ toast("Escoja al menos una categoría"); return; }
   const pool = (T.s.hard ? EASY.concat(HARD) : EASY).filter(l => !T.s.used.includes(l));
   if(!pool.length){ toast("Ya salieron todas las letras. Toque «Reiniciar letras»."); return; }
   const el = $("tLetter"); $("tDraw").disabled = true; el.classList.add("spin");
@@ -467,7 +588,7 @@ function tDraw(){
       clearInterval(iv);
       const letter = pool[Math.floor(Math.random()*pool.length)];
       el.classList.remove("spin");
-      T.s.used.push(letter);
+      T.s.used.push(letter); T.s.podium = null;
       T.s.round = { n: T.s.round.n + 1, status:"playing", letter, cats:[...T.s.cats], endsAt: Date.now() + T.s.dur*1000,
         dur:T.s.dur, answers:{}, finals:{}, over:{}, stoppedBy:"" };
       tSave(); beep(880,180);
@@ -478,11 +599,13 @@ function tDraw(){
 }
 function tStartTick(){
   clearInterval(T.tick);
+  let lastBeep = -1;
   T.tick = setInterval(() => {
     const r = T.s.round; if(r.status !== "playing"){ clearInterval(T.tick); return; }
     const left = (r.endsAt - Date.now())/1000;
     tRenderClock();
-    if(left <= 5.2 && left > 0 && Math.abs(left - Math.round(left)) < .13) beep(660,80);
+    const sec = Math.ceil(left);
+    if(sec <= 5 && sec > 0 && sec !== lastBeep){ lastBeep = sec; beep(660,80); }
     if(left <= 0) tEndRound("Se acabó el tiempo");
   }, 250);
 }
@@ -500,9 +623,7 @@ function tScores(){
   const answersBy = {}; ids.forEach(id => answersBy[id] = r.answers[id] || []);
   const auto = autoScore(answersBy, r.letter, r.cats.length);
   const res = {};
-  ids.forEach(id => {
-    res[id] = auto[id].map((p,i) => (r.over[id] && r.over[id][i] != null) ? r.over[id][i] : p);
-  });
+  ids.forEach(id => { res[id] = auto[id].map((p,i) => (r.over[id] && r.over[id][i] != null) ? r.over[id][i] : p); });
   return { auto, res };
 }
 function tConfirm(){
@@ -518,15 +639,50 @@ function tConfirm(){
   r.status = "done"; tSave(); tBroadcast(); tRenderAll(); toast("Puntos enviados a los estudiantes");
 }
 
+/* ---- podio ---- */
+function tRanking(){
+  return Object.values(T.s.players).map(p => ({ name:p.name, total:p.total }))
+    .sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
+}
+function tPodiumClick(){
+  const r = T.s.round, b = $("tPodium");
+  if(r.status === "playing") return;
+  if(!Object.keys(T.s.players).length){ toast("Todavía no hay jugadores"); return; }
+  if(r.status === "review" && !b.dataset.armed){
+    b.dataset.armed = "1"; b.textContent = "Falta confirmar la ronda. ¿Ver podio igual?";
+    setTimeout(() => { delete b.dataset.armed; b.textContent = "🏆 Terminar y ver podio"; }, 3500); return;
+  }
+  delete b.dataset.armed; b.textContent = "🏆 Terminar y ver podio";
+  T.s.podium = tRanking(); tSave();
+  tShowPodium(); tSendPodium();
+}
+function tSendPodium(){
+  Object.entries(T.conns).forEach(([id,c]) => {
+    const p = T.s.players[id]; if(!c || !c.open || !p) return;
+    try{ c.send({ t:"podium", list:T.s.podium, me:p.name }); }catch(e){}
+  });
+}
+function tShowPodium(){
+  const L = T.s.podium || [];
+  const col = (k, cls) => { const x = L[k];
+    return x ? `<div class="podCol ${cls}"><div class="who">${esc(x.name)}</div><div class="sc">${x.total} pts</div><div class="blk">${k+1}</div></div>`
+             : `<div class="podCol ${cls} empty"><div class="blk">${k+1}</div></div>`; };
+  $("podCols").innerHTML = col(1,"g2") + col(0,"g1") + col(2,"g3");
+  const rest = L.slice(3, 12);
+  $("podRest").innerHTML = rest.map((x,i) => `<div class="bRow"><span class="pos">${i+4}°</span><span class="nm">${esc(x.name)}</span><span class="tt">${x.total}</span></div>`).join("");
+  $("podRest").hidden = !rest.length;
+  $("ovPod").hidden = false;
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => beep(f,160), 1300 + i*140));
+}
+
 /* ---- render docente ---- */
 function tRenderAll(){ tRenderStage(); tRenderCats(); tRenderReview(); tRenderPlayers(); }
 function tRenderClock(){
   const r = T.s.round;
-  const total = r.status === "playing" ? r.dur : T.s.dur;
-  const left = r.status === "playing" ? (r.endsAt - Date.now())/1000 : (r.status === "idle" ? T.s.dur : 0);
-  $("tClock").textContent = fmt(r.status === "idle" || r.status === "done" ? T.s.dur : left);
+  const left = r.status === "playing" ? (r.endsAt - Date.now())/1000 : 0;
+  $("tClock").textContent = fmt(r.status === "playing" ? left : (r.status === "review" ? 0 : T.s.dur));
   $("tClock").classList.toggle("low", r.status === "playing" && left <= 10);
-  $("tBar").style.width = (r.status === "playing" ? Math.max(0,left/total*100) : (r.status==="review"?0:100)) + "%";
+  $("tBar").style.width = (r.status === "playing" ? Math.max(0,left/r.dur*100) : (r.status==="review"?0:100)) + "%";
 }
 function tRenderStage(){
   const r = T.s.round;
@@ -535,20 +691,40 @@ function tRenderStage(){
   $("tDraw").disabled = r.status === "playing";
   if(!$("tDraw").dataset.armed) $("tDraw").textContent = r.n ? "Sortear otra letra" : "Sortear letra y empezar";
   $("tStop").disabled = r.status !== "playing";
+  $("tPodium").disabled = r.status === "playing";
   $("tDur").disabled = r.status === "playing";
-  const online = Object.values(T.s.players).filter(p=>p.online).length;
+  const online = Object.values(T.s.players).filter(isOn).length;
   $("tStatus").textContent =
-    r.status === "playing" ? "Jugando con la letra " + r.letter + ". Los chicos ven la letra y el reloj en su celular." :
+    r.status === "playing" ? "Jugando con la letra " + r.letter + " · " + online + " en línea" :
     r.status === "review" ? "¡STOP! (" + r.stoppedBy + "). Revise la tabla y confirme los puntos." :
     r.status === "done" ? "Puntos enviados. Sortee otra letra cuando estén listos." :
-    online ? online + " conectado(s). Cuando estén todos, sortee la letra." : "Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.";
+    online ? online + " en línea. Cuando estén todos, sortee la letra." : "Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.";
   tRenderClock();
 }
 function tRenderCats(){
   const lock = T.s.round.status === "playing";
-  $("tCats").innerHTML = T.s.cats.map((c,i) => `<div class="cat"><span>${esc(c)}</span>${lock?"":`<button data-i="${i}" aria-label="Quitar ${esc(c)}">×</button>`}</div>`).join("");
+  const sel = T.s.cats;
+  $("tCatCount").textContent = "(" + sel.length + "/" + MAX_CATS + ")";
+  $("tCats").innerHTML = sel.length
+    ? sel.map((c,i) => `<span class="selCat ${colorOf(i)}"><span>${esc(c)}</span>${lock?"":`<button data-i="${i}" aria-label="Quitar ${esc(c)}">×</button>`}</span>`).join("")
+    : '<span class="emptyCats">Todavía no hay categorías. Toque algunas de abajo.</span>';
   $("tCats").querySelectorAll("button").forEach(b => b.onclick = () => { T.s.cats.splice(+b.dataset.i,1); tSave(); tRenderCats(); });
-  ["tNewCat","tAddCat","tPreset"].forEach(id => $(id).disabled = lock);
+  const pickHtml = (list, offset) => list.map((c,i) => {
+    const on = sel.some(x => x.toLowerCase() === c.toLowerCase());
+    return `<button class="${colorOf(i+offset)} ${on?"on":""}" data-c="${esc(c)}" ${lock?"disabled":""}>${esc(c)}</button>`;
+  }).join("");
+  $("pickCommon").innerHTML = pickHtml(COMMON, 0);
+  $("pickTec").innerHTML = pickHtml(TEC, 3);
+  $("pickMine").innerHTML = pickHtml(T.s.mine, 5);
+  $("pickMineBox").hidden = !T.s.mine.length;
+  document.querySelectorAll(".pick button").forEach(b => b.onclick = () => {
+    const c = b.dataset.c, i = T.s.cats.findIndex(x => x.toLowerCase() === c.toLowerCase());
+    if(i >= 0) T.s.cats.splice(i,1);
+    else if(T.s.cats.length >= MAX_CATS){ toast("Máximo " + MAX_CATS + " categorías"); return; }
+    else T.s.cats.push(c);
+    tSave(); tRenderCats();
+  });
+  ["tNewCat","tAddCat","tClearCats"].forEach(id => $(id).disabled = lock);
 }
 function tRenderReview(){
   const r = T.s.round;
@@ -557,8 +733,9 @@ function tRenderReview(){
   $("tRevTitle").textContent = (r.status === "done" ? "Resultados" : "Revisión") + " · ronda " + r.n + " · letra " + r.letter;
   $("tConfirm").hidden = r.status !== "review";
   const { auto, res } = tScores();
-  const ids = Object.keys(T.s.players).sort((a,b) => res[b].reduce((x,y)=>x+y,0) - res[a].reduce((x,y)=>x+y,0));
-  let h = "<thead><tr><th>Estudiante</th>" + r.cats.map(c => `<th>${esc(c)}</th>`).join("") + "<th style='text-align:right'>Ronda</th></tr></thead><tbody>";
+  const sum = a => a.reduce((x,y)=>x+y,0);
+  const ids = Object.keys(T.s.players).sort((a,b) => sum(res[b]) - sum(res[a]));
+  let h = "<thead><tr><th>Estudiante</th>" + r.cats.map((c,i) => `<th class="${colorOf(i)}">${esc(c)}</th>`).join("") + "<th style='text-align:right'>Ronda</th></tr></thead><tbody>";
   ids.forEach(id => {
     const p = T.s.players[id], ans = r.answers[id] || [];
     h += `<tr><td class="name">${esc(p.name)}${ans.length?"":" <span class='muted' style='font-weight:500'>(sin respuestas)</span>"}</td>`;
@@ -566,7 +743,7 @@ function tRenderReview(){
       const a = ans[i] || "", pts = res[id][i], manual = pts !== auto[id][i];
       h += `<td class="cell" data-id="${esc(id)}" data-i="${i}" title="Toque para cambiar los puntos"><span class="a ${a?"":"empty"}">${a?esc(a):"vacío"}</span><span class="b b${pts}">${pts}</span>${manual?"<span class='m'>ajustado</span>":""}</td>`;
     });
-    h += `<td class="tot">${res[id].reduce((x,y)=>x+y,0)}</td></tr>`;
+    h += `<td class="tot">${sum(res[id])}</td></tr>`;
   });
   h += "</tbody>";
   $("tTable").innerHTML = ids.length ? h : "<tbody><tr><td>No hay jugadores.</td></tr></tbody>";
@@ -583,13 +760,16 @@ function tRenderReview(){
 function tRenderPlayers(){
   const r = T.s.round;
   const list = Object.entries(T.s.players).sort((a,b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
-  $("tCount").textContent = "(" + list.length + ")";
+  const online = list.filter(([,p]) => isOn(p)).length;
+  $("tOnline").textContent = online + " en línea";
+  $("tTotal").textContent = list.length + " en total";
   if(!list.length){ $("tPlayers").innerHTML = '<p class="rules">Todavía no ha entrado nadie. Los nombres aparecen aquí apenas los chicos entran.</p>'; return; }
   $("tPlayers").innerHTML = list.map(([id,p],k) => {
     const ans = r.answers[id] || [];
     const filled = ans.filter(a => a && a.trim()).length;
     const prog = r.status === "playing" ? `<span class="done">${filled}/${r.cats.length}</span>` : "";
-    return `<div class="pl"><span class="rk">${k+1}</span><span class="nm"><span class="dot ${p.online?"":"off"}" title="${p.online?"Conectado":"Desconectado"}"></span><b>${esc(p.name)}</b>${prog}</span><span class="sc">${p.total}</span>
+    const on = isOn(p);
+    return `<div class="pl"><span class="rk">${k+1}</span><span class="nm"><span class="dot ${on?"":"off"}" title="${on?"En línea":"Desconectado"}"></span><b>${esc(p.name)}</b>${prog}</span><span class="sc">${p.total}</span>
       <span class="act"><button class="small" data-a="+50" data-id="${esc(id)}">+50</button><button class="small" data-a="-50" data-id="${esc(id)}">−50</button><button class="small" data-a="kick" data-id="${esc(id)}">Quitar</button></span></div>`;
   }).join("");
   $("tPlayers").querySelectorAll("button").forEach(b => b.onclick = () => {
@@ -602,7 +782,7 @@ function tRenderPlayers(){
     tSave(); tRenderPlayers(); tRenderReview(); tBroadcast();
   });
 }
-function tShowQr(){
+function tShowPin(){
   $("ovQrLink").textContent = location.host + location.pathname;
   $("ovPin").textContent = T.s.code;
   $("ovQr").hidden = false;
@@ -611,12 +791,14 @@ function tShowQr(){
 /* ============================================================
    MODO ESTUDIANTE
    ============================================================ */
-const S = { peer:null, conn:null, code:"", name:"", cid:"", joined:false, st:null, round:0, answers:[], endsAt:0, dur:90, final:false, tick:null, sendT:null, retry:null };
+const S = { peer:null, conn:null, code:"", name:"", cid:"", joined:false, st:null, round:0, answers:[], endsAt:0, dur:90, final:false,
+  tick:null, sendT:null, retry:null, attempts:0, openT:null, ping:null };
 
 function studentInit(){
   show("vJoin");
-  S.cid = ls.get("stop_cid", null) || (Math.random().toString(36).slice(2) + Date.now().toString(36));
-  ls.set("stop_cid", S.cid);
+  // identificador por pestaña: cada celular/pestaña es un jugador distinto
+  S.cid = ss.get("stop_cid") || (Math.random().toString(36).slice(2) + Date.now().toString(36));
+  ss.set("stop_cid", S.cid);
   const sala = new URLSearchParams(location.search).get("sala");
   if(sala) $("inCode").value = sala.replace(/\D/g,"").slice(0,4);
   $("inName").value = ls.get("stop_name", "");
@@ -628,45 +810,61 @@ function studentInit(){
     if(name.length < 2){ $("joinErr").textContent = "Escriba su nombre."; return; }
     S.code = code; S.name = name; ls.set("stop_name", name);
     $("joinErr").textContent = ""; $("joinBtn").disabled = true; $("joinBtn").textContent = "Entrando…";
-    sStart();
+    S.attempts = 0; sStart();
   };
   $("pStop").onclick = () => {
     if(!S.answers.every(a => a.trim())) return;
     sSend({ t:"answers", round:S.round, answers:S.answers, stop:true, final:true });
     S.final = true; $("pStop").disabled = true;
   };
+  clearInterval(S.ping);
+  S.ping = setInterval(() => { if(S.joined) sSend({ t:"ping" }); }, 4000);
 }
 function sJoinFail(msg){
-  $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "Entrar";
+  clearTimeout(S.openT); clearTimeout(S.retry);
+  $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "¡Entrar!";
   show("vJoin");
 }
 function sStart(){
   if(S.peer){ try{ S.peer.destroy(); }catch(e){} }
-  const peer = new Peer(); S.peer = peer;
-  const failT = setTimeout(() => { if(!S.joined) sJoinFail("No se pudo conectar. Revise el PIN y que la profe tenga el juego abierto."); }, 12000);
+  const peer = new Peer(PEER_OPTS); S.peer = peer;
   peer.on("open", () => sConnect());
   peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
   peer.on("error", e => {
     if(e.type === "peer-unavailable"){
-      if(!S.joined){ clearTimeout(failT); sJoinFail("No hay ningún juego con el PIN " + S.code + ". Revíselo o pida a la profe que abra el juego."); }
+      if(!S.joined) sJoinFail("No hay ningún juego con el PIN " + S.code + ". Revíselo o pida a la profe que abra el juego.");
       else sRetry();
-    } else if(!S.joined && (e.type === "network" || e.type === "server-error" || e.type === "socket-error" || e.type === "browser-incompatible")){
-      clearTimeout(failT); sJoinFail("Problema de conexión a internet. Intente de nuevo.");
+    } else if(!S.joined && ["network","server-error","socket-error","browser-incompatible"].includes(e.type)){
+      sJoinFail("Problema de conexión a internet. Intente de nuevo.");
     }
   });
 }
 function sConnect(){
   if(!S.peer || S.peer.destroyed) return;
+  S.attempts++;
+  if(S.conn){ try{ S.conn.close(); }catch(e){} }
   const c = S.peer.connect(PREFIX + S.code, { reliable:true });
   S.conn = c;
-  c.on("open", () => c.send({ t:"join", name:S.name, cid:S.cid }));
+  clearTimeout(S.openT);
+  // si en 7 s no abre, se reintenta (hasta 4 veces antes de avisar)
+  S.openT = setTimeout(() => {
+    if(c.open) return;
+    if(!S.joined && S.attempts >= 4){ sJoinFail("No se pudo conectar con la compu de la profe. Pruebe con otra red (por ejemplo datos móviles) e intente de nuevo."); return; }
+    if(!S.joined) $("joinBtn").textContent = "Entrando… (intento " + (S.attempts+1) + ")";
+    sConnect();
+  }, 7000);
+  c.on("open", () => { clearTimeout(S.openT); c.send({ t:"join", name:S.name, cid:S.cid }); });
   c.on("data", sOnData);
   c.on("close", () => { if(S.conn === c && S.joined) sRetry(); });
   c.on("error", () => { if(S.conn === c && S.joined) sRetry(); });
 }
 function sRetry(){
   $("wDot").classList.add("off"); $("wCount").textContent = "Reconectando…";
-  clearTimeout(S.retry); S.retry = setTimeout(() => { if(S.peer && S.peer.disconnected) { try{ S.peer.reconnect(); }catch(e){} } sConnect(); }, 2500);
+  clearTimeout(S.retry); S.retry = setTimeout(() => {
+    if(S.peer && S.peer.destroyed){ sStart(); return; }
+    if(S.peer && S.peer.disconnected){ try{ S.peer.reconnect(); }catch(e){} }
+    S.attempts = 0; sConnect();
+  }, 2500);
 }
 function sSend(m){ try{ if(S.conn && S.conn.open) S.conn.send(m); }catch(e){} }
 
@@ -674,18 +872,20 @@ function sOnData(d){
   if(!d || typeof d !== "object") return;
   if(d.t === "welcome"){ S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
   if(d.t === "rejected"){ sJoinFail(d.msg || "No se pudo entrar."); return; }
-  if(d.t === "kicked"){ S.joined = false; try{ S.peer.destroy(); }catch(e){} sJoinFail("La profe lo sacó de la sala."); return; }
+  if(d.t === "kicked"){ S.joined = false; try{ S.peer.destroy(); }catch(e){} sJoinFail("La profe lo sacó del juego."); return; }
   if(d.t === "result"){ sShowResult(d); return; }
+  if(d.t === "podium"){ sShowPodium(d); return; }
   if(d.t === "state"){ sOnState(d); }
 }
 function sOnState(d){
   S.st = d;
   const online = (d.players||[]).filter(p=>p.online).length;
-  $("wDot").classList.remove("off"); $("wCount").textContent = online + " conectado(s)";
+  $("wDot").classList.remove("off"); $("wCount").textContent = online + " en línea";
+  sRenderBoards();
   if(d.status === "playing"){
     if(d.round !== S.round){
       S.round = d.round; S.final = false;
-      const saved = ls.get("stop_ans_" + S.code + "_" + d.round, null);
+      const saved = ls.get("stop_ans_" + S.code + "_" + d.round + "_" + S.cid, null);
       S.answers = d.cats.map((_,i) => (saved && saved[i]) || "");
       sBuildForm(d);
     }
@@ -698,10 +898,11 @@ function sOnState(d){
     if(!$("vRes").hidden && !$("rBox").hidden) return;
     $("rTitle").textContent = "¡STOP!";
     $("rMsg").textContent = (d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo. " : "¡STOP! lo dijo " + d.stoppedBy + ". ") + "La profe está revisando las respuestas…";
-    $("rBox").hidden = true; show("vRes");
-    beep(220,400);
+    $("rBox").hidden = true;
+    if($("vRes").hidden) beep(220,400);
+    show("vRes");
   } else if(d.status === "done"){
-    if($("vRes").hidden && $("vPlay").hidden === false) show("vWait");
+    if(!$("vPlay").hidden || !$("vJoin").hidden) show("vWait");
   } else {
     if(!$("vPlay").hidden || !$("vJoin").hidden) show("vWait");
   }
@@ -709,12 +910,12 @@ function sOnState(d){
 function sBuildForm(d){
   $("pLetter").textContent = d.letter;
   $("pLetter").classList.remove("pop"); void $("pLetter").offsetWidth; $("pLetter").classList.add("pop");
-  $("pForm").innerHTML = d.cats.map((c,i) => `<div class="field"><label for="a${i}">${esc(c)}</label><input id="a${i}" data-i="${i}" maxlength="40" autocapitalize="sentences" autocomplete="off" spellcheck="false" placeholder="${esc(d.letter)}…" value="${esc(S.answers[i])}"></div>`).join("");
+  $("pForm").innerHTML = d.cats.map((c,i) => `<div class="field ${colorOf(i)}"><label for="a${i}" data-n="[${i+1}]">${esc(c)}</label><input id="a${i}" data-i="${i}" maxlength="40" autocapitalize="sentences" autocomplete="off" spellcheck="false" placeholder="${esc(d.letter)}…" value="${esc(S.answers[i])}"></div>`).join("");
   $("pForm").onsubmit = e => e.preventDefault();
   $("pForm").querySelectorAll("input").forEach(inp => {
     inp.oninput = () => {
       S.answers[+inp.dataset.i] = inp.value; sMark(inp, d.letter); sCheckStop();
-      ls.set("stop_ans_" + S.code + "_" + S.round, S.answers);
+      ls.set("stop_ans_" + S.code + "_" + S.round + "_" + S.cid, S.answers);
       clearTimeout(S.sendT); S.sendT = setTimeout(() => sSend({ t:"answers", round:S.round, answers:S.answers }), 700);
     };
     inp.onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); const nx = $("a" + (+inp.dataset.i + 1)); if(nx) nx.focus(); else inp.blur(); } };
@@ -745,12 +946,37 @@ function sStartTick(){
 function sShowResult(d){
   const rows = d.rows.map(r => `<div class="resRow"><div><small>${esc(r.cat)}</small><div class="ans">${r.ans?esc(r.ans):"<span class='muted'>vacío</span>"}</div></div><div class="pts p${r.pts}">${r.pts}</div></div>`).join("");
   $("rTitle").textContent = "+" + d.roundPts;
-  $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--yellow)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
+  $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--pink)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
   $("rBox").innerHTML = rows; $("rBox").hidden = false;
   show("vRes");
-  // en la pantalla de espera también queda el último resultado
-  $("wLast").innerHTML = `<h2>Última ronda (letra ${esc(d.letter)})</h2><p style="margin:0;font-size:18px">+${d.roundPts} · Total <b style="color:var(--yellow)">${d.total}</b> · Puesto ${d.rank} de ${d.of}</p>`;
+  $("wLast").innerHTML = `<h2>Última ronda (letra ${esc(d.letter)})</h2><p style="margin:0;font-size:18px">+${d.roundPts} · Total <b style="color:var(--pink)">${d.total}</b> · Puesto ${d.rank} de ${d.of}</p>`;
   $("wLast").hidden = false;
+  sRenderBoards();
+}
+function sBoardHtml(list, maxTop){
+  const meI = list.findIndex(p => p.name === S.name);
+  const row = (p,i) => `<div class="bRow p${i+1} ${i===meI?"me":""}"><span class="pos">${i+1}°</span><span class="nm">${esc(p.name)}</span><span class="tt">${p.total}</span></div>`;
+  let h = list.slice(0, maxTop).map(row).join("");
+  if(meI >= maxTop){ if(meI > maxTop) h += '<div class="gap">⋯</div>'; h += row(list[meI], meI); }
+  return h;
+}
+function sRenderBoards(){
+  const list = ((S.st && S.st.players) || []).slice().sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
+  const any = list.some(p => p.total > 0);
+  $("wBoardBox").hidden = !any; $("rBoardBox").hidden = !any || $("rBox").hidden;
+  if(!any) return;
+  $("wBoard").innerHTML = sBoardHtml(list, 5);
+  $("rBoard").innerHTML = sBoardHtml(list, 5);
+}
+function sShowPodium(d){
+  if(!d.list){ show("vWait"); return; }
+  const i = d.list.findIndex(p => p.name === d.me), pos = i + 1;
+  $("podMeIcon").textContent = pos === 1 ? "🏆" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "🎮";
+  $("podMePos").textContent = pos > 0 ? pos + "°" : "—";
+  $("podMeTxt").innerHTML = pos > 0 ? `Quedó en el puesto <b>${pos}</b> de ${d.list.length} con <b style="color:var(--acc)">${d.list[i].total}</b> puntos.` : "";
+  S.name = d.me || S.name;
+  $("podBoard").innerHTML = sBoardHtml(d.list, 3);
+  show("vPodium");
 }
 
 /* ---------- arranque ---------- */
