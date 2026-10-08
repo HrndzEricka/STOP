@@ -364,6 +364,21 @@ const PEER_OPTS = { debug: 0, config: { iceServers: [
   { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
   { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
 ]}};
+/* Conexión por "relevo": los mensajes viajan por el mismo servidor del PIN (puerto 443),
+   así funciona aunque la red del colegio bloquee la conexión directa entre equipos. */
+function sockOf(peer){ return peer && (peer.socket || peer._socket); }
+class RelayConn{
+  constructor(peer, remote){ this.peer = peer; this.remote = remote; this.open = true; this.h = {}; }
+  on(e,f){ (this.h[e] = this.h[e] || []).push(f); }
+  emit(e,...a){ (this.h[e] || []).forEach(f => { try{ f(...a); }catch(err){ console.error(err); } }); }
+  send(d){ const sk = sockOf(this.peer); if(!sk || !this.open) return; try{ sk.send({ type:"CANDIDATE", dst:this.remote, payload:{ stopMsg:d } }); }catch(e){} }
+  close(){ this.open = false; }
+}
+function onRelay(peer, fn){
+  const sk = sockOf(peer); if(!sk) return false;
+  sk.on("message", m => { if(m && m.type === "CANDIDATE" && m.payload && m.payload.stopMsg !== undefined && m.src) fn(m.src, m.payload.stopMsg); });
+  return true;
+}
 const COMMON = ["Nombre","Apellido","País","Ciudad","Animal","Fruta","Verdura","Color","Cosa","Comida",
   "Marca","Profesión u oficio","Deporte","Cantante o banda","Película o serie","Parte del cuerpo",
   "Objeto de la casa","Flor o planta","Personaje famoso","Lugar de Costa Rica"];
@@ -465,6 +480,7 @@ function teacherInit(){
   $("podClose").onclick = () => $("ovPod").hidden = true;
   $("podAgain").onclick = () => { T.s.podium = null; tSave(); $("ovPod").hidden = true; tSendPodium(); tBroadcast(); toast("Listo para otra ronda"); };
   document.addEventListener("keydown", e => { if(e.key==="Escape"){ $("ovQr").hidden=true; $("ovStop").hidden=true; $("ovPod").hidden=true; } });
+  setInterval(tBroadcast, 8000);
   // revisa cada 3 s quién sigue en línea
   setInterval(() => {
     const key = Object.entries(T.s.players).filter(([,p]) => isOn(p)).map(([id]) => id).sort().join(",");
@@ -486,6 +502,12 @@ function tStartPeer(){
   if(T.peer){ try{ T.peer.destroy(); }catch(e){} }
   const peer = new Peer(PREFIX + T.s.code, PEER_OPTS);
   T.peer = peer;
+  T.relays = {};
+  onRelay(peer, (src, d) => {
+    let c = T.relays[src];
+    if(!c){ c = T.relays[src] = new RelayConn(peer, src); }
+    tOnData(c, d);
+  });
   peer.on("open", () => { $("tLink").textContent = "Listo ✓ " + location.host + location.pathname; });
   peer.on("connection", c => {
     c.on("data", d => tOnData(c, d));
@@ -819,7 +841,12 @@ function studentInit(){
     S.final = true; $("pStop").disabled = true;
   };
   clearInterval(S.ping);
-  S.ping = setInterval(() => { if(S.joined) sSend({ t:"ping" }); }, 4000);
+  S.ping = setInterval(() => {
+    if(!S.joined) return;
+    sSend({ t:"ping" });
+    // si la compu de la profe lleva 25 s sin responder, se vuelve a anunciar
+    if(Date.now() - (S.lastHeard || 0) > 25000){ S.lastHeard = Date.now(); sRetry(); }
+  }, 4000);
 }
 function sJoinFail(msg){
   clearTimeout(S.openT); clearTimeout(S.retry);
@@ -829,7 +856,8 @@ function sJoinFail(msg){
 function sStart(){
   if(S.peer){ try{ S.peer.destroy(); }catch(e){} }
   const peer = new Peer(PEER_OPTS); S.peer = peer;
-  peer.on("open", () => sConnect());
+  onRelay(peer, (src, d) => { if(src !== PREFIX + S.code) return; S.lastHeard = Date.now(); sOnData(d); });
+  peer.on("open", () => { S.attempts = 0; sConnect(); });
   peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
   peer.on("error", e => {
     if(e.type === "peer-unavailable"){
@@ -843,35 +871,31 @@ function sStart(){
 function sConnect(){
   if(!S.peer || S.peer.destroyed) return;
   S.attempts++;
-  if(S.conn){ try{ S.conn.close(); }catch(e){} }
-  const c = S.peer.connect(PREFIX + S.code, { reliable:true });
+  const c = new RelayConn(S.peer, PREFIX + S.code);
   S.conn = c;
+  c.send({ t:"join", name:S.name, cid:S.cid });
   clearTimeout(S.openT);
-  // si en 7 s no abre, se reintenta (hasta 4 veces antes de avisar)
+  // si en 6 s la profe no responde, se reintenta (hasta 4 veces antes de avisar)
   S.openT = setTimeout(() => {
-    if(c.open) return;
-    if(!S.joined && S.attempts >= 4){ sJoinFail("No se pudo conectar con la compu de la profe. Pruebe con otra red (por ejemplo datos móviles) e intente de nuevo."); return; }
-    if(!S.joined) $("joinBtn").textContent = "Entrando… (intento " + (S.attempts+1) + ")";
+    if(S.joined) return;
+    if(S.attempts >= 4){ sJoinFail("La compu de la profe no responde. Revise el PIN y que la profe tenga el juego abierto."); return; }
+    $("joinBtn").textContent = "Entrando… (intento " + (S.attempts+1) + ")";
     sConnect();
-  }, 7000);
-  c.on("open", () => { clearTimeout(S.openT); c.send({ t:"join", name:S.name, cid:S.cid }); });
-  c.on("data", sOnData);
-  c.on("close", () => { if(S.conn === c && S.joined) sRetry(); });
-  c.on("error", () => { if(S.conn === c && S.joined) sRetry(); });
+  }, 6000);
 }
 function sRetry(){
   $("wDot").classList.add("off"); $("wCount").textContent = "Reconectando…";
   clearTimeout(S.retry); S.retry = setTimeout(() => {
     if(S.peer && S.peer.destroyed){ sStart(); return; }
     if(S.peer && S.peer.disconnected){ try{ S.peer.reconnect(); }catch(e){} }
-    S.attempts = 0; sConnect();
+    S.attempts = 0; S.lastHeard = Date.now(); sConnect();
   }, 2500);
 }
 function sSend(m){ try{ if(S.conn && S.conn.open) S.conn.send(m); }catch(e){} }
 
 function sOnData(d){
   if(!d || typeof d !== "object") return;
-  if(d.t === "welcome"){ S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
+  if(d.t === "welcome"){ clearTimeout(S.openT); S.lastHeard = Date.now(); S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
   if(d.t === "rejected"){ sJoinFail(d.msg || "No se pudo entrar."); return; }
   if(d.t === "kicked"){ S.joined = false; try{ S.peer.destroy(); }catch(e){} sJoinFail("La profe lo sacó del juego."); return; }
   if(d.t === "result"){ sShowResult(d); return; }
