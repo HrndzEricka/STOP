@@ -346,38 +346,45 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
 </div></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 "use strict";
 /* ============================================================
-   ¡STOP! en clase — multijugador sin cuentas (PeerJS)
-   La computadora de la docente es la "central"; los celulares
-   se conectan a ella con el PIN.
+   STOP PROFE ERICKA — multijugador con Firebase Realtime Database
+   La computadora de la profe es la "central" (calcula puntos);
+   Firebase solo lleva los mensajes entre la compu y los celulares.
    ============================================================ */
-const PREFIX = "ctpmn-stop-v1-";
-// Servidores para que los celulares se conecten aunque estén en otra red (datos móviles, wifi del cole)
-const PEER_OPTS = { debug: 0, config: { iceServers: [
-  { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:global.stun.twilio.com:3478" },
-  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
-]}};
-/* Conexión por "relevo": los mensajes viajan por el mismo servidor del PIN (puerto 443),
-   así funciona aunque la red del colegio bloquee la conexión directa entre equipos. */
-function sockOf(peer){ return peer && (peer.socket || peer._socket); }
-class RelayConn{
-  constructor(peer, remote){ this.peer = peer; this.remote = remote; this.open = true; this.h = {}; }
-  on(e,f){ (this.h[e] = this.h[e] || []).push(f); }
-  emit(e,...a){ (this.h[e] || []).forEach(f => { try{ f(...a); }catch(err){ console.error(err); } }); }
-  send(d){ const sk = sockOf(this.peer); if(!sk || !this.open) return; try{ sk.send({ type:"CANDIDATE", dst:this.remote, payload:{ stopMsg:d } }); }catch(e){} }
+
+/* ▼▼▼ PEGUE AQUÍ LA CONFIGURACIÓN DE SU PROYECTO DE FIREBASE ▼▼▼ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBkALD5JhwPaACsuUAJ2pfqOoVTPEqm2xI",
+  authDomain: "stop-profe-ericka.firebaseapp.com",
+  databaseURL: "https://stop-profe-ericka-default-rtdb.firebaseio.com",
+  projectId: "stop-profe-ericka",
+  storageBucket: "stop-profe-ericka.firebasestorage.app",
+  messagingSenderId: "816670586894",
+  appId: "1:816670586894:web:1bfc34b4447d9507f6645f"
+};
+/* ▲▲▲ ------------------------------------------------------ ▲▲▲ */
+
+const clean = d => JSON.parse(JSON.stringify(d === undefined ? null : d)); // Firebase no acepta "undefined"
+const NET = {
+  db: null,
+  init(){
+    if(!FIREBASE_CONFIG || typeof firebase === "undefined") return false;
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    this.db = firebase.database();
+    return true;
+  },
+  room(code){ return this.db.ref("rooms/" + code); },
+  onConnected(fn){ this.db.ref(".info/connected").on("value", s => fn(!!s.val())); }
+};
+/* Conexión "virtual" hacia un estudiante: lo que se envía queda en su buzón */
+class FbConn{
+  constructor(code, cid){ this.code = code; this.cid = cid; this.open = true; }
+  send(d){ if(!this.open) return; try{ NET.room(this.code).child("inbox/" + this.cid).push(clean(d)); }catch(e){ console.error(e); } }
   close(){ this.open = false; }
-}
-function onRelay(peer, fn){
-  const sk = sockOf(peer); if(!sk) return false;
-  sk.on("message", m => { if(m && m.type === "CANDIDATE" && m.payload && m.payload.stopMsg !== undefined && m.src) fn(m.src, m.payload.stopMsg); });
-  return true;
 }
 const COMMON = ["Nombre","Apellido","País","Ciudad","Animal","Fruta","Verdura","Color","Cosa","Comida",
   "Marca","Profesión u oficio","Deporte","Cantante o banda","Película o serie","Parte del cuerpo",
@@ -471,7 +478,7 @@ function teacherInit(){
   $("tNewCat").onkeydown = e => { if(e.key==="Enter") $("tAddCat").click(); };
   $("tClearCats").onclick = () => { T.s.cats = []; tSave(); tRenderCats(); };
   armButton($("tZero"), "Marcador en 0", () => { Object.values(T.s.players).forEach(p=>p.total=0); tSave(); tRenderPlayers(); tBroadcast(); });
-  armButton($("tNew"), "Juego nuevo", () => { ls.del("stop_host"); location.reload(); }, "¿Borrar todo? Toque otra vez");
+  armButton($("tNew"), "Juego nuevo", () => { ls.del("stop_host"); try{ if(T.roomRef) T.roomRef.remove(); }catch(e){} setTimeout(() => location.reload(), 400); }, "¿Borrar todo? Toque otra vez");
   $("tCopy").onclick = () => { const l=tLinkUrl(); (navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast("Enlace copiado")).catch(()=>toast(l)); };
   $("tQrBtn").onclick = tShowPin; $("tCode").onclick = tShowPin;
   $("ovQr").onclick = () => $("ovQr").hidden = true;
@@ -499,30 +506,26 @@ function tLinkUrl(){ return location.origin + location.pathname; }
 function tStartPeer(){
   $("tCode").textContent = T.s.code;
   $("tLink").textContent = "Conectando…";
-  if(T.peer){ try{ T.peer.destroy(); }catch(e){} }
-  const peer = new Peer(PREFIX + T.s.code, PEER_OPTS);
-  T.peer = peer;
-  T.relays = {};
-  onRelay(peer, (src, d) => {
-    let c = T.relays[src];
-    if(!c){ c = T.relays[src] = new RelayConn(peer, src); }
-    tOnData(c, d);
-  });
-  peer.on("open", () => { $("tLink").textContent = "Listo ✓ " + location.host + location.pathname; });
-  peer.on("connection", c => {
-    c.on("data", d => tOnData(c, d));
-    c.on("close", () => tOnClose(c));
-    c.on("error", () => tOnClose(c));
-  });
-  peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
-  peer.on("error", e => {
-    if(e.type === "unavailable-id"){
-      T.s.code = newCode(); tSave(); setTimeout(tStartPeer, 300);
-    } else if(["network","server-error","socket-error","socket-closed"].includes(e.type)){
-      $("tLink").textContent = "Sin conexión al servidor. Revise el internet; reintentando…";
-      setTimeout(() => { try{ if(peer.destroyed) tStartPeer(); else peer.reconnect(); }catch(err){ tStartPeer(); } }, 3000);
-    }
-  });
+  if(!NET.init()){ $("tLink").textContent = "Falta configurar Firebase (vea las instrucciones)."; return; }
+  if(!T.token){ T.token = ls.get("stop_token", null) || (Math.random().toString(36).slice(2) + Date.now().toString(36)); ls.set("stop_token", T.token); }
+  if(T.roomRef){ try{ T.roomRef.child("toHost").off(); }catch(e){} }
+  const code = T.s.code, room = NET.room(code);
+  room.child("host").once("value").then(snap => {
+    const h = snap.val();
+    if(h && h.token !== T.token){ T.s.code = newCode(); tSave(); tStartPeer(); return; } // PIN ocupado por otra profe
+    T.roomRef = room; T.conns = {}; T.fbConns = {};
+    room.child("host").set({ token:T.token, t:firebase.database.ServerValue.TIMESTAMP });
+    room.child("host").onDisconnect().remove();
+    room.child("toHost").on("child_added", s2 => {
+      const m = s2.val(); s2.ref.remove();
+      if(!m || !m.cid || !m.d) return;
+      const cid = String(m.cid).replace(/[^a-z0-9]/gi,"").slice(0,40); if(!cid) return;
+      let c = T.fbConns[cid]; if(!c) c = T.fbConns[cid] = new FbConn(code, cid);
+      tOnData(c, m.d);
+    });
+    tBroadcast();
+  }).catch(err => { console.error(err); $("tLink").textContent = "Firebase rechazó la conexión. Revise las reglas de la base de datos."; });
+  NET.onConnected(ok => { $("tLink").textContent = ok ? "Listo ✓ " + location.host + location.pathname : "Sin conexión a internet; reintentando…"; });
 }
 
 function tOnClose(c){
@@ -556,7 +559,7 @@ function tOnData(c, d){
       }
     }
     if(T.conns[cid] && T.conns[cid] !== c){ const old = T.conns[cid]; T.conns[cid] = null; try{ old.close(); }catch(e){} }
-    c._cid = cid; T.conns[cid] = c; p.seen = Date.now();
+    c.open = true; c._cid = cid; T.conns[cid] = c; p.seen = Date.now();
     tSave();
     c.send({ t:"welcome", name:p.name });
     tRenderPlayers(); tRenderStage(); tBroadcast();
@@ -591,7 +594,7 @@ function tStateMsg(){
   return { t:"state", status:r.status, round:r.n, letter:r.letter, cats:r.cats,
     remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players };
 }
-function tBroadcast(){ const m = tStateMsg(); Object.values(T.conns).forEach(c => { try{ if(c && c.open) c.send(m); }catch(e){} }); }
+function tBroadcast(){ if(!T.roomRef) return; const m = tStateMsg(); m.hb = Date.now(); try{ T.roomRef.child("state").set(clean(m)); }catch(e){ console.error(e); } }
 
 function tDraw(){
   if(T.s.round.status === "playing") return;
@@ -854,26 +857,25 @@ function sJoinFail(msg){
   show("vJoin");
 }
 function sStart(){
-  if(S.peer){ try{ S.peer.destroy(); }catch(e){} }
-  const peer = new Peer(PEER_OPTS); S.peer = peer;
-  onRelay(peer, (src, d) => { if(src !== PREFIX + S.code) return; S.lastHeard = Date.now(); sOnData(d); });
-  peer.on("open", () => { S.attempts = 0; sConnect(); });
-  peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
-  peer.on("error", e => {
-    if(e.type === "peer-unavailable"){
-      if(!S.joined) sJoinFail("No hay ningún juego con el PIN " + S.code + ". Revíselo o pida a la profe que abra el juego.");
-      else sRetry();
-    } else if(!S.joined && ["network","server-error","socket-error","browser-incompatible"].includes(e.type)){
-      sJoinFail("Problema de conexión a internet. Intente de nuevo.");
-    }
-  });
+  if(!NET.init()){ sJoinFail("El juego todavía no está configurado. Avise a la profe."); return; }
+  if(S.room){ try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} }
+  const room = NET.room(S.code);
+  const failT = setTimeout(() => { if(!S.joined) sJoinFail("Problema de conexión a internet. Intente de nuevo."); }, 15000);
+  room.child("host").once("value").then(snap => {
+    clearTimeout(failT);
+    if(!snap.exists()){ sJoinFail("No hay ningún juego con el PIN " + S.code + ". Revíselo o pida a la profe que abra el juego."); return; }
+    S.room = room;
+    S.cid = S.cid.replace(/[^a-z0-9]/gi,"");
+    room.child("inbox/" + S.cid).on("child_added", s2 => { const d = s2.val(); s2.ref.remove(); S.lastHeard = Date.now(); sOnData(d); });
+    room.child("state").on("value", s2 => { const d = s2.val(); if(d){ S.lastHeard = Date.now(); if(S.joined) sOnData(d); } });
+    S.attempts = 0; sConnect();
+  }).catch(err => { clearTimeout(failT); console.error(err); sJoinFail("No se pudo entrar al juego. Avise a la profe."); });
+  if(!S.connWatch){ S.connWatch = true; NET.onConnected(ok => { if(!S.joined) return; if(ok){ $("wDot").classList.remove("off"); } else { $("wDot").classList.add("off"); $("wCount").textContent = "Reconectando…"; } }); }
 }
 function sConnect(){
-  if(!S.peer || S.peer.destroyed) return;
+  if(!S.room) return;
   S.attempts++;
-  const c = new RelayConn(S.peer, PREFIX + S.code);
-  S.conn = c;
-  c.send({ t:"join", name:S.name, cid:S.cid });
+  sSend({ t:"join", name:S.name, cid:S.cid });
   clearTimeout(S.openT);
   // si en 6 s la profe no responde, se reintenta (hasta 4 veces antes de avisar)
   S.openT = setTimeout(() => {
@@ -886,23 +888,22 @@ function sConnect(){
 function sRetry(){
   $("wDot").classList.add("off"); $("wCount").textContent = "Reconectando…";
   clearTimeout(S.retry); S.retry = setTimeout(() => {
-    if(S.peer && S.peer.destroyed){ sStart(); return; }
-    if(S.peer && S.peer.disconnected){ try{ S.peer.reconnect(); }catch(e){} }
     S.attempts = 0; S.lastHeard = Date.now(); sConnect();
   }, 2500);
 }
-function sSend(m){ try{ if(S.conn && S.conn.open) S.conn.send(m); }catch(e){} }
+function sSend(m){ if(!S.room) return; try{ S.room.child("toHost").push(clean({ cid:S.cid, d:m })); }catch(e){ console.error(e); } }
 
 function sOnData(d){
   if(!d || typeof d !== "object") return;
   if(d.t === "welcome"){ clearTimeout(S.openT); S.lastHeard = Date.now(); S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
   if(d.t === "rejected"){ sJoinFail(d.msg || "No se pudo entrar."); return; }
-  if(d.t === "kicked"){ S.joined = false; try{ S.peer.destroy(); }catch(e){} sJoinFail("La profe lo sacó del juego."); return; }
+  if(d.t === "kicked"){ S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; sJoinFail("La profe lo sacó del juego."); return; }
   if(d.t === "result"){ sShowResult(d); return; }
   if(d.t === "podium"){ sShowPodium(d); return; }
   if(d.t === "state"){ sOnState(d); }
 }
 function sOnState(d){
+  d.players = d.players || []; d.cats = d.cats || [];
   S.st = d;
   const online = (d.players||[]).filter(p=>p.online).length;
   $("wDot").classList.remove("off"); $("wCount").textContent = online + " en línea";
@@ -1005,7 +1006,7 @@ function sShowPodium(d){
 }
 
 /* ---------- arranque ---------- */
-if(typeof Peer === "undefined"){
+if(typeof firebase === "undefined"){
   document.body.innerHTML = '<div class="narrow panel center" style="margin-top:40px"><h1>¡STOP!</h1><p>No se pudo cargar el juego. Revise la conexión a internet y recargue la página.</p></div>';
 } else if(new URLSearchParams(location.search).has("profe")){
   teacherInit();
