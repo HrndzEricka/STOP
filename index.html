@@ -61,6 +61,7 @@ select{color:var(--ink)}
 
 /* ---------- Estudiante ---------- */
 .narrow{max-width:520px;margin:0 auto;display:grid;gap:16px}
+.narrow.center{justify-content:stretch}
 .join input{width:100%;font-size:19px;padding:12px}
 .join label{font-size:14px;display:block;margin:14px 0 6px;color:var(--kw)}
 .join .codeIn{font-weight:800;letter-spacing:.35em;text-align:center;font-size:30px;color:var(--num)}
@@ -185,6 +186,23 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
 .podRest{margin:22px auto 0;max-width:520px;text-align:left;border:1px solid var(--tab);border-radius:8px;background:var(--bg)}
 .podBtns{margin-top:22px;justify-content:center}
 .crown{font-size:40px;line-height:1}
+/* sorteo y revisión */
+.drawLetter{font-size:150px;margin:10px 0 6px;transition:color .1s}
+.drawLetter.c-a{color:var(--fn)}.drawLetter.c-b{color:var(--kw)}.drawLetter.c-c{color:var(--str)}.drawLetter.c-d{color:var(--red)}.drawLetter.c-e{color:var(--teal)}.drawLetter.c-f{color:var(--num)}
+.reveal{animation:reveal .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes reveal{0%{transform:scale(.3);filter:brightness(3)}60%{transform:scale(1.25)}100%{transform:scale(1);filter:none}}
+.flash{animation:flash .6s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(249,226,175,.9)}100%{box-shadow:0 0 0 40px rgba(249,226,175,0)}}
+.wave{font-weight:800;font-size:30px;letter-spacing:.12em;margin:8px 0}
+.wave span{display:inline-block;animation:wave 1.4s ease-in-out infinite,hue 2.4s linear infinite}
+@keyframes wave{0%,100%{transform:translateY(0)}25%{transform:translateY(-10px)}}
+@keyframes hue{0%{color:var(--fn)}20%{color:var(--kw)}40%{color:var(--red)}60%{color:var(--num)}80%{color:var(--str)}100%{color:var(--fn)}}
+.loadbar{height:8px;border-radius:4px;background:var(--tab);overflow:hidden;position:relative;margin:12px 0}
+.loadbar::after{content:"";position:absolute;inset:0;width:40%;border-radius:4px;background:linear-gradient(90deg,var(--fn),var(--kw),var(--red),var(--num),var(--str));animation:slide 1.3s ease-in-out infinite}
+@keyframes slide{0%{left:-40%}100%{left:100%}}
+.tip{color:var(--ink-dim);font-size:15px;min-height:1.5em;transition:opacity .3s}
+.stage .letter.spin{animation:hue .5s linear infinite}
+.drawing-note{color:var(--yel);font-weight:700;text-align:center;margin-top:6px;min-height:1.4em}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -235,11 +253,22 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
   <p class="center" id="pHint" style="margin:0;font-size:15px;color:#fff;font-weight:600">Llene todas las casillas para poder decir ¡STOP!</p>
 </section>
 
+<!-- ================= ESTUDIANTE: sorteo ================= -->
+<section id="vDraw" class="narrow center" hidden>
+  <div class="panel" id="dPanel">
+    <h2 style="text-align:left">Sorteo de letra</h2>
+    <div class="letter drawLetter" id="dLetter">?</div>
+    <div class="wave" id="dWave"></div>
+    <div class="loadbar" id="dBar"></div>
+  </div>
+</section>
+
 <!-- ================= ESTUDIANTE: resultados ================= -->
 <section id="vRes" class="narrow" hidden>
   <div class="panel center">
     <h1 style="font-size:46px" id="rTitle">¡STOP!</h1>
     <p class="muted" id="rMsg">La profe está revisando las respuestas…</p>
+    <div id="rLoading"><div class="wave" id="rWave"></div><div class="loadbar"></div><p class="tip" id="rTip"></p></div>
   </div>
   <div class="panel" id="rMine" hidden><h2>Sus respuestas</h2><div id="rMineList"></div></div>
   <div class="panel" id="rBox" hidden></div>
@@ -282,6 +311,7 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
       <div class="stage">
         <div>
           <div class="letter" id="tLetter">?</div>
+          <div class="drawing-note" id="tDrawNote"></div>
           <div class="used" id="tUsed">Letras usadas: —</div>
         </div>
         <div style="display:grid;gap:12px">
@@ -412,12 +442,14 @@ const ss = {
   set(k,v){ try{ sessionStorage.setItem(k, v); }catch(e){} }
 };
 const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
-function show(id){ ["vJoin","vWait","vPlay","vRes","vPodium","vTeacher"].forEach(v => $(v).hidden = (v !== id)); }
+function show(id){ ["vJoin","vWait","vDraw","vPlay","vRes","vPodium","vTeacher"].forEach(v => $(v).hidden = (v !== id)); }
 let toastT;
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2400); }
 let audio=null;
 function beep(f,ms){ try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); const o=audio.createOscillator(), g=audio.createGain(); o.type="square"; o.frequency.value=f; g.gain.value=.07; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+ms/1000); }catch(e){} }
 const colorOf = i => "c" + (i % 8);
+const waveHtml = txt => [...txt].map((ch,i) => `<span style="animation-delay:${(i*0.09).toFixed(2)}s,${(i*0.12).toFixed(2)}s">${ch === " " ? "&nbsp;" : esc(ch)}</span>`).join("");
+const DRAW_COLORS = ["c-a","c-b","c-c","c-d","c-e","c-f"];
 
 /* ---------- Calificación ---------- */
 function baseFold(s){
@@ -596,13 +628,13 @@ function tOnData(c, d){
 function tStateMsg(){
   const r = T.s.round;
   const players = Object.values(T.s.players).map(p => ({ name:p.name, total:p.total, online:isOn(p) })).sort((a,b) => b.total - a.total);
-  return { t:"state", status:r.status, round:r.n, letter:r.letter, cats:r.cats,
+  return { t:"state", status:r.status, round:r.n, letter:r.status === "playing" || r.status === "review" || r.status === "done" ? r.letter : "", cats:r.cats, drawing: !!T.drawing,
     remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players };
 }
 function tBroadcast(){ if(!T.roomRef) return; const m = tStateMsg(); m.hb = Date.now(); try{ T.roomRef.child("state").set(clean(m)); }catch(e){ console.error(e); } }
 
 function tDraw(){
-  if(T.s.round.status === "playing") return;
+  if(T.s.round.status === "playing" || T.drawing) return;
   if(T.s.round.status === "review" && !$("tDraw").dataset.armed){
     $("tDraw").dataset.armed = "1"; $("tDraw").textContent = "Falta confirmar puntos. ¿Sortear igual?";
     setTimeout(() => { delete $("tDraw").dataset.armed; tRenderStage(); }, 3500); return;
@@ -611,22 +643,40 @@ function tDraw(){
   if(!T.s.cats.length){ toast("Escoja al menos una categoría"); return; }
   const pool = (T.s.hard ? EASY.concat(HARD) : EASY).filter(l => !T.s.used.includes(l));
   if(!pool.length){ toast("Ya salieron todas las letras. Toque «Reiniciar letras»."); return; }
-  const el = $("tLetter"); $("tDraw").disabled = true; el.classList.add("spin");
-  let n = 0;
-  const iv = setInterval(() => {
-    el.textContent = pool[Math.floor(Math.random()*pool.length)]; beep(500+n*20,30);
-    if(++n > 16){
-      clearInterval(iv);
-      const letter = pool[Math.floor(Math.random()*pool.length)];
-      el.classList.remove("spin");
-      T.s.used.push(letter); T.s.podium = null;
-      T.s.round = { n: T.s.round.n + 1, status:"playing", letter, cats:[...T.s.cats], endsAt: Date.now() + T.s.dur*1000,
-        dur:T.s.dur, answers:{}, finals:{}, over:{}, stoppedBy:"" };
-      tSave(); beep(880,180);
-      tRenderAll(); el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
-      tBroadcast(); tStartTick();
-    }
-  }, 70);
+  const letter = pool[Math.floor(Math.random()*pool.length)];
+  const all = T.s.hard ? EASY.concat(HARD) : EASY;
+  const el = $("tLetter");
+  T.drawing = true; tBroadcast();
+  $("tDraw").disabled = true; $("tPodium").disabled = true;
+  $("tDrawNote").textContent = "Sorteando…";
+  el.classList.add("spin");
+  // la ruleta empieza rápido y se va frenando (unos 4 segundos)
+  let delay = 45, n = 0;
+  const step = () => {
+    n++;
+    el.textContent = all[Math.floor(Math.random()*all.length)];
+    beep(380 + n*14, 25);
+    delay = delay * 1.11;
+    if(delay < 420) setTimeout(step, delay);
+    else setTimeout(finish, 450);
+  };
+  const finish = () => {
+    T.drawing = false;
+    el.classList.remove("spin");
+    el.textContent = letter;
+    T.s.used.push(letter); T.s.podium = null;
+    T.s.round = { n: T.s.round.n + 1, status:"playing", letter, cats:[...T.s.cats], endsAt: Date.now() + T.s.dur*1000 + 1500,
+      dur:T.s.dur, answers:{}, finals:{}, over:{}, stoppedBy:"" };
+    tSave();
+    [660, 880, 1320].forEach((f,i) => setTimeout(() => beep(f,140), i*110));
+    $("tDrawNote").textContent = "¡Letra " + letter + "!";
+    setTimeout(() => { if($("tDrawNote").textContent === "¡Letra " + letter + "!") $("tDrawNote").textContent = ""; }, 3000);
+    tRenderAll();
+    el.classList.remove("pop","reveal"); void el.offsetWidth; el.classList.add("reveal");
+    const panel = el.closest(".panel"); panel.classList.remove("flash"); void panel.offsetWidth; panel.classList.add("flash");
+    tBroadcast(); tStartTick();
+  };
+  step();
 }
 function tStartTick(){
   clearInterval(T.tick);
@@ -717,9 +767,9 @@ function tRenderClock(){
 }
 function tRenderStage(){
   const r = T.s.round;
-  $("tLetter").textContent = r.letter || "?";
+  if(!T.drawing) $("tLetter").textContent = r.letter || "?";
   $("tUsed").textContent = "Letras usadas: " + (T.s.used.length ? T.s.used.join(" · ") : "—");
-  $("tDraw").disabled = r.status === "playing";
+  $("tDraw").disabled = r.status === "playing" || !!T.drawing;
   if(!$("tDraw").dataset.armed) $("tDraw").textContent = r.n ? "Sortear otra letra" : "Sortear letra y empezar";
   $("tStop").disabled = r.status !== "playing";
   $("tPodium").disabled = r.status === "playing";
@@ -913,14 +963,17 @@ function sOnState(d){
   const online = (d.players||[]).filter(p=>p.online).length;
   $("wDot").classList.remove("off"); $("wCount").textContent = online + " en línea";
   sRenderBoards();
+  if(d.drawing){ sDrawStart(); return; }
   if(d.status === "playing"){
+    S.dur = d.dur || 90; S.endsAt = Date.now() + d.remaining*1000;
     if(d.round !== S.round){
       S.round = d.round; S.final = false;
       const saved = ls.get("stop_ans_" + S.code + "_" + d.round + "_" + S.cid, null);
       S.answers = d.cats.map((_,i) => (saved && saved[i]) || "");
       sBuildForm(d);
+      if(S.drawIv){ sDrawReveal(d.letter, () => { show("vPlay"); sStartTick(); }); return; }
     }
-    S.dur = d.dur || 90; S.endsAt = Date.now() + d.remaining*1000;
+    if(S.revealing) return;
     show("vPlay"); sStartTick();
   } else if(d.status === "review"){
     if(d.round === S.round && !S.final){ S.final = true; sSend({ t:"answers", round:S.round, answers:S.answers, final:true }); }
@@ -928,18 +981,58 @@ function sOnState(d){
     $("pForm").querySelectorAll("input").forEach(i => i.disabled = true);
     if(!$("vRes").hidden && !$("rBox").hidden) return;
     $("rTitle").textContent = "¡STOP!";
-    $("rMsg").textContent = (d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo. " : "¡STOP! lo dijo " + d.stoppedBy + ". ") + "La profe está revisando las respuestas…";
+    $("rMsg").textContent = d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo." : "¡STOP! lo dijo " + d.stoppedBy + ".";
+    sStartReviewAnim();
     $("rBox").hidden = true;
     const cats = d.cats || [];
     $("rMineList").innerHTML = cats.map((c,i) => `<div class="resRow mine"><div><small>${esc(c)}</small><div class="ans">${S.answers[i] ? esc(S.answers[i]) : "<span class='muted'>vacío</span>"}</div></div></div>`).join("");
     $("rMine").hidden = !(d.round === S.round && cats.length);
     if($("vRes").hidden) beep(220,400);
     show("vRes");
-  } else if(d.status === "done"){
-    if(!$("vPlay").hidden || !$("vJoin").hidden) show("vWait");
   } else {
+    if(S.drawIv){ clearInterval(S.drawIv); S.drawIv = null; show("vWait"); }
     if(!$("vPlay").hidden || !$("vJoin").hidden) show("vWait");
   }
+}
+function sDrawStart(){
+  if(S.drawIv) return;
+  sStopReviewAnim();
+  $("dWave").innerHTML = waveHtml("SORTEANDO…");
+  $("dBar").hidden = false;
+  const el = $("dLetter"); let k = 0;
+  const letters = EASY.concat(HARD);
+  S.drawIv = setInterval(() => {
+    el.textContent = letters[Math.floor(Math.random()*letters.length)];
+    el.className = "letter drawLetter " + DRAW_COLORS[k++ % DRAW_COLORS.length];
+    if(k % 2) beep(420 + (k%10)*30, 20);
+  }, 90);
+  show("vDraw");
+}
+function sDrawReveal(letter, done){
+  clearInterval(S.drawIv); S.drawIv = null; S.revealing = true;
+  const el = $("dLetter");
+  el.className = "letter drawLetter"; el.textContent = letter;
+  void el.offsetWidth; el.classList.add("reveal");
+  const p = $("dPanel"); p.classList.remove("flash"); void p.offsetWidth; p.classList.add("flash");
+  $("dWave").innerHTML = waveHtml("¡LETRA " + letter + "!");
+  $("dBar").hidden = true;
+  show("vDraw");
+  [660, 880, 1320].forEach((f,i) => setTimeout(() => beep(f,140), i*110));
+  setTimeout(() => { S.revealing = false; done(); }, 1500);
+}
+const TIPS = ["La profe está revisando las respuestas…","Buscando respuestas repetidas…","Revisando que empiecen con la letra…","Contando puntos…","Ya casi…"];
+function sStartReviewAnim(){
+  if(S.revIv) return;
+  $("rWave").innerHTML = waveHtml("REVISANDO");
+  $("rLoading").hidden = false;
+  let i = 0; $("rTip").textContent = TIPS[0];
+  S.revIv = setInterval(() => { i = (i+1) % TIPS.length; $("rTip").textContent = TIPS[i]; }, 2500);
+}
+function sStopReviewAnim(){ clearInterval(S.revIv); S.revIv = null; $("rLoading").hidden = true; }
+function sCountUp(el, to){
+  const t0 = performance.now(), dur = 1200;
+  const tick = now => { const k = Math.min(1, (now - t0)/dur); el.textContent = "+" + Math.round(to * (1 - Math.pow(1-k, 3))); if(k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
 }
 function sBuildForm(d){
   $("pLetter").textContent = d.letter;
@@ -980,11 +1073,13 @@ function sStartTick(){
 function sShowResult(d){
   $("rMine").hidden = true;
   const rows = d.rows.map(r => `<div class="resRow"><div><small>${esc(r.cat)}</small><div class="ans">${r.ans?esc(r.ans):"<span class='muted'>vacío</span>"}</div></div><div class="pts p${r.pts}">${r.pts}</div></div>`).join("");
-  $("rTitle").textContent = "+" + d.roundPts;
-  $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--pink)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
+  sStopReviewAnim();
+  sCountUp($("rTitle"), d.roundPts);
+  [523,659,784].forEach((f,i) => setTimeout(() => beep(f,120), i*120));
+  $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--num)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
   $("rBox").innerHTML = rows; $("rBox").hidden = false;
   show("vRes");
-  $("wLast").innerHTML = `<h2>Última ronda (letra ${esc(d.letter)})</h2><p style="margin:0;font-size:18px">+${d.roundPts} · Total <b style="color:var(--pink)">${d.total}</b> · Puesto ${d.rank} de ${d.of}</p>`;
+  $("wLast").innerHTML = `<h2>Última ronda (letra ${esc(d.letter)})</h2><p style="margin:0;font-size:18px">+${d.roundPts} · Total <b style="color:var(--num)">${d.total}</b> · Puesto ${d.rank} de ${d.of}</p>`;
   $("wLast").hidden = false;
   sRenderBoards();
 }
