@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>¡Stop! en clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Pizarra de aula: letra gigante, tarjetas de tiza, marcador lateral */
+:root{
+  --board:#16332c; --board-2:#1d4038; --board-3:#24493f; --chalk:#eef3ea; --chalk-dim:#a9bdb3;
+  --yellow:#f5cf4a; --red:#ef5b4c; --green:#6fd08c; --line:#2f5a50;
+  --display:"Bowlby One","Arial Black",Impact,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--board);color:var(--chalk);font-family:var(--body);font-size:16px;padding:20px 16px 48px;min-height:100vh;
+  background-image:radial-gradient(circle at 20% 10%,rgba(255,255,255,.04),transparent 50%),radial-gradient(circle at 80% 90%,rgba(255,255,255,.03),transparent 40%)}
+[hidden]{display:none!important}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);margin:0;color:var(--yellow);letter-spacing:.02em}
+h1 span{color:var(--chalk)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--chalk-dim);margin:0 0 10px;font-weight:800}
+p{line-height:1.5}
+.muted{color:var(--chalk-dim)}
+.panel{background:var(--board-2);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+button{font:inherit;cursor:pointer;border-radius:10px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);padding:10px 16px;font-weight:800}
+button:hover{background:rgba(255,255,255,.08)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+button:disabled{opacity:.35;cursor:not-allowed}
+.primary{background:var(--yellow);border-color:var(--yellow);color:#1b1b14}
+.primary:hover{background:#ffe07a}
+.danger{background:var(--red);border-color:var(--red);color:#fff}
+.danger:hover{background:#ff7466}
+.small{padding:4px 10px;font-size:14px;border-width:1.5px}
+input,select{font:inherit;background:var(--board);color:var(--chalk);border:2px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input::placeholder{color:#7f978c}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.center{justify-content:center;text-align:center}
+.letter{font-family:var(--display);line-height:1;color:var(--yellow);text-shadow:4px 4px 0 rgba(0,0,0,.25)}
+.letter.spin{color:var(--chalk)}
+.pop{animation:pop .45s ease-out}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.clock{font-family:var(--display);font-variant-numeric:tabular-nums;line-height:1}
+.clock.low{color:var(--red)}
+.bar{height:10px;border-radius:6px;background:var(--board);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--yellow);width:100%;transition:width .25s linear}
+.err{color:#ffb3aa;font-weight:700;min-height:1.5em}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
+.dot.off{background:#5d726a}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+
+/* ---------- Inicio / estudiante ---------- */
+.narrow{max-width:520px;margin:0 auto;display:grid;gap:18px}
+.join input{width:100%;font-size:20px;padding:14px}
+.join label{font-weight:800;display:block;margin:12px 0 6px}
+.join .codeIn{font-family:var(--display);letter-spacing:.2em;text-align:center;font-size:30px}
+.sPlayHead{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.sPlayHead .letter{font-size:96px}
+.sPlayHead .clock{font-size:44px;text-align:right}
+.field{display:grid;gap:6px}
+.field label{font-weight:800;font-size:15px}
+.field input{font-size:19px;padding:12px}
+.field input.ok{border-color:var(--green)}
+.field input.bad{border-color:var(--red)}
+.bigStop{width:100%;font-family:var(--display);font-weight:400;font-size:34px;padding:14px;letter-spacing:.05em}
+.resRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.resRow:last-child{border-bottom:none}
+.resRow small{color:var(--chalk-dim);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.resRow .ans{font-weight:800;font-size:18px;overflow-wrap:anywhere}
+.pts{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;align-self:center}
+.p100{color:var(--green)}.p50{color:var(--yellow)}.p0{color:#ff8c80}
+
+/* ---------- Docente ---------- */
+.tWrap{max-width:1280px;margin:0 auto;display:grid;gap:18px;grid-template-columns:minmax(0,1fr) 340px}
+@media (max-width:960px){.tWrap{grid-template-columns:minmax(0,1fr)}}
+.tHead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;border-bottom:2px dashed var(--line);padding-bottom:14px}
+.salaBox{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.salaCode{font-family:var(--display);font-size:30px;color:var(--yellow);letter-spacing:.12em}
+.linkTxt{font-weight:700;color:var(--chalk-dim);font-size:14px;overflow-wrap:anywhere;max-width:340px}
+.tMain{display:grid;gap:18px;min-width:0}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:center}
+@media (max-width:700px){.stage{grid-template-columns:minmax(0,1fr)}}
+.stage .letter{font-size:clamp(120px,18vw,220px);text-align:center;min-height:1em}
+.stage .clock{font-size:64px;text-align:center}
+.used{color:var(--chalk-dim);font-weight:700;font-size:14px;letter-spacing:.12em;text-align:center;margin-top:8px;overflow-wrap:anywhere}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.cat{display:flex;align-items:center;justify-content:space-between;gap:8px;border:2px solid var(--chalk);border-radius:10px;padding:8px 10px 8px 12px;font-weight:800;min-width:0}
+.cat span{overflow-wrap:anywhere}
+.cat button{border:none;padding:2px 8px;color:var(--chalk-dim);font-size:18px}
+.cat button:hover{color:var(--red)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.tools input{flex:1 1 180px}
+.check{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--chalk-dim);font-size:14px}
+.tableWrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--chalk-dim);background:var(--board-3);position:sticky;top:0}
+td.name{font-weight:800;white-space:nowrap}
+td.cell{cursor:pointer;min-width:120px;border-left:1px solid var(--line)}
+td.cell:hover{background:rgba(255,255,255,.05)}
+td.cell .a{display:block;font-weight:700;overflow-wrap:anywhere}
+td.cell .a.empty{color:#6f857b;font-style:italic;font-weight:500}
+td.cell .b{display:inline-block;margin-top:4px;font-weight:800;font-size:13px;border-radius:6px;padding:1px 7px}
+.b100{background:rgba(111,208,140,.18);color:var(--green)}
+.b50{background:rgba(245,207,74,.18);color:var(--yellow)}
+.b0{background:rgba(239,91,76,.2);color:#ff8c80}
+td.cell .m{font-size:11px;color:var(--chalk-dim);margin-left:4px}
+td.tot{font-family:var(--display);font-size:20px;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
+.pl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.pl:last-child{border-bottom:none}
+.pl .rk{font-weight:800;color:var(--chalk-dim);width:1.6em;text-align:right;font-variant-numeric:tabular-nums}
+.pl .nm{font-weight:800;display:flex;align-items:center;gap:8px;min-width:0}
+.pl .nm b{overflow-wrap:anywhere;font-weight:800}
+.pl .sc{font-family:var(--display);font-size:22px;color:var(--yellow);font-variant-numeric:tabular-nums}
+.pl .act{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px}
+.done{color:var(--green);font-size:13px;font-weight:800}
+.rules{font-size:14px;color:var(--chalk-dim);line-height:1.5;margin:10px 0 0}
+.rules b{color:var(--chalk)}
+
+/* overlays */
+.overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:20;text-align:center;padding:16px;cursor:pointer}
+.overlay.red{background:rgba(239,91,76,.96)}
+.overlay.dark{background:rgba(10,24,20,.94)}
+.overlay h3{font-family:var(--display);font-weight:400;font-size:clamp(90px,22vw,240px);margin:0;color:#fff;line-height:1;animation:pop .5s ease-out}
+.overlay p{color:#fff;font-weight:800;font-size:22px;margin:10px 0 0}
+.pinBig{font-family:var(--display);font-size:clamp(110px,24vw,280px);line-height:1;color:#fff;letter-spacing:.12em;margin:10px 0 20px;font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--chalk);color:#14261f;font-weight:800;padding:10px 18px;border-radius:999px;z-index:30}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ================= INICIO / UNIRSE (estudiante) ================= -->
+<section id="vJoin" class="narrow" hidden>
+  <div class="center"><h1>¡STOP! <span>en clase</span></h1></div>
+  <div class="panel join">
+    <h2>Entrar al juego</h2>
+    <form id="joinForm" autocomplete="off">
+      <label for="inCode">PIN del juego</label>
+      <input id="inCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000" required>
+      <label for="inName">Su nombre y apellido</label>
+      <input id="inName" maxlength="24" placeholder="Ej. Ana Mora" required>
+      <p class="err" id="joinErr"></p>
+      <button class="primary" style="width:100%;font-size:20px" id="joinBtn">Entrar</button>
+    </form>
+  </div>
+  <p class="muted center" style="font-size:14px">¿Es docente? <a href="?profe" style="color:var(--yellow)">Abrir modo docente</a></p>
+</section>
+
+<!-- ================= ESTUDIANTE: esperando ================= -->
+<section id="vWait" class="narrow center" hidden>
+  <h1>¡STOP! <span>en clase</span></h1>
+  <div class="panel">
+    <p style="font-size:20px;margin:0">Hola, <b id="wName"></b> 👋</p>
+    <p class="muted" id="wMsg">Ya está dentro. Espere a que la profe sortee la letra.</p>
+    <p class="chip" style="margin:0 auto"><span class="dot" id="wDot"></span><span id="wCount">—</span></p>
+  </div>
+  <div class="panel" id="wLast" hidden></div>
+</section>
+
+<!-- ================= ESTUDIANTE: jugando ================= -->
+<section id="vPlay" class="narrow" hidden>
+  <div class="panel">
+    <div class="sPlayHead">
+      <div class="letter" id="pLetter">A</div>
+      <div>
+        <div class="clock" id="pClock">1:30</div>
+        <div class="bar" style="margin-top:10px"><i id="pBar"></i></div>
+      </div>
+    </div>
+  </div>
+  <form class="panel" id="pForm" autocomplete="off" style="display:grid;gap:14px"></form>
+  <button class="danger bigStop" id="pStop" disabled>¡STOP!</button>
+  <p class="muted center" id="pHint" style="margin:0;font-size:14px">Llene todas las casillas para poder decir ¡STOP!</p>
+</section>
+
+<!-- ================= ESTUDIANTE: revisión / resultados ================= -->
+<section id="vRes" class="narrow" hidden>
+  <div class="panel center">
+    <h1 style="font-size:40px" id="rTitle">¡STOP!</h1>
+    <p class="muted" id="rMsg">La profe está revisando las respuestas…</p>
+  </div>
+  <div class="panel" id="rBox" hidden></div>
+</section>
+
+<!-- ================= DOCENTE ================= -->
+<div id="vTeacher" class="tWrap" hidden>
+  <header class="tHead">
+    <h1>¡STOP! <span>en clase</span></h1>
+    <div class="salaBox">
+      <div>
+        <div class="muted" style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">PIN del juego</div>
+        <div class="salaCode" id="tCode">····</div>
+      </div>
+      <div style="display:grid;gap:6px">
+        <span class="linkTxt" id="tLink">Conectando…</span>
+        <div class="row">
+          <button class="small" id="tCopy">Copiar enlace</button>
+          <button class="small" id="tQrBtn">Proyectar PIN</button>
+          <button class="small" id="tNew">Sala nueva</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="tMain">
+    <section class="panel">
+      <div class="stage">
+        <div>
+          <div class="letter" id="tLetter">?</div>
+          <div class="used" id="tUsed">Letras usadas: —</div>
+        </div>
+        <div style="display:grid;gap:12px">
+          <div class="clock" id="tClock">1:30</div>
+          <div class="bar"><i id="tBar"></i></div>
+          <button class="primary" id="tDraw">Sortear letra y empezar</button>
+          <button class="danger" id="tStop" disabled>¡STOP! (terminar ronda)</button>
+          <div class="row">
+            <select id="tDur" aria-label="Duración">
+              <option value="60">60 s</option><option value="90" selected>90 s</option>
+              <option value="120">2 min</option><option value="180">3 min</option>
+            </select>
+            <label class="check"><input type="checkbox" id="tHard"> Ñ K Q W X Y Z</label>
+          </div>
+          <button class="small" id="tResetLetters">Reiniciar letras</button>
+        </div>
+      </div>
+      <p class="muted center" id="tStatus" style="margin:12px 0 0;font-weight:700">Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.</p>
+    </section>
+
+    <section class="panel" id="tReview" hidden>
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2 style="margin:0" id="tRevTitle">Revisión de la ronda</h2>
+        <button class="primary" id="tConfirm">Confirmar puntos y enviar</button>
+      </div>
+      <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía o con otra letra. <b>Toque una casilla</b> para cambiar los puntos (100 → 50 → 0) si usted ve que la respuesta está bien o mal.</p>
+      <div class="tableWrap"><table id="tTable"></table></div>
+    </section>
+
+    <section class="panel" id="tCatsPanel">
+      <h2>Categorías</h2>
+      <div class="cats" id="tCats"></div>
+      <div class="tools">
+        <input id="tNewCat" placeholder="Nueva categoría (ej. Protocolo de red)" maxlength="40">
+        <button id="tAddCat">Agregar</button>
+        <select id="tPreset" aria-label="Juego de categorías">
+          <option value="">Cargar juego de categorías…</option>
+          <option value="clasico">Clásico</option>
+          <option value="tec">Tecnología</option>
+          <option value="ciber">Ciberseguridad</option>
+          <option value="web">Desarrollo Web</option>
+          <option value="mixto">Mixto (clásico + tecno)</option>
+        </select>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel" style="align-self:start">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <h2 style="margin:0">Jugadores <span id="tCount">(0)</span></h2>
+      <button class="small" id="tZero">Marcador en 0</button>
+    </div>
+    <div id="tPlayers"><p class="rules">Todavía no ha entrado nadie. Los nombres aparecen aquí apenas los chicos entran.</p></div>
+  </aside>
+</div>
+
+<div class="overlay red" id="ovStop" hidden><div><h3>¡STOP!</h3><p id="ovStopMsg">Lápices abajo</p></div></div>
+<div class="overlay dark" id="ovQr" hidden><div><p style="font-size:24px;margin:0 0 6px">Entre a</p><p id="ovQrLink" style="font-size:clamp(20px,3.4vw,40px);margin:0 0 28px;color:var(--yellow);overflow-wrap:anywhere"></p><p style="font-size:24px;margin:0">y escriba el PIN</p><div class="pinBig" id="ovPin"></div><p class="muted" style="font-size:16px">Toque para cerrar</p></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   ¡STOP! en clase — multijugador sin cuentas (PeerJS)
+   La computadora de la docente es la "central"; los celulares
+   se conectan a ella con el código de sala.
+   ============================================================ */
+const PREFIX = "ctpmn-stop-v1-";
+const PRESETS = {
+  clasico:["Nombre","Apellido","País o ciudad","Animal","Fruta o verdura","Color","Cosa"],
+  tec:["Lenguaje de programación","Marca tecnológica","Componente de hardware","App o sitio web","Término informático","Profesión TI"],
+  ciber:["Tipo de ataque","Herramienta de seguridad","Término de ciberseguridad","Protocolo","Buena práctica","Dispositivo de red"],
+  web:["Etiqueta HTML","Propiedad CSS","Palabra de JavaScript","Framework o librería","Término web","Sitio famoso"],
+  mixto:["Nombre","País o ciudad","Animal","Lenguaje de programación","Marca tecnológica","Término informático","Cosa"]
+};
+const EASY = "ABCDEFGHIJLMNOPRSTUV".split("");
+const HARD = "ÑKQWXYZ".split("");
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ls = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+function show(id){ ["vJoin","vWait","vPlay","vRes","vTeacher"].forEach(v => $(v).hidden = (v !== id)); }
+let toastT;
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2200); }
+let audio=null;
+function beep(f,ms){ try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); const o=audio.createOscillator(), g=audio.createGain(); o.type="square"; o.frequency.value=f; g.gain.value=.07; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+ms/1000); }catch(e){} }
+
+/* ---------- Calificación ---------- */
+// Quita tildes (pero conserva la Ñ) para comparar
+function baseFold(s){
+  return String(s||"").replace(/ñ/g,"\u0001").replace(/Ñ/g,"\u0002")
+    .normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/\u0001/g,"ñ").replace(/\u0002/g,"Ñ");
+}
+function norm(s){ return baseFold(s).toLowerCase().replace(/[^a-z0-9ñ]+/g," ").trim(); }
+function startsOk(ans, letter){ const n = norm(ans); return n.length > 0 && n[0] === baseFold(letter).toLowerCase(); }
+/** answersBy: {id:[...]}; returns {id:[pts...]} automático */
+function autoScore(answersBy, letter, nCats){
+  const ids = Object.keys(answersBy), out = {};
+  ids.forEach(id => out[id] = new Array(nCats).fill(0));
+  for(let i=0;i<nCats;i++){
+    const counts = {};
+    ids.forEach(id => { const a = (answersBy[id]||[])[i]||""; if(startsOk(a,letter)){ const k=norm(a); counts[k]=(counts[k]||0)+1; } });
+    ids.forEach(id => { const a = (answersBy[id]||[])[i]||""; if(startsOk(a,letter)) out[id][i] = counts[norm(a)] > 1 ? 50 : 100; });
+  }
+  return out;
+}
+
+/* ============================================================
+   MODO DOCENTE (central)
+   ============================================================ */
+const T = {
+  peer:null, conns:{}, tick:null,
+  s: null
+};
+function freshState(code){
+  return { code, cats:[...PRESETS.mixto], dur:90, hard:false, used:[], players:{},
+    round:{ n:0, status:"idle", letter:"", cats:[], endsAt:0, answers:{}, finals:{}, over:{}, stoppedBy:"", dur:90 } };
+}
+function newCode(){ return String(Math.floor(1000 + Math.random()*9000)); }
+function tSave(){ ls.set("stop_host", T.s); }
+
+function teacherInit(){
+  show("vTeacher");
+  const saved = ls.get("stop_host", null);
+  T.s = saved && saved.code ? saved : freshState(newCode());
+  Object.values(T.s.players).forEach(p => p.online = false);
+  // si se recargó durante una ronda, se pasa directo a revisión
+  if(T.s.round.status === "playing") T.s.round.status = "review";
+  $("tDur").value = String(T.s.dur); $("tHard").checked = !!T.s.hard;
+  tSave(); tStartPeer(); tRenderAll();
+
+  $("tDraw").onclick = tDraw;
+  $("tStop").onclick = () => tEndRound("la profe");
+  $("tConfirm").onclick = tConfirm;
+  $("tResetLetters").onclick = () => { T.s.used=[]; tSave(); tRenderStage(); };
+  $("tDur").onchange = e => { T.s.dur = +e.target.value; tSave(); tRenderStage(); };
+  $("tHard").onchange = e => { T.s.hard = e.target.checked; tSave(); };
+  $("tAddCat").onclick = () => { const v=$("tNewCat").value.trim(); if(v && T.s.cats.length<12){ T.s.cats.push(v); $("tNewCat").value=""; tSave(); tRenderCats(); } };
+  $("tNewCat").onkeydown = e => { if(e.key==="Enter") $("tAddCat").click(); };
+  $("tPreset").onchange = e => { if(PRESETS[e.target.value]){ T.s.cats=[...PRESETS[e.target.value]]; tSave(); tRenderCats(); } e.target.value=""; };
+  $("tZero").onclick = () => { if($("tZero").dataset.armed){ Object.values(T.s.players).forEach(p=>p.total=0); tSave(); tRenderPlayers(); tBroadcast(); delete $("tZero").dataset.armed; $("tZero").textContent="Marcador en 0"; } else { $("tZero").dataset.armed="1"; $("tZero").textContent="¿Seguro? Toque otra vez"; setTimeout(()=>{ delete $("tZero").dataset.armed; $("tZero").textContent="Marcador en 0"; },3000); } };
+  $("tNew").onclick = () => { if($("tNew").dataset.armed){ ls.del("stop_host"); location.reload(); } else { $("tNew").dataset.armed="1"; $("tNew").textContent="¿Borrar todo? Toque otra vez"; setTimeout(()=>{ delete $("tNew").dataset.armed; $("tNew").textContent="Sala nueva"; },3000); } };
+  $("tCopy").onclick = () => { const l=tLinkUrl(); (navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast("Enlace copiado")).catch(()=>toast(l)); };
+  $("tQrBtn").onclick = tShowQr; $("tCode").onclick = tShowQr; $("tCode").style.cursor = "pointer";
+  $("ovQr").onclick = () => $("ovQr").hidden = true;
+  $("ovStop").onclick = () => $("ovStop").hidden = true;
+  document.addEventListener("keydown", e => { if(e.key==="Escape"){ $("ovQr").hidden=true; $("ovStop").hidden=true; } });
+  setInterval(tPing, 5000);
+}
+function tLinkUrl(){ return location.origin + location.pathname + "?sala=" + T.s.code; }
+
+function tStartPeer(){
+  $("tCode").textContent = T.s.code;
+  $("tLink").textContent = "Conectando…";
+  if(T.peer){ try{ T.peer.destroy(); }catch(e){} }
+  const peer = new Peer(PREFIX + T.s.code);
+  T.peer = peer;
+  peer.on("open", () => {
+    $("tLink").textContent = tLinkUrl();
+  });
+  peer.on("connection", c => {
+    c.on("data", d => tOnData(c, d));
+    c.on("close", () => tOnClose(c));
+    c.on("error", () => tOnClose(c));
+  });
+  peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
+  peer.on("error", e => {
+    if(e.type === "unavailable-id"){
+      // Otra pestaña tiene este PIN abierto, o el servidor aún la recuerda: usar código nuevo
+      T.s.code = newCode(); tSave(); setTimeout(tStartPeer, 300);
+    } else if(e.type === "network" || e.type === "server-error" || e.type === "socket-error" || e.type === "socket-closed"){
+      $("tLink").textContent = "Sin conexión al servidor. Revise el internet; reintentando…";
+      setTimeout(() => { try{ if(peer.destroyed) tStartPeer(); else peer.reconnect(); }catch(err){ tStartPeer(); } }, 3000);
+    }
+  });
+}
+
+function tCidOf(c){ return c && c._cid; }
+function tOnClose(c){
+  const cid = tCidOf(c);
+  if(cid && T.conns[cid] === c){ delete T.conns[cid]; if(T.s.players[cid]){ T.s.players[cid].online = false; tRenderPlayers(); tBroadcast(); } }
+}
+function tPing(){ Object.entries(T.conns).forEach(([cid,c]) => { if(!c.open){ tOnClose(c); } }); }
+
+function tOnData(c, d){
+  if(!d || typeof d !== "object") return;
+  if(d.t === "join"){
+    let name = String(d.name||"").replace(/\s+/g," ").trim().slice(0,24);
+    const cid = String(d.cid||"").slice(0,40);
+    if(!name || !cid){ c.send({t:"rejected", msg:"Escriba su nombre para entrar."}); return; }
+    let p = T.s.players[cid];
+    if(!p){
+      const taken = new Set(Object.values(T.s.players).map(x => x.name.toLowerCase()));
+      let nm = name, k = 2; while(taken.has(nm.toLowerCase())) nm = name + " " + (k++);
+      p = T.s.players[cid] = { name: nm, total: 0, online: true };
+    }
+    if(T.conns[cid] && T.conns[cid] !== c){ try{ T.conns[cid].close(); }catch(e){} }
+    c._cid = cid; T.conns[cid] = c; p.online = true;
+    tSave();
+    c.send({ t:"welcome", name:p.name });
+    tRenderPlayers(); tBroadcast();
+    if(p.last) c.send({ t:"result", ...p.last });
+    return;
+  }
+  const cid = tCidOf(c); if(!cid || !T.s.players[cid]) return;
+  if(d.t === "answers"){
+    const r = T.s.round;
+    if(d.round !== r.n) return;
+    const clean = Array.isArray(d.answers) ? r.cats.map((_,i) => String(d.answers[i]||"").slice(0,40)) : null;
+    if(!clean) return;
+    if(r.status === "playing"){
+      r.answers[cid] = clean;
+      if(d.final) r.finals[cid] = true;
+      if(d.stop && clean.every(a => a.trim())) { tEndRound(T.s.players[cid].name); return; }
+      tSave(); tRenderPlayers();
+    } else if(r.status === "review" && !r.finals[cid]){
+      // respuesta final que llega justo después del STOP
+      r.answers[cid] = clean; r.finals[cid] = true; tSave(); tRenderReview(); tRenderPlayers();
+    }
+  }
+}
+
+function tStateMsg(){
+  const r = T.s.round;
+  const players = Object.entries(T.s.players).map(([cid,p]) => ({ name:p.name, total:p.total, online:!!p.online }))
+    .sort((a,b) => b.total - a.total);
+  return { t:"state", status:r.status, round:r.n, letter:r.letter, cats:r.cats,
+    remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players };
+}
+function tBroadcast(){ const m = tStateMsg(); Object.values(T.conns).forEach(c => { try{ if(c.open) c.send(m); }catch(e){} }); }
+
+function tDraw(){
+  if(T.s.round.status === "playing") return;
+  if(T.s.round.status === "review" && !$("tDraw").dataset.armed){
+    $("tDraw").dataset.armed = "1"; $("tDraw").textContent = "Falta confirmar puntos. ¿Sortear igual?";
+    setTimeout(() => { delete $("tDraw").dataset.armed; tRenderStage(); }, 3500); return;
+  }
+  delete $("tDraw").dataset.armed;
+  if(!T.s.cats.length){ toast("Agregue al menos una categoría"); return; }
+  const pool = (T.s.hard ? EASY.concat(HARD) : EASY).filter(l => !T.s.used.includes(l));
+  if(!pool.length){ toast("Ya salieron todas las letras. Toque «Reiniciar letras»."); return; }
+  const el = $("tLetter"); $("tDraw").disabled = true; el.classList.add("spin");
+  let n = 0;
+  const iv = setInterval(() => {
+    el.textContent = pool[Math.floor(Math.random()*pool.length)]; beep(500+n*20,30);
+    if(++n > 16){
+      clearInterval(iv);
+      const letter = pool[Math.floor(Math.random()*pool.length)];
+      el.classList.remove("spin");
+      T.s.used.push(letter);
+      T.s.round = { n: T.s.round.n + 1, status:"playing", letter, cats:[...T.s.cats], endsAt: Date.now() + T.s.dur*1000,
+        dur:T.s.dur, answers:{}, finals:{}, over:{}, stoppedBy:"" };
+      tSave(); beep(880,180);
+      tRenderAll(); el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+      tBroadcast(); tStartTick();
+    }
+  }, 70);
+}
+function tStartTick(){
+  clearInterval(T.tick);
+  T.tick = setInterval(() => {
+    const r = T.s.round; if(r.status !== "playing"){ clearInterval(T.tick); return; }
+    const left = (r.endsAt - Date.now())/1000;
+    tRenderClock();
+    if(left <= 5.2 && left > 0 && Math.abs(left - Math.round(left)) < .13) beep(660,80);
+    if(left <= 0) tEndRound("Se acabó el tiempo");
+  }, 250);
+}
+function tEndRound(by){
+  const r = T.s.round; if(r.status !== "playing") return;
+  r.status = "review"; r.stoppedBy = by; r.endsAt = Date.now();
+  clearInterval(T.tick); tSave();
+  $("ovStopMsg").textContent = by === "Se acabó el tiempo" ? "Se acabó el tiempo" : "Lo dijo: " + by;
+  $("ovStop").hidden = false; beep(220,500);
+  setTimeout(() => $("ovStop").hidden = true, 2500);
+  tBroadcast(); tRenderAll();
+}
+function tScores(){
+  const r = T.s.round, ids = Object.keys(T.s.players);
+  const answersBy = {}; ids.forEach(id => answersBy[id] = r.answers[id] || []);
+  const auto = autoScore(answersBy, r.letter, r.cats.length);
+  const res = {};
+  ids.forEach(id => {
+    res[id] = auto[id].map((p,i) => (r.over[id] && r.over[id][i] != null) ? r.over[id][i] : p);
+  });
+  return { auto, res };
+}
+function tConfirm(){
+  const r = T.s.round; if(r.status !== "review") return;
+  const { res } = tScores();
+  Object.entries(T.s.players).forEach(([id,p]) => { p.total += res[id].reduce((a,b)=>a+b,0); });
+  const ranking = Object.entries(T.s.players).sort((a,b)=>b[1].total-a[1].total).map(e=>e[0]);
+  Object.entries(T.s.players).forEach(([id,p]) => {
+    const rows = r.cats.map((cat,i) => ({ cat, ans:(r.answers[id]||[])[i]||"", pts:res[id][i] }));
+    p.last = { round:r.n, letter:r.letter, rows, roundPts: res[id].reduce((a,b)=>a+b,0), total:p.total, rank: ranking.indexOf(id)+1, of: ranking.length };
+    const c = T.conns[id]; if(c && c.open){ try{ c.send({ t:"result", ...p.last }); }catch(e){} }
+  });
+  r.status = "done"; tSave(); tBroadcast(); tRenderAll(); toast("Puntos enviados a los estudiantes");
+}
+
+/* ---- render docente ---- */
+function tRenderAll(){ tRenderStage(); tRenderCats(); tRenderReview(); tRenderPlayers(); }
+function tRenderClock(){
+  const r = T.s.round;
+  const total = r.status === "playing" ? r.dur : T.s.dur;
+  const left = r.status === "playing" ? (r.endsAt - Date.now())/1000 : (r.status === "idle" ? T.s.dur : 0);
+  $("tClock").textContent = fmt(r.status === "idle" || r.status === "done" ? T.s.dur : left);
+  $("tClock").classList.toggle("low", r.status === "playing" && left <= 10);
+  $("tBar").style.width = (r.status === "playing" ? Math.max(0,left/total*100) : (r.status==="review"?0:100)) + "%";
+}
+function tRenderStage(){
+  const r = T.s.round;
+  $("tLetter").textContent = r.letter || "?";
+  $("tUsed").textContent = "Letras usadas: " + (T.s.used.length ? T.s.used.join(" · ") : "—");
+  $("tDraw").disabled = r.status === "playing";
+  if(!$("tDraw").dataset.armed) $("tDraw").textContent = r.n ? "Sortear otra letra" : "Sortear letra y empezar";
+  $("tStop").disabled = r.status !== "playing";
+  $("tDur").disabled = r.status === "playing";
+  const online = Object.values(T.s.players).filter(p=>p.online).length;
+  $("tStatus").textContent =
+    r.status === "playing" ? "Jugando con la letra " + r.letter + ". Los chicos ven la letra y el reloj en su celular." :
+    r.status === "review" ? "¡STOP! (" + r.stoppedBy + "). Revise la tabla y confirme los puntos." :
+    r.status === "done" ? "Puntos enviados. Sortee otra letra cuando estén listos." :
+    online ? online + " conectado(s). Cuando estén todos, sortee la letra." : "Toque «Proyectar PIN» para que los chicos entren. Cuando estén todos, sortee la letra.";
+  tRenderClock();
+}
+function tRenderCats(){
+  const lock = T.s.round.status === "playing";
+  $("tCats").innerHTML = T.s.cats.map((c,i) => `<div class="cat"><span>${esc(c)}</span>${lock?"":`<button data-i="${i}" aria-label="Quitar ${esc(c)}">×</button>`}</div>`).join("");
+  $("tCats").querySelectorAll("button").forEach(b => b.onclick = () => { T.s.cats.splice(+b.dataset.i,1); tSave(); tRenderCats(); });
+  ["tNewCat","tAddCat","tPreset"].forEach(id => $(id).disabled = lock);
+}
+function tRenderReview(){
+  const r = T.s.round;
+  const showIt = r.status === "review" || r.status === "done";
+  $("tReview").hidden = !showIt; if(!showIt) return;
+  $("tRevTitle").textContent = (r.status === "done" ? "Resultados" : "Revisión") + " · ronda " + r.n + " · letra " + r.letter;
+  $("tConfirm").hidden = r.status !== "review";
+  const { auto, res } = tScores();
+  const ids = Object.keys(T.s.players).sort((a,b) => res[b].reduce((x,y)=>x+y,0) - res[a].reduce((x,y)=>x+y,0));
+  let h = "<thead><tr><th>Estudiante</th>" + r.cats.map(c => `<th>${esc(c)}</th>`).join("") + "<th style='text-align:right'>Ronda</th></tr></thead><tbody>";
+  ids.forEach(id => {
+    const p = T.s.players[id], ans = r.answers[id] || [];
+    h += `<tr><td class="name">${esc(p.name)}${ans.length?"":" <span class='muted' style='font-weight:500'>(sin respuestas)</span>"}</td>`;
+    r.cats.forEach((_,i) => {
+      const a = ans[i] || "", pts = res[id][i], manual = pts !== auto[id][i];
+      h += `<td class="cell" data-id="${esc(id)}" data-i="${i}" title="Toque para cambiar los puntos"><span class="a ${a?"":"empty"}">${a?esc(a):"vacío"}</span><span class="b b${pts}">${pts}</span>${manual?"<span class='m'>ajustado</span>":""}</td>`;
+    });
+    h += `<td class="tot">${res[id].reduce((x,y)=>x+y,0)}</td></tr>`;
+  });
+  h += "</tbody>";
+  $("tTable").innerHTML = ids.length ? h : "<tbody><tr><td>No hay jugadores.</td></tr></tbody>";
+  if(r.status === "review"){
+    $("tTable").querySelectorAll("td.cell").forEach(td => td.onclick = () => {
+      const id = td.dataset.id, i = +td.dataset.i;
+      const cur = tScores().res[id][i];
+      const next = cur === 100 ? 50 : cur === 50 ? 0 : 100;
+      r.over[id] = r.over[id] || {}; r.over[id][i] = next;
+      tSave(); tRenderReview();
+    });
+  }
+}
+function tRenderPlayers(){
+  const r = T.s.round;
+  const list = Object.entries(T.s.players).sort((a,b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
+  $("tCount").textContent = "(" + list.length + ")";
+  if(!list.length){ $("tPlayers").innerHTML = '<p class="rules">Todavía no ha entrado nadie. Los nombres aparecen aquí apenas los chicos entran.</p>'; return; }
+  $("tPlayers").innerHTML = list.map(([id,p],k) => {
+    const ans = r.answers[id] || [];
+    const filled = ans.filter(a => a && a.trim()).length;
+    const prog = r.status === "playing" ? `<span class="done">${filled}/${r.cats.length}</span>` : "";
+    return `<div class="pl"><span class="rk">${k+1}</span><span class="nm"><span class="dot ${p.online?"":"off"}" title="${p.online?"Conectado":"Desconectado"}"></span><b>${esc(p.name)}</b>${prog}</span><span class="sc">${p.total}</span>
+      <span class="act"><button class="small" data-a="+50" data-id="${esc(id)}">+50</button><button class="small" data-a="-50" data-id="${esc(id)}">−50</button><button class="small" data-a="kick" data-id="${esc(id)}">Quitar</button></span></div>`;
+  }).join("");
+  $("tPlayers").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const id = b.dataset.id, p = T.s.players[id]; if(!p) return;
+    if(b.dataset.a === "kick"){
+      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent="¿Seguro?"; setTimeout(()=>{ b.textContent="Quitar"; delete b.dataset.armed; },3000); return; }
+      const c = T.conns[id]; if(c){ try{ c.send({t:"kicked"}); setTimeout(()=>c.close(),300); }catch(e){} delete T.conns[id]; }
+      delete T.s.players[id];
+    } else { p.total = Math.max(0, p.total + (+b.dataset.a)); }
+    tSave(); tRenderPlayers(); tRenderReview(); tBroadcast();
+  });
+}
+function tShowQr(){
+  $("ovQrLink").textContent = location.host + location.pathname;
+  $("ovPin").textContent = T.s.code;
+  $("ovQr").hidden = false;
+}
+
+/* ============================================================
+   MODO ESTUDIANTE
+   ============================================================ */
+const S = { peer:null, conn:null, code:"", name:"", cid:"", joined:false, st:null, round:0, answers:[], endsAt:0, dur:90, final:false, tick:null, sendT:null, retry:null };
+
+function studentInit(){
+  show("vJoin");
+  S.cid = ls.get("stop_cid", null) || (Math.random().toString(36).slice(2) + Date.now().toString(36));
+  ls.set("stop_cid", S.cid);
+  const sala = new URLSearchParams(location.search).get("sala");
+  if(sala) $("inCode").value = sala.replace(/\D/g,"").slice(0,4);
+  $("inName").value = ls.get("stop_name", "");
+  ($("inCode").value ? $("inName") : $("inCode")).focus();
+  $("joinForm").onsubmit = e => {
+    e.preventDefault();
+    const code = $("inCode").value.replace(/\D/g,""), name = $("inName").value.replace(/\s+/g," ").trim();
+    if(code.length !== 4){ $("joinErr").textContent = "El PIN tiene 4 números. Véalo en la pantalla de la profe."; return; }
+    if(name.length < 2){ $("joinErr").textContent = "Escriba su nombre."; return; }
+    S.code = code; S.name = name; ls.set("stop_name", name);
+    $("joinErr").textContent = ""; $("joinBtn").disabled = true; $("joinBtn").textContent = "Entrando…";
+    sStart();
+  };
+  $("pStop").onclick = () => {
+    if(!S.answers.every(a => a.trim())) return;
+    sSend({ t:"answers", round:S.round, answers:S.answers, stop:true, final:true });
+    S.final = true; $("pStop").disabled = true;
+  };
+}
+function sJoinFail(msg){
+  $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "Entrar";
+  show("vJoin");
+}
+function sStart(){
+  if(S.peer){ try{ S.peer.destroy(); }catch(e){} }
+  const peer = new Peer(); S.peer = peer;
+  const failT = setTimeout(() => { if(!S.joined) sJoinFail("No se pudo conectar. Revise el PIN y que la profe tenga el juego abierto."); }, 12000);
+  peer.on("open", () => sConnect());
+  peer.on("disconnected", () => { setTimeout(() => { try{ if(!peer.destroyed) peer.reconnect(); }catch(e){} }, 1500); });
+  peer.on("error", e => {
+    if(e.type === "peer-unavailable"){
+      if(!S.joined){ clearTimeout(failT); sJoinFail("No hay ningún juego con el PIN " + S.code + ". Revíselo o pida a la profe que abra el juego."); }
+      else sRetry();
+    } else if(!S.joined && (e.type === "network" || e.type === "server-error" || e.type === "socket-error" || e.type === "browser-incompatible")){
+      clearTimeout(failT); sJoinFail("Problema de conexión a internet. Intente de nuevo.");
+    }
+  });
+}
+function sConnect(){
+  if(!S.peer || S.peer.destroyed) return;
+  const c = S.peer.connect(PREFIX + S.code, { reliable:true });
+  S.conn = c;
+  c.on("open", () => c.send({ t:"join", name:S.name, cid:S.cid }));
+  c.on("data", sOnData);
+  c.on("close", () => { if(S.conn === c && S.joined) sRetry(); });
+  c.on("error", () => { if(S.conn === c && S.joined) sRetry(); });
+}
+function sRetry(){
+  $("wDot").classList.add("off"); $("wCount").textContent = "Reconectando…";
+  clearTimeout(S.retry); S.retry = setTimeout(() => { if(S.peer && S.peer.disconnected) { try{ S.peer.reconnect(); }catch(e){} } sConnect(); }, 2500);
+}
+function sSend(m){ try{ if(S.conn && S.conn.open) S.conn.send(m); }catch(e){} }
+
+function sOnData(d){
+  if(!d || typeof d !== "object") return;
+  if(d.t === "welcome"){ S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
+  if(d.t === "rejected"){ sJoinFail(d.msg || "No se pudo entrar."); return; }
+  if(d.t === "kicked"){ S.joined = false; try{ S.peer.destroy(); }catch(e){} sJoinFail("La profe lo sacó de la sala."); return; }
+  if(d.t === "result"){ sShowResult(d); return; }
+  if(d.t === "state"){ sOnState(d); }
+}
+function sOnState(d){
+  S.st = d;
+  const online = (d.players||[]).filter(p=>p.online).length;
+  $("wDot").classList.remove("off"); $("wCount").textContent = online + " conectado(s)";
+  if(d.status === "playing"){
+    if(d.round !== S.round){
+      S.round = d.round; S.final = false;
+      const saved = ls.get("stop_ans_" + S.code + "_" + d.round, null);
+      S.answers = d.cats.map((_,i) => (saved && saved[i]) || "");
+      sBuildForm(d);
+    }
+    S.dur = d.dur || 90; S.endsAt = Date.now() + d.remaining*1000;
+    show("vPlay"); sStartTick();
+  } else if(d.status === "review"){
+    if(d.round === S.round && !S.final){ S.final = true; sSend({ t:"answers", round:S.round, answers:S.answers, final:true }); }
+    clearInterval(S.tick);
+    $("pForm").querySelectorAll("input").forEach(i => i.disabled = true);
+    if(!$("vRes").hidden && !$("rBox").hidden) return;
+    $("rTitle").textContent = "¡STOP!";
+    $("rMsg").textContent = (d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo. " : "¡STOP! lo dijo " + d.stoppedBy + ". ") + "La profe está revisando las respuestas…";
+    $("rBox").hidden = true; show("vRes");
+    beep(220,400);
+  } else if(d.status === "done"){
+    if($("vRes").hidden && $("vPlay").hidden === false) show("vWait");
+  } else {
+    if(!$("vPlay").hidden || !$("vJoin").hidden) show("vWait");
+  }
+}
+function sBuildForm(d){
+  $("pLetter").textContent = d.letter;
+  $("pLetter").classList.remove("pop"); void $("pLetter").offsetWidth; $("pLetter").classList.add("pop");
+  $("pForm").innerHTML = d.cats.map((c,i) => `<div class="field"><label for="a${i}">${esc(c)}</label><input id="a${i}" data-i="${i}" maxlength="40" autocapitalize="sentences" autocomplete="off" spellcheck="false" placeholder="${esc(d.letter)}…" value="${esc(S.answers[i])}"></div>`).join("");
+  $("pForm").onsubmit = e => e.preventDefault();
+  $("pForm").querySelectorAll("input").forEach(inp => {
+    inp.oninput = () => {
+      S.answers[+inp.dataset.i] = inp.value; sMark(inp, d.letter); sCheckStop();
+      ls.set("stop_ans_" + S.code + "_" + S.round, S.answers);
+      clearTimeout(S.sendT); S.sendT = setTimeout(() => sSend({ t:"answers", round:S.round, answers:S.answers }), 700);
+    };
+    inp.onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); const nx = $("a" + (+inp.dataset.i + 1)); if(nx) nx.focus(); else inp.blur(); } };
+    sMark(inp, d.letter);
+  });
+  sCheckStop(); beep(880,160);
+}
+function sMark(inp, letter){
+  const v = inp.value.trim();
+  inp.classList.toggle("ok", !!v && startsOk(v, letter));
+  inp.classList.toggle("bad", !!v && !startsOk(v, letter));
+}
+function sCheckStop(){
+  const all = S.answers.every(a => a.trim());
+  $("pStop").disabled = !all || S.final;
+  $("pHint").textContent = all ? "¡Listo! Toque ¡STOP! para detener a todos." : "Llene todas las casillas para poder decir ¡STOP!";
+}
+function sStartTick(){
+  clearInterval(S.tick);
+  const paint = () => {
+    const left = (S.endsAt - Date.now())/1000;
+    $("pClock").textContent = fmt(left);
+    $("pClock").classList.toggle("low", left <= 10);
+    $("pBar").style.width = Math.max(0, left/S.dur*100) + "%";
+  };
+  paint(); S.tick = setInterval(paint, 250);
+}
+function sShowResult(d){
+  const rows = d.rows.map(r => `<div class="resRow"><div><small>${esc(r.cat)}</small><div class="ans">${r.ans?esc(r.ans):"<span class='muted'>vacío</span>"}</div></div><div class="pts p${r.pts}">${r.pts}</div></div>`).join("");
+  $("rTitle").textContent = "+" + d.roundPts;
+  $("rMsg").innerHTML = `Ronda ${d.round} · letra ${esc(d.letter)}<br>Total: <b style="color:var(--yellow)">${d.total}</b> puntos · puesto <b>${d.rank}</b> de ${d.of}`;
+  $("rBox").innerHTML = rows; $("rBox").hidden = false;
+  show("vRes");
+  // en la pantalla de espera también queda el último resultado
+  $("wLast").innerHTML = `<h2>Última ronda (letra ${esc(d.letter)})</h2><p style="margin:0;font-size:18px">+${d.roundPts} · Total <b style="color:var(--yellow)">${d.total}</b> · Puesto ${d.rank} de ${d.of}</p>`;
+  $("wLast").hidden = false;
+}
+
+/* ---------- arranque ---------- */
+if(typeof Peer === "undefined"){
+  document.body.innerHTML = '<div class="narrow panel center" style="margin-top:40px"><h1>¡STOP!</h1><p>No se pudo cargar el juego. Revise la conexión a internet y recargue la página.</p></div>';
+} else if(new URLSearchParams(location.search).has("profe")){
+  teacherInit();
+} else {
+  studentInit();
+}
+</script>
+</body>
+</html>
