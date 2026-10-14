@@ -20,22 +20,25 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 html{background:var(--deep)}
-body{font-family:var(--mono);font-size:16px;line-height:1.5;color:var(--ink);padding:20px 16px 48px;min-height:100vh;background:var(--deep)}
+body{font-family:var(--mono);font-size:16px;line-height:1.5;color:var(--ink);padding:20px 16px 48px;min-height:100vh;background:var(--deep);
+  background-image:radial-gradient(ellipse 60% 40% at 10% -5%,rgba(137,180,250,.13),transparent 70%),radial-gradient(ellipse 50% 35% at 95% 0%,rgba(203,166,247,.10),transparent 70%),radial-gradient(ellipse 60% 40% at 50% 110%,rgba(166,227,161,.06),transparent 70%);background-attachment:fixed}
 [hidden]{display:none!important}
-h1{font-family:var(--mono);font-weight:800;font-size:clamp(20px,3vw,30px);margin:0;color:var(--fn);line-height:1.3}
+h1{font-family:var(--mono);font-weight:800;font-size:clamp(20px,3vw,30px);margin:0;color:var(--fn);line-height:1.3;text-shadow:0 0 24px rgba(137,180,250,.35)}
 h1 span{color:var(--str)}
 h2{font-size:13px;font-weight:600;color:var(--ink);margin:-18px -18px 16px;padding:8px 16px;background:var(--side);border-bottom:1px solid var(--tab);border-top:2px solid var(--fn);display:block;border-radius:8px 8px 0 0}
 h2::before{content:"▸ ";color:var(--fn)}
 p{line-height:1.5}
 .muted{color:var(--ink-dim)}
-.panel{background:var(--bg);border:1px solid var(--tab);border-radius:8px;padding:18px;min-width:0}
+.panel{background:linear-gradient(180deg,#22223a,var(--bg) 120px);border:1px solid var(--tab);border-radius:12px;padding:18px;min-width:0;box-shadow:0 14px 34px -14px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.04)}
 button{font-family:var(--mono);font-weight:700;font-size:14px;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--tab);color:var(--ink);padding:9px 14px}
 button:hover{border-color:var(--fn);color:var(--fn)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--fn);outline-offset:2px}
 button:disabled{opacity:.35;cursor:not-allowed}
 button:disabled:hover{border-color:var(--line);color:var(--ink)}
 .primary,.go{background:var(--str);border-color:var(--str);color:var(--deep)}
-.primary:hover,.go:hover{background:#c3f0bd;border-color:#c3f0bd;color:var(--deep)}
+.primary:hover,.go:hover{background:#c3f0bd;border-color:#c3f0bd;color:var(--deep);box-shadow:0 0 0 4px rgba(166,227,161,.18),0 0 22px rgba(166,227,161,.35)}
+button{transition:box-shadow .15s,transform .08s,background .15s}
+button:active:not(:disabled){transform:translateY(1px)}
 .danger{background:var(--red);border-color:var(--red);color:var(--deep)}
 .danger:hover{background:#f7aec2;border-color:#f7aec2;color:var(--deep)}
 .small{padding:4px 9px;font-size:12px}
@@ -80,7 +83,7 @@ select{color:var(--ink)}
 .resRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 0;border-bottom:1px solid var(--tab)}
 .resRow:last-child{border-bottom:none}
 .resRow.mine .ans{color:var(--ink-dim)}
-#rMine{opacity:.8}
+#rMine .resRow small{opacity:.8}
 .resRow small{color:var(--fn);font-size:13px}
 .resRow .ans{font-size:17px;overflow-wrap:anywhere;color:var(--str)}
 .pts{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;align-self:center}
@@ -100,7 +103,7 @@ select{color:var(--ink)}
 /* ---------- Docente ---------- */
 .tWrap{max-width:1320px;margin:0 auto;display:grid;gap:18px;grid-template-columns:minmax(0,1fr) 350px}
 @media (max-width:980px){.tWrap{grid-template-columns:minmax(0,1fr)}}
-.tHead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;background:var(--side);border:1px solid var(--tab);border-radius:8px;padding:10px 16px}
+.tHead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(137,180,250,.10),rgba(203,166,247,.06) 60%,var(--side));border:1px solid var(--tab);border-radius:12px;padding:12px 18px;box-shadow:0 14px 34px -14px rgba(0,0,0,.7)}
 .salaBox{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
 .salaCode{font-weight:800;font-size:34px;color:var(--num);letter-spacing:.16em;cursor:pointer;line-height:1}
 .linkTxt{color:var(--ink-dim);font-size:13px;overflow-wrap:anywhere;max-width:330px}
@@ -137,7 +140,12 @@ table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--tab);text-align:left;vertical-align:top}
 th{font-size:12px;font-weight:600;color:var(--fn);background:var(--side);position:sticky;top:0}
 td.name{white-space:nowrap;color:var(--ink);font-weight:600}
-td.cell{cursor:pointer;min-width:120px;border-left:1px solid var(--tab)}
+td.cell{min-width:130px;border-left:1px solid var(--tab)}
+.pbtns{display:flex;gap:4px;margin-top:5px}
+.pb{padding:2px 7px;font-size:12px;border-radius:4px;background:transparent;border:1px solid var(--line);color:var(--faint);font-weight:700}
+.pb:hover{border-color:currentColor}
+.pb100:hover,.pb100.on{color:var(--ok)}.pb50:hover,.pb50.on{color:var(--mid)}.pb0:hover,.pb0.on{color:var(--bad)}
+.pb.on{border-color:currentColor;background:color-mix(in srgb,currentColor 18%,transparent)}
 td.cell:hover{background:var(--side)}
 td.cell .a{display:block;overflow-wrap:anywhere;color:var(--str)}
 td.cell .a.empty{color:var(--faint);font-style:italic}
@@ -203,6 +211,15 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
 .tip{color:var(--ink-dim);font-size:15px;min-height:1.5em;transition:opacity .3s}
 .stage .letter.spin{animation:hue .5s linear infinite}
 .drawing-note{color:var(--yel);font-weight:700;text-align:center;margin-top:6px;min-height:1.4em}
+/* lluvia de palabras */
+.rainBand{display:block;width:100%;height:150px;border-radius:10px;background:var(--deep);border:1px solid var(--tab);margin-bottom:14px}
+.rainBg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
+.narrow,.tWrap{position:relative;z-index:1}
+#ovRain canvas{position:absolute;inset:0;width:100%;height:100%}
+#ovRain .rainTitle{position:relative;z-index:1;background:rgba(17,17,27,.72);border:1px solid var(--tab);border-radius:16px;padding:22px 34px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#ovRain .wave{font-size:clamp(34px,6vw,72px)}
+.stage .letter{text-shadow:0 0 50px rgba(249,226,175,.28)}
+.salaCode{text-shadow:0 0 22px rgba(250,179,135,.35)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -338,7 +355,7 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
         <h2 style="margin:0" id="tRevTitle">Revisión de la ronda</h2>
         <button class="go" id="tConfirm">Confirmar puntos y enviar</button>
       </div>
-      <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía, de una sola letra o con otra letra. <b>Toque una casilla</b> para cambiar los puntos (100 → 50 → 0) si usted ve que la respuesta está bien o mal.</p>
+      <p class="rules" style="margin:0 0 12px">El sistema ya calificó: <b>100</b> única · <b>50</b> repetida · <b>0</b> vacía, de una sola letra o con otra letra. En cada respuesta toque <b>100</b>, <b>50</b> o <b>0</b> para dejar los puntos que usted quiera.</p>
       <div class="tableWrap"><table id="tTable"></table></div>
     </section>
 
@@ -377,6 +394,7 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
   <div class="podRest board" id="podRest"></div>
   <div class="row podBtns"><button id="podClose">Cerrar</button><button class="primary" id="podAgain">Seguir jugando</button></div>
 </div></div>
+<canvas class="rainBg" id="sRain" hidden></canvas>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -450,6 +468,53 @@ function beep(f,ms){ try{ audio = audio || new (window.AudioContext||window.webk
 const colorOf = i => "c" + (i % 8);
 const waveHtml = txt => [...txt].map((ch,i) => `<span style="animation-delay:${(i*0.09).toFixed(2)}s,${(i*0.12).toFixed(2)}s">${ch === " " ? "&nbsp;" : esc(ch)}</span>`).join("");
 const DRAW_COLORS = ["c-a","c-b","c-c","c-d","c-e","c-f"];
+/* Lluvia de palabras (estilo Matrix) sobre un <canvas> */
+const RAIN_COLORS = ["#89b4fa","#cba6f7","#a6e3a1","#f9e2af","#fab387","#f38ba8","#94e2d5"];
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+function makeRain(canvas, density){
+  const ctx = canvas.getContext("2d");
+  let words = [], drops = [], raf = null, last = 0, W = 0, H = 0;
+  const fit = () => {
+    const r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    canvas.width = Math.max(1, Math.round(W*dpr)); canvas.height = Math.max(1, Math.round(H*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  };
+  const spawn = () => {
+    const size = 12 + Math.random()*16;
+    drops.push({ t: words[Math.floor(Math.random()*words.length)], x: Math.random()*W, y: -8, v: 35 + Math.random()*85 + size*2,
+                 s: size, c: RAIN_COLORS[Math.floor(Math.random()*RAIN_COLORS.length)] });
+  };
+  const frame = ts => {
+    const dt = Math.min(.05, (ts - (last || ts))/1000); last = ts;
+    ctx.fillStyle = "rgba(17,17,27,.22)"; ctx.fillRect(0,0,W,H);
+    if(words.length && drops.length < W/(density||9) && Math.random() < .55) spawn();
+    for(const d of drops){
+      d.y += d.v*dt;
+      ctx.font = "700 " + d.s.toFixed(0) + "px 'JetBrains Mono', monospace";
+      ctx.globalAlpha = Math.min(1, .3 + d.s/32); ctx.fillStyle = d.c;
+      ctx.fillText(d.t, d.x - ctx.measureText(d.t).width/2, d.y);
+    }
+    ctx.globalAlpha = 1;
+    drops = drops.filter(d => d.y < H + 30);
+    raf = requestAnimationFrame(frame);
+  };
+  return {
+    setWords(a){ words = (a || []).filter(Boolean); },
+    start(){ if(raf || REDUCED) return; fit(); ctx.fillStyle = "#11111b"; ctx.fillRect(0,0,W,H); last = 0; raf = requestAnimationFrame(frame); },
+    stop(){ if(raf) cancelAnimationFrame(raf); raf = null; drops = []; },
+    fit, get on(){ return !!raf; }
+  };
+}
+function roundWords(answers){
+  const seen = new Set(), out = [];
+  Object.values(answers || {}).forEach(arr => (arr || []).forEach(a => {
+    const t = String(a || "").trim(); const k = norm(t);
+    if(t.length >= 2 && !seen.has(k)){ seen.add(k); out.push(t.toUpperCase().slice(0,24)); }
+  }));
+  return out.slice(0, 160);
+}
+window.addEventListener("resize", () => { [S.rain].forEach(r => { if(r && r.on) r.fit(); }); });
 
 /* ---------- Calificación ---------- */
 function baseFold(s){
@@ -629,7 +694,7 @@ function tStateMsg(){
   const r = T.s.round;
   const players = Object.values(T.s.players).map(p => ({ name:p.name, total:p.total, online:isOn(p) })).sort((a,b) => b.total - a.total);
   return { t:"state", status:r.status, round:r.n, letter:r.status === "playing" || r.status === "review" || r.status === "done" ? r.letter : "", cats:r.cats, drawing: !!T.drawing,
-    remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players };
+    remaining: r.status === "playing" ? Math.max(0,(r.endsAt - Date.now())/1000) : 0, dur:r.dur, stoppedBy:r.stoppedBy, players, words: r.status === "review" ? roundWords(r.answers).slice(0,120) : [] };
 }
 function tBroadcast(){ if(!T.roomRef) return; const m = tStateMsg(); m.hb = Date.now(); try{ T.roomRef.child("state").set(clean(m)); }catch(e){ console.error(e); } }
 
@@ -810,7 +875,8 @@ function tRenderCats(){
 function tRenderReview(){
   const r = T.s.round;
   const showIt = r.status === "review" || r.status === "done";
-  $("tReview").hidden = !showIt; if(!showIt) return;
+  $("tReview").hidden = !showIt;
+  if(!showIt) return;
   $("tRevTitle").textContent = (r.status === "done" ? "Resultados" : "Revisión") + " · ronda " + r.n + " · letra " + r.letter;
   $("tConfirm").hidden = r.status !== "review";
   const { auto, res } = tScores();
@@ -822,18 +888,19 @@ function tRenderReview(){
     h += `<tr><td class="name">${esc(p.name)}${ans.length?"":" <span class='muted' style='font-weight:500'>(sin respuestas)</span>"}</td>`;
     r.cats.forEach((_,i) => {
       const a = ans[i] || "", pts = res[id][i], manual = pts !== auto[id][i];
-      h += `<td class="cell" data-id="${esc(id)}" data-i="${i}" title="Toque para cambiar los puntos"><span class="a ${a?"":"empty"}">${a?esc(a):"vacío"}</span><span class="b b${pts}">${pts}</span>${manual?"<span class='m'>ajustado</span>":""}</td>`;
+      const btns = r.status === "review"
+        ? `<span class="pbtns">${[100,50,0].map(v => `<button type="button" class="pb pb${v} ${v===pts?"on":""}" data-id="${esc(id)}" data-i="${i}" data-v="${v}" aria-label="Poner ${v} puntos">${v}</button>`).join("")}</span>`
+        : `<span class="b b${pts}">${pts}</span>`;
+      h += `<td class="cell"><span class="a ${a?"":"empty"}">${a?esc(a):"vacío"}</span>${btns}${manual?"<span class='m'>ajustado</span>":""}</td>`;
     });
     h += `<td class="tot">${sum(res[id])}</td></tr>`;
   });
   h += "</tbody>";
   $("tTable").innerHTML = ids.length ? h : "<tbody><tr><td>No hay jugadores.</td></tr></tbody>";
   if(r.status === "review"){
-    $("tTable").querySelectorAll("td.cell").forEach(td => td.onclick = () => {
-      const id = td.dataset.id, i = +td.dataset.i;
-      const cur = tScores().res[id][i];
-      const next = cur === 100 ? 50 : cur === 50 ? 0 : 100;
-      r.over[id] = r.over[id] || {}; r.over[id][i] = next;
+    $("tTable").querySelectorAll("button.pb").forEach(b => b.onclick = () => {
+      const id = b.dataset.id, i = +b.dataset.i, v = +b.dataset.v;
+      r.over[id] = r.over[id] || {}; r.over[id][i] = v;
       tSave(); tRenderReview();
     });
   }
@@ -983,6 +1050,7 @@ function sOnState(d){
     $("rTitle").textContent = "¡STOP!";
     $("rMsg").textContent = d.stoppedBy === "Se acabó el tiempo" ? "Se acabó el tiempo." : "¡STOP! lo dijo " + d.stoppedBy + ".";
     sStartReviewAnim();
+    sRainOn(d.words);
     $("rBox").hidden = true;
     const cats = d.cats || [];
     $("rMineList").innerHTML = cats.map((c,i) => `<div class="resRow mine"><div><small>${esc(c)}</small><div class="ans">${S.answers[i] ? esc(S.answers[i]) : "<span class='muted'>vacío</span>"}</div></div></div>`).join("");
@@ -1021,6 +1089,12 @@ function sDrawReveal(letter, done){
   setTimeout(() => { S.revealing = false; done(); }, 1500);
 }
 const TIPS = ["La profe está revisando las respuestas…","Buscando respuestas repetidas…","Revisando que empiecen con la letra…","Contando puntos…","Ya casi…"];
+function sRainOn(words){
+  if(!S.rain) S.rain = makeRain($("sRain"), 10);
+  S.rain.setWords(words && words.length ? words : ["STOP"]);
+  $("sRain").hidden = false; requestAnimationFrame(() => S.rain.start());
+}
+function sRainOff(){ if(S.rain) S.rain.stop(); $("sRain").hidden = true; }
 function sStartReviewAnim(){
   if(S.revIv) return;
   $("rWave").innerHTML = waveHtml("REVISANDO");
@@ -1028,7 +1102,7 @@ function sStartReviewAnim(){
   let i = 0; $("rTip").textContent = TIPS[0];
   S.revIv = setInterval(() => { i = (i+1) % TIPS.length; $("rTip").textContent = TIPS[i]; }, 2500);
 }
-function sStopReviewAnim(){ clearInterval(S.revIv); S.revIv = null; $("rLoading").hidden = true; }
+function sStopReviewAnim(){ clearInterval(S.revIv); S.revIv = null; $("rLoading").hidden = true; sRainOff(); }
 function sCountUp(el, to){
   const t0 = performance.now(), dur = 1200;
   const tick = now => { const k = Math.min(1, (now - t0)/dur); el.textContent = "+" + Math.round(to * (1 - Math.pow(1-k, 3))); if(k < 1) requestAnimationFrame(tick); };
