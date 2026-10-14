@@ -211,6 +211,24 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
 .tip{color:var(--ink-dim);font-size:15px;min-height:1.5em;transition:opacity .3s}
 .stage .letter.spin{animation:hue .5s linear infinite}
 .drawing-note{color:var(--yel);font-weight:700;text-align:center;margin-top:6px;min-height:1.4em}
+/* portada */
+.hero{text-align:center;padding:10px 0 4px}
+.tiles{display:flex;justify-content:center;gap:clamp(8px,2.5vw,14px);perspective:600px}
+.tiles span{display:grid;place-items:center;width:clamp(62px,19vw,88px);aspect-ratio:1;max-width:100%;border-radius:14px;font-weight:800;font-size:clamp(38px,12vw,56px);
+  background:linear-gradient(180deg,#2a2a44,#1b1b2c);border:2px solid var(--c,var(--fn));color:var(--c,var(--fn));
+  box-shadow:0 6px 0 #0b0b13,0 0 26px -6px var(--c,var(--fn));animation:tileFlip 6s ease-in-out infinite,tileHue 6s steps(1) infinite}
+.tiles span:nth-child(1){--c:var(--fn);animation-delay:0s,0s}
+.tiles span:nth-child(2){--c:var(--kw);animation-delay:.25s,.25s}
+.tiles span:nth-child(3){--c:var(--str);animation-delay:.5s,.5s}
+.tiles span:nth-child(4){--c:var(--red);animation-delay:.75s,.75s}
+@keyframes tileFlip{0%,70%,100%{transform:rotateX(0)}78%{transform:rotateX(180deg)}86%{transform:rotateX(360deg)}}
+@keyframes tileHue{0%{filter:none}33%{filter:hue-rotate(60deg)}66%{filter:hue-rotate(-60deg)}}
+.heroSub{margin-top:16px;font-weight:800;letter-spacing:.42em;font-size:clamp(15px,4vw,19px);color:var(--yel);text-shadow:0 0 18px rgba(249,226,175,.35);padding-left:.42em}
+.typeLine{margin-top:10px;color:var(--str);font-size:15px;min-height:1.5em}
+.typeLine .prompt{color:var(--faint)}
+.caret{color:var(--str);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
 /* lluvia de palabras */
 .rainBand{display:block;width:100%;height:150px;border-radius:10px;background:var(--deep);border:1px solid var(--tab);margin-bottom:14px}
 .rainBg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
@@ -227,7 +245,11 @@ td.tot{font-weight:800;font-size:17px;color:var(--num);text-align:right;font-var
 
 <!-- ================= UNIRSE (estudiante) ================= -->
 <section id="vJoin" class="narrow" hidden>
-  <div class="center"><h1>STOP <span>PROFE ERICKA</span></h1></div>
+  <div class="hero">
+    <div class="tiles" aria-label="STOP"><span>S</span><span>T</span><span>O</span><span>P</span></div>
+    <div class="heroSub">PROFE ERICKA</div>
+    <div class="typeLine"><span class="prompt">$</span> <span id="typeTxt"></span><span class="caret">▌</span></div>
+  </div>
   <div class="panel join">
     <h2>Entrar al juego</h2>
     <form id="joinForm" autocomplete="off">
@@ -942,8 +964,27 @@ function tShowPin(){
 const S = { peer:null, conn:null, code:"", name:"", cid:"", joined:false, st:null, round:0, answers:[], endsAt:0, dur:90, final:false,
   tick:null, sendT:null, retry:null, attempts:0, openT:null, ping:null };
 
+function sJoinFx(on){
+  clearTimeout(S.typeT);
+  if(!on){ if(S.joinRain){ S.joinRain.stop(); $("sRain").hidden = true; S.joinRain = null; } return; }
+  const msgs = ["escriba el PIN y su nombre","¿listos para el STOP?","conectando con la profe Ericka…","piense rápido, escriba más rápido"];
+  let m = 0, i = 0, del = false;
+  const tick = () => {
+    const full = msgs[m];
+    i += del ? -1 : 1; $("typeTxt").textContent = full.slice(0, i);
+    let wait = del ? 28 : 70;
+    if(!del && i >= full.length){ del = true; wait = 1800; }
+    else if(del && i <= 0){ del = false; m = (m+1) % msgs.length; wait = 400; }
+    S.typeT = setTimeout(tick, wait);
+  };
+  tick();
+  if(!S.rain) S.rain = makeRain($("sRain"), 16);
+  S.joinRain = S.rain;
+  S.rain.setWords("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split(""));
+  $("sRain").hidden = false; requestAnimationFrame(() => S.rain.start());
+}
 function studentInit(){
-  show("vJoin");
+  show("vJoin"); sJoinFx(true);
   // identificador por pestaña: cada celular/pestaña es un jugador distinto
   S.cid = ss.get("stop_cid") || (Math.random().toString(36).slice(2) + Date.now().toString(36));
   ss.set("stop_cid", S.cid);
@@ -1017,7 +1058,7 @@ function sSend(m){ if(!S.room) return; try{ S.room.child("toHost").push(clean({ 
 
 function sOnData(d){
   if(!d || typeof d !== "object") return;
-  if(d.t === "welcome"){ clearTimeout(S.openT); S.lastHeard = Date.now(); S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
+  if(d.t === "welcome"){ sJoinFx(false); clearTimeout(S.openT); S.lastHeard = Date.now(); S.joined = true; S.name = d.name; $("wName").textContent = d.name; if(!S.st) show("vWait"); return; }
   if(d.t === "rejected"){ sJoinFail(d.msg || "No se pudo entrar."); return; }
   if(d.t === "kicked"){ S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; sJoinFail("La profe lo sacó del juego."); return; }
   if(d.t === "result"){ sShowResult(d); return; }
