@@ -587,6 +587,11 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 @keyframes countPop{from{transform:scale(2.2);opacity:0}}
 #ovIntro .inSkip{font-size:14px;opacity:.55;margin-top:6px}
 @media (prefers-reduced-motion:reduce){#seenModal .mini,.inFile,.inCount,.inStamp.on{animation-duration:.01s}}
+.standTable{margin-top:12px;padding-top:10px;border-top:2px dashed var(--line)}
+.standTable .lbl{font-family:var(--head);font-weight:600;letter-spacing:.06em;font-size:13px;color:var(--yel);margin-bottom:6px;text-align:center}
+.standTable .miniRow{justify-content:center;flex-wrap:wrap}
+.mini.pub{position:relative;opacity:.9}
+.mini.pub::after{content:"✗";position:absolute;top:2px;right:5px;color:var(--red);font-weight:800}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -1186,7 +1191,9 @@ function standHtml(m, viewer, seenCard, leftSecs, picks){
     else msg = "";
   }
   else if(tr.phase === "suggest") msg = "";
-  return `<div class="standTop">${top}</div>${q}${chain}<div class="standMsg">${msg}</div>`;
+  // las pistas sobre la mesa: públicas para todos (en el celular y en la pantalla de la profe)
+  const pub = (m.table || []).length ? `<div class="standTable"><div class="lbl">🗂️ Pistas sobre la mesa · las ven todos · ninguna es la respuesta</div><div class="miniRow">${m.table.map(id => miniHtml(id, "tiny pub")).join("")}</div></div>` : "";
+  return `<div class="standTop">${top}</div>${q}${chain}<div class="standMsg">${msg}</div>${pub}`;
 }
 
 /* ============================================================
