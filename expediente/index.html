@@ -596,6 +596,31 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 .toMarkBox button{margin-left:auto;background:var(--red);border-color:var(--red);color:#fff}
 .tile.toMark{border-color:var(--yel)!important;animation:toMarkPulse 1s ease-in-out infinite}
 @keyframes toMarkPulse{50%{box-shadow:0 0 0 4px rgba(245,197,24,.45)}}
+/* ===== tablero en 3 columnas (hoja de notas del detective) ===== */
+.bcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start}
+.bcol{min-width:0;background:rgba(255,255,255,.02);border:1px solid var(--tab);border-radius:12px;padding:6px}
+.bcol .secHd{margin:0 0 6px!important;padding:5px 2px!important;text-align:center;font-size:12px!important;letter-spacing:.06em;border-radius:8px}
+.bcols .bgrid,#tBoardPanel .bcols .bgrid{grid-template-columns:1fr!important;gap:5px!important}
+.bcols .tile{min-height:0!important;display:flex!important;align-items:center;gap:6px;padding:6px 22px 6px 5px!important;border-radius:9px!important;text-align:left;justify-items:start}
+.bcols .tile::before{display:none!important}
+.bcols .tile:hover{transform:none!important}
+.bcols .tile .por{width:28px!important;height:28px!important;margin:0!important;flex:none;box-shadow:0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)!important}
+.bcols .tile.k-e .por{width:24px!important;height:24px!important;margin:0 2px!important}
+.bcols .tile .ti{font-size:15px!important}
+.bcols .tile .ti svg,.bcols .tile .ti .art{width:22px!important;height:22px!important}
+.bcols .tile .por svg.portrait,.bcols .tile .por .portrait{width:28px!important;height:28px!important}
+.bcols .tile .tn{font-size:12px!important;line-height:1.15;margin:0!important;flex:1;min-width:0;overflow-wrap:anywhere}
+.bcols .tile .ta{display:none}
+.bcols .tile .tm{position:absolute!important;top:50%!important;bottom:auto!important;right:5px!important;transform:translateY(-50%);font-size:14px!important}
+.bcols .tile.q::after,.bcols .tile.v::after{top:50%!important;right:3px!important;width:18px!important;height:18px!important;font-size:12px;transform:translateY(-50%)!important}
+.bcols .tile.x::after{content:"✗"!important;top:50%!important;left:auto!important;right:4px!important;transform:translateY(-50%)!important;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;font-size:18px!important;font-weight:800;color:var(--stamp)!important;animation:none!important}
+.bcols .tile.x .tn{text-decoration:line-through;text-decoration-color:var(--stamp);text-decoration-thickness:2px}
+.bcols .tile.sel{transform:none!important}
+.bcols .tile.sel::after{font-size:8px!important;padding:1px 0!important;letter-spacing:.06em!important}
+@media (max-width:400px){.bcols{gap:5px}.bcol{padding:4px}.bcols .tile{gap:4px;padding:5px 18px 5px 4px!important}.bcols .tile .por{width:22px!important;height:22px!important}.bcols .tile .tn{font-size:11px!important}}
+/* en la pantalla de la profe, un poco más grande para proyectar */
+#tBoardPanel .bcols .tile .tn{font-size:15px!important}
+#tBoardPanel .bcols .tile .por{width:36px!important;height:36px!important}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -720,9 +745,11 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
       <div class="row" style="gap:6px;margin:0"><button type="button" class="small" id="gHideX">🙈 Ocultar descartadas</button><div class="seg" id="gSeg" hidden><button data-m="ask" class="on">🔎 Armar pregunta</button><button data-m="mark">✏️ Marcar</button></div></div>
     </div>
     <p class="rules" id="gBoardHint" style="margin:0 0 10px">Toque una carta para marcarla: <b>?</b> sospecho · <b>✓</b> creo que es · <b>✗</b> la descarto. Las que ya sabe que no son se tachan solas.</p>
-    <div class="secHd s">👤 Personas</div><div class="bgrid" id="bS"></div>
-    <div class="secHd d">🗡️ Armas digitales</div><div class="bgrid" id="bD"></div>
-    <div class="secHd e">📍 Lugares</div><div class="bgrid" id="bE"></div>
+    <div class="bcols">
+      <div class="bcol"><div class="secHd s">👤 Personas</div><div class="bgrid" id="bS"></div></div>
+      <div class="bcol"><div class="secHd d">💻 Delitos</div><div class="bgrid" id="bD"></div></div>
+      <div class="bcol"><div class="secHd e">📍 Lugares</div><div class="bgrid" id="bE"></div></div>
+    </div>
   </div>
 
 
@@ -821,9 +848,11 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 
     <section class="panel" id="tBoardPanel">
       <h2>Tablero del caso</h2>
-      <div class="secHd s">👤 Personas</div><div class="bgrid" id="tbS"></div>
-      <div class="secHd d">🗡️ Armas digitales</div><div class="bgrid" id="tbD"></div>
-      <div class="secHd e">📍 Lugares</div><div class="bgrid" id="tbE"></div>
+      <div class="bcols">
+        <div class="bcol"><div class="secHd s">👤 Personas</div><div class="bgrid" id="tbS"></div></div>
+        <div class="bcol"><div class="secHd d">💻 Delitos</div><div class="bgrid" id="tbD"></div></div>
+        <div class="bcol"><div class="secHd e">📍 Lugares</div><div class="bgrid" id="tbE"></div></div>
+      </div>
     </section>
 
     <section class="panel">
