@@ -592,6 +592,10 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 .standTable .miniRow{justify-content:center;flex-wrap:wrap}
 .mini.pub{position:relative;opacity:.9}
 .mini.pub::after{content:"✗";position:absolute;top:2px;right:5px;color:var(--red);font-weight:800}
+.toMarkBox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#2a2610;border:2px solid var(--yel);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;line-height:1.4}
+.toMarkBox button{margin-left:auto;background:var(--red);border-color:var(--red);color:#fff}
+.tile.toMark{border-color:var(--yel)!important;animation:toMarkPulse 1s ease-in-out infinite}
+@keyframes toMarkPulse{50%{box-shadow:0 0 0 4px rgba(245,197,24,.45)}}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -807,6 +811,8 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
         <select id="tTurnSecs"><option value="45">45 s</option><option value="60" selected>60 s</option><option value="90">90 s</option><option value="120">2 min</option></select>
         <label class="check" for="tSize">Mazo</label>
         <select id="tSize"><option value="auto" selected>automático (4 sobre la mesa)</option><option value="0">mini (5·5·5)</option><option value="1">pequeño (6·7·7)</option><option value="2">mediano (8·9·9)</option><option value="3">grande (10·12·12)</option></select>
+        <label class="check" for="tMark">Marcado</label>
+        <select id="tMark" title="Qué cartas tacha solo el sistema en el tablero de cada estudiante"><option value="medio">punto medio (recomendado)</option><option value="auto">automático</option><option value="experto">detective experto</option></select>
         <span class="secret">Solución: <span id="tSol" class="solHide">— — —</span></span>
         <button class="small" id="tSolBtn">👁 mantener para ver</button>
       </div>
@@ -1224,6 +1230,9 @@ function teacherInit(){
   $("tPodium").onclick = tShowPodium;
   $("tTurnSecs").onchange = e => { T.s.turnSecs = +e.target.value; tSave(); };
   $("tSize").onchange = e => { T.s.size = e.target.value; tSave(); };
+  if(!T.s.markMode) T.s.markMode = "medio";
+  $("tMark").value = T.s.markMode;
+  $("tMark").onchange = e => { T.s.markMode = e.target.value; tSave(); tBroadcast(); toast({ medio:"Punto medio: el sistema tacha sus cartas y la mesa; lo que les muestran lo tachan ellos.", auto:"Automático: el sistema tacha todo.", experto:"Detective experto: ellos tachan todo, hasta sus propias cartas." }[T.s.markMode]); };
   armButton($("tZero"), "Puntos en 0", () => { Object.values(T.s.players).forEach(p => p.total = 0); tSave(); tRender(); tBroadcast(); });
   armButton($("tNew"), "Juego nuevo", () => { ls.del("xv_host"); try{ if(T.roomRef) T.roomRef.remove(); }catch(e){} setTimeout(() => location.reload(), 400); }, "¿Borrar todo? Toque otra vez");
   const showSol = on => { $("tSol").className = on ? "solShow" : "solHide"; document.querySelectorAll("#tBoardPanel .tile").forEach(t => { const g = G(); if(g.sol) t.classList.toggle("solc", on && (t.dataset.id === g.sol.s || t.dataset.id === g.sol.d || t.dataset.id === g.sol.e)); }); };
@@ -1465,7 +1474,7 @@ function tFinish(winnerCid){
 function tStateMsg(){
   const g = G();
   const players = Object.entries(T.s.players).map(([cid,p]) => ({ cid, name:p.name, total:p.total, online:isOn(p) })).sort((a,b) => b.total - a.total);
-  const m = { t:"state", status:g.status, caseId:g.caseId || "", victim:g.victim || "", hook:g.hook || "", players, log:(g.log || []).slice(-30) };
+  const m = { t:"state", markMode:T.s.markMode || "medio", status:g.status, caseId:g.caseId || "", victim:g.victim || "", hook:g.hook || "", players, log:(g.log || []).slice(-30) };
   if(g.status === "playing" || g.status === "ended"){
     m.deck = g.deck; m.table = g.table || [];
     m.order = g.order.map(cid => ({ cid, name:pname(cid), online:isOn(T.s.players[cid]), elim:!!g.elim[cid], cards:(g.hands[cid]||[]).length }));
@@ -1649,7 +1658,7 @@ function sOnData(d){
     case "rejected": sJoinFail(d.msg || "No se pudo entrar."); return;
     case "kicked": S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; sJoinFail("La profe lo sacó del juego."); return;
     case "private":
-      if(d.reset){ S.inGame = false; S.hand = []; S.shown = []; S.elim = false; }
+      if(d.reset){ S.inGame = false; S.hand = []; S.shown = []; S.elim = false; S.toMark = null; }
       else { S.inGame = !!d.inGame; S.hand = d.hand || []; S.shown = d.shown || []; S.elim = !!d.elim; }
       sRender(); return;
     case "yourTurn":
@@ -1662,6 +1671,7 @@ function sOnData(d){
       if(d.card){
         if(!S.shown.some(x => x.card === d.card)) S.shown.push({ card:d.card, from:d.from });
         S.seenCard = d.card; sShowSeen(d.card, d.from);
+        if(markMode() !== "auto" && S.marks[d.card] !== "x") S.toMark = d.card;
       } else { S.seenCard = null; toast("😮 ¡Nadie pudo mostrarle ninguna carta!"); beep(880,160); }
       sRender(); return;
     case "showReq": sShowReq(d); return;
@@ -1688,7 +1698,10 @@ function sOnState(d){
   else { $("wMsg").textContent = d.status === "ready" ? "Caso abierto: " + d.victim + ". Espere a que la profe reparta las cartas." : "Espere a que la profe abra el expediente."; show("vWait"); }
   sRender();
 }
-const isOut = id => S.hand.includes(id) || S.shown.some(x => x.card === id) || ((S.st && S.st.table) || []).includes(id);
+// lo que el sistema tacha solo, según el modo que eligió la profe
+const markMode = () => (S.st && S.st.markMode) || "medio";
+const isOut = id => { const mm = markMode(); if(mm === "experto") return false;
+  return S.hand.includes(id) || ((S.st && S.st.table) || []).includes(id) || (mm === "auto" && S.shown.some(x => x.card === id)); };
 function sLeft(){ const tr = S.st && S.st.turn; return tr ? Math.max(0, tr.left - Math.floor((Date.now() - S.stAt)/1000)) : 0; }
 function sRenderStand(){
   const d = S.st || {};
@@ -1719,18 +1732,23 @@ function sRender(){
       <div class="row"><button class="go" id="endBtn" style="flex:2;font-size:17px">✔ Terminar turno</button><button class="accLite" id="accBtn2" style="flex:1">⚖️ Acusación final</button></div>
       <p class="rules" style="margin:6px 0 0;font-size:12px">⚖️ Solo acuse si está <b>seguro</b> de quién, qué delito y dónde: si falla, queda fuera del juego.</p></div>`;
   }
+  // recordatorio: tache la carta que le mostraron (modos punto medio y experto)
+  if(S.toMark && S.marks[S.toMark] === "x") S.toMark = null;
+  if(S.toMark && CARD[S.toMark]) act = `<div class="toMarkBox"><span>📝 Le mostraron <b>${esc(CARD[S.toMark].name)}</b>: ya sabe que no es la respuesta. <b>Táchela en su tablero</b>.</span><button class="small" id="toMarkBtn">✗ Tacharla ahora</button></div>` + act;
   if(S.lastAct !== act){ S.lastAct = act; $("gAct").innerHTML = act; }
+  const tmb = $("toMarkBtn"); if(tmb) tmb.onclick = () => { S.marks[S.toMark] = "x"; ls.set("xv_marks_" + S.caseId, S.marks); SFX.stamp(); S.toMark = null; sRender(); };
   const ab = $("askBtn"); if(ab) ab.onclick = () => { if(!(S.pickQ.s && S.pickQ.d && S.pickQ.e)) return; sSend({ t:"suggest", h:{ ...S.pickQ } }); S.sentAsk = true; S.mode = "mark"; sRender(); };
   const eb = $("endBtn"); if(eb) eb.onclick = () => { sSend({ t:"endTurn" }); eb.disabled = true; };
   const ab2 = $("accBtn2"); if(ab2) ab2.onclick = () => $("accOpenBtn").click();
   // tablero
   $("gSeg").hidden = !asking;
   $("gSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.m === S.mode));
-  $("gBoardHint").innerHTML = S.mode === "ask" ? "Toque <b>una carta de cada grupo</b> para armar su pregunta." : "Toque una carta para marcarla: <b>?</b> sospecho · <b>✓</b> creo que es · <b>✗</b> la descarto. Las que ya sabe que no son se tachan solas.";
+  $("gBoardHint").innerHTML = S.mode === "ask" ? "Toque <b>una carta de cada grupo</b> para armar su pregunta." : "Toque una carta para marcarla: <b>?</b> sospecho · <b>✓</b> creo que es · <b>✗</b> la descarto. " + ({ auto:"Las que ya sabe que no son se tachan solas.", medio:"Sus cartas y las de la mesa se tachan solas; <b>las que le muestren, táchelas usted</b>.", experto:"🕵️ Modo experto: <b>usted tacha todo</b>, también sus propias cartas." }[markMode()]);
   const tileFor = id => {
     const out = isOut(id), m = S.marks[id] || "", k = CARD[id].k;
     let cls = out || m === "x" ? "x" : m === "q" ? "q" : m === "v" ? "v" : "";
     if(S.mode === "ask" && S.pickQ[k] === id) cls += " sel";
+    if(S.toMark === id) cls += " toMark";
     return tileHtml(id, cls).replace('<span class="tm"></span>', `<span class="tm">${out || m === "x" ? "✗" : m === "q" ? "?" : m === "v" ? "✓" : ""}</span>`);
   };
   const bh = [deck.s.map(tileFor).join(""), deck.d.map(tileFor).join(""), deck.e.map(tileFor).join("")];
