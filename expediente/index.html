@@ -772,7 +772,7 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
         <label class="check" for="tTurnSecs">Tiempo por turno</label>
         <select id="tTurnSecs"><option value="45">45 s</option><option value="60" selected>60 s</option><option value="90">90 s</option><option value="120">2 min</option></select>
         <label class="check" for="tSize">Mazo</label>
-        <select id="tSize"><option value="auto" selected>automático</option><option value="0">mini (5·5·5)</option><option value="1">pequeño (6·7·7)</option><option value="2">mediano (8·9·9)</option><option value="3">grande (10·12·12)</option></select>
+        <select id="tSize"><option value="auto" selected>automático (4 sobre la mesa)</option><option value="0">mini (5·5·5)</option><option value="1">pequeño (6·7·7)</option><option value="2">mediano (8·9·9)</option><option value="3">grande (10·12·12)</option></select>
         <span class="secret">Solución: <span id="tSol" class="solHide">— — —</span></span>
         <button class="small" id="tSolBtn">👁 mantener para ver</button>
       </div>
@@ -903,6 +903,18 @@ const VICTIMS = [
 ];
 const SIZES = { 0:[5,5,5], 1:[6,7,7], 2:[8,9,9], 3:[10,12,12] };
 const MAX_HAND = 4; // nadie recibe más de 4 cartas; las que sobran quedan sobre la mesa a la vista de todos
+const TABLE_CARDS = 4; // en modo automático siempre quedan 4 cartas boca arriba sobre la mesa
+// arma el mazo según cuántos juegan: cartas por detective (4, 3, 2 o 1) + 4 sobre la mesa + las 3 de la solución
+function deckPlan(n){
+  const maxRest = SUSPECTS.length + CRIMES.length + SCENES.length - 3;
+  let hp = n <= 4 ? 4 : n <= 8 ? 3 : 2;
+  hp = Math.max(1, Math.min(hp, Math.floor((maxRest - TABLE_CARDS) / n)));
+  const total = Math.min(n * hp + TABLE_CARDS + 3, maxRest + 3);
+  const ns = Math.min(SUSPECTS.length, Math.max(4, Math.round(total / 3)));
+  const nd = Math.min(CRIMES.length, Math.max(4, Math.ceil((total - ns) / 2)));
+  const ne = Math.min(SCENES.length, Math.max(4, total - ns - nd));
+  return [ns, nd, ne, hp];
+}
 const ALL = [...SUSPECTS.map(x => ({...x, k:"s"})), ...CRIMES.map(x => ({...x, k:"d"})), ...SCENES.map(x => ({...x, k:"e"}))];
 const CARD = Object.fromEntries(ALL.map(c => [c.id, c]));
 const KNAME = { s:"Sospechoso", d:"Delito", e:"Escena" };
@@ -1374,8 +1386,8 @@ function tStartGame(){
   const players = T.s.joinOrder.filter(cid => T.s.players[cid] && isOn(T.s.players[cid]));
   if(players.length < 2){ toast("Se necesitan al menos 2 detectives en línea"); return; }
   const n = players.length;
-  const size = T.s.size === "auto" ? (n <= 3 ? 0 : n <= 6 ? 1 : n <= 12 ? 2 : 3) : +T.s.size;
-  const [ns, nd, ne] = SIZES[size];
+  const plan = T.s.size === "auto" ? deckPlan(n) : null;
+  const [ns, nd, ne] = plan || SIZES[+T.s.size];
   const ord = id => +id.slice(1);
   const deck = { s:shuffle(SUSPECTS.map(x => x.id)).slice(0,ns).sort((a,b)=>ord(a)-ord(b)), d:shuffle(CRIMES.map(x => x.id)).slice(0,nd).sort((a,b)=>ord(a)-ord(b)), e:shuffle(SCENES.map(x => x.id)).slice(0,ne).sort((a,b)=>ord(a)-ord(b)) };
   const last = T.s.lastSol || {};
@@ -1386,7 +1398,7 @@ function tStartGame(){
   const order = shuffle(players);
   const hands = {}; order.forEach(c => hands[c] = []);
   // máximo 4 cartas por detective; lo que sobra se pone boca arriba sobre la mesa
-  const cap = Math.min(rest.length, n * MAX_HAND);
+  const cap = plan ? Math.max(0, Math.min(rest.length - TABLE_CARDS, n * plan[3])) : Math.min(rest.length, n * MAX_HAND);
   rest.slice(0, cap).forEach((id,i) => hands[order[i % n]].push(id));
   const table = rest.slice(cap);
   Object.assign(g, { status:"playing", deck, sol, order, hands, table, shown:{}, elim:{}, startedAt:Date.now(), turnNo:0, winner:null, turn:null });
