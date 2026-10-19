@@ -649,6 +649,28 @@ h2::before{content:none!important}
 /* la barra fija de abajo no tapa lo último de la pantalla */
 #vGame{padding-bottom:96px}
 /* una línea suave antes de las cartas tachadas */
+/* ===== acta de acusación ===== */
+#accModal .box.accFolder{position:relative;background:linear-gradient(180deg,#f1e6c9,#e3d2a8)!important;color:var(--paper-ink)!important;border:0!important;border-radius:4px 14px 14px 14px!important;padding:30px 16px 16px!important;margin-top:28px;box-shadow:0 24px 60px rgba(0,0,0,.6)!important;max-height:calc(100vh - 60px);overflow-y:auto}
+.accTab{position:relative;display:inline-block;margin:-18px 0 10px -4px;background:rgba(120,95,50,.16);border-radius:6px;padding:4px 14px;font-family:var(--type);font-size:12px;color:#6b5a36;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.accStamp{position:absolute;top:14px;right:12px;font-family:var(--type);font-size:14px;line-height:1.05;text-align:center;color:var(--stamp);border:3px solid var(--stamp);border-radius:6px;padding:3px 8px;transform:rotate(9deg);opacity:.85}
+.accCols .tile.sel::after{content:"ACUSADO"!important;background:var(--stamp)!important;color:#fff7e6!important}
+.accCols .tile.sel{border-color:var(--stamp)!important;box-shadow:0 0 0 3px rgba(215,38,61,.35)!important;background:linear-gradient(180deg,#3d1a16,#1f1012)!important}
+.accFolder .agency{margin:0;font-family:var(--head);font-weight:600;letter-spacing:.2em;font-size:11px;color:#7a6840}
+.accTitle{font-family:var(--type)!important;font-weight:400!important;font-size:clamp(30px,8vw,42px)!important;color:var(--paper-ink)!important;margin:4px 0 10px!important;text-shadow:none!important}
+.accFolder .accBoard{height:170px;margin-bottom:10px}
+.accFolder .accBoard .polaroid .ph{display:grid;place-items:center}
+.accFolder .accBoard .polaroid .ph svg{width:70%;height:70%}
+.accFolder .accBoard.ready{box-shadow:inset 0 0 0 6px var(--stamp),inset 0 0 22px rgba(0,0,0,.45)}
+.accLine{font-family:var(--type);font-size:17px;line-height:1.5;margin:0 0 10px;color:var(--paper-ink)}
+.accLine b{color:var(--stamp);font-weight:400;font-family:var(--type)}
+.accLine .blank{color:#a8977a;letter-spacing:.05em}
+.accNote{background:#fff7c2;color:#2b2418;border-radius:3px;padding:10px 12px;margin:0 0 12px;font-size:14px;line-height:1.45;transform:rotate(-.8deg);box-shadow:0 4px 8px rgba(0,0,0,.25)}
+.accHow{margin:0 0 6px;font-size:14px;color:#4a3d24}
+.accCols .bcol{background:rgba(43,36,24,.08);border-color:rgba(120,95,50,.3)}
+.accBtns{margin-top:14px;gap:8px}
+.accBack{flex:1.3;background:#2b2418!important;color:#f1e6c9!important;border:0!important;font-weight:700}
+.accSign{flex:1;background:var(--stamp)!important;color:#fff7e6!important;border:3px double #fff7e6!important;outline:3px solid var(--stamp);font-family:var(--head)!important;letter-spacing:.08em;text-transform:uppercase;transform:rotate(-1deg)}
+.accSign:disabled{opacity:.45;transform:none}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -810,14 +832,21 @@ h2::before{content:none!important}
   <div id="seenCard" style="display:flex;justify-content:center;margin:10px 0"></div>
   <p class="rules center" style="margin:0">Ya quedó tachada en su tablero. <span class="timer" id="seenTimer"></span></p>
 </div></div>
-<div class="modal" id="accModal" hidden><div class="box big">
-  <h3>⚖️ Acusación final</h3>
-  <p class="accWarn">⚠️ <b>Esto NO es una pregunta.</b> Es su respuesta final del caso. Si acierta, <b>gana</b>. Si se equivoca, <b>queda fuera del juego</b> (pero igual muestra sus cartas cuando le pregunten).</p>
-  <p class="rules" style="margin:0 0 8px">Elija 1 persona, 1 arma y 1 lugar.</p>
-  <div class="secHd s">👤 Persona</div><div class="bgrid sm" id="aS"></div>
-  <div class="secHd d">🗡️ Arma digital</div><div class="bgrid sm" id="aD"></div>
-  <div class="secHd e">📍 Lugar</div><div class="bgrid sm" id="aE"></div>
-  <div class="row" style="margin-top:12px"><button class="go" id="accCancel" style="flex:1.4">← No, todavía no estoy seguro</button><button class="danger" id="accGo" style="flex:1" disabled>⚖️ Acusar</button></div>
+<div class="modal" id="accModal" hidden><div class="box big accFolder">
+  <div class="accTab">ACTA DE ACUSACIÓN · EXPEDIENTE Nº <span id="accNo"></span></div>
+  <div class="accStamp">ACUSACIÓN<br>FINAL</div>
+  <p class="agency">AGENCIA DE CIBERINVESTIGACIÓN</p>
+  <h3 class="accTitle">Yo acuso…</h3>
+  <div class="board accBoard" id="accBoard" aria-hidden="true"></div>
+  <p class="accLine" id="accLine"></p>
+  <div class="accNote">⚠️ <b>Esto NO es una pregunta.</b> Es su respuesta final del caso. Si acierta, <b>gana</b>. Si se equivoca, <b>queda fuera</b> (pero igual muestra sus cartas cuando le pregunten).</div>
+  <p class="accHow">Elija <b>1 persona</b>, <b>1 delito</b> y <b>1 lugar</b>:</p>
+  <div class="bcols accCols">
+    <div class="bcol"><div class="secHd s">👤 Persona</div><div class="bgrid" id="aS"></div></div>
+    <div class="bcol"><div class="secHd d">💻 Delito</div><div class="bgrid" id="aD"></div></div>
+    <div class="bcol"><div class="secHd e">📍 Lugar</div><div class="bgrid" id="aE"></div></div>
+  </div>
+  <div class="row accBtns"><button class="accBack" id="accCancel">← No, todavía no estoy seguro</button><button class="danger accSign" id="accGo" disabled>⚖️ Firmar acusación</button></div>
 </div></div>
 <div class="modal" id="logModal" hidden><div class="box big">
   <h3>📜 Historial de la mesa</h3>
@@ -1650,7 +1679,7 @@ function studentInit(){
   $("gSeg").querySelectorAll("button").forEach(b => b.onclick = () => { S.mode = b.dataset.m; S.modeTouched = true; sRender(); });
   $("accOpenBtn").onclick = () => { const tr = S.st && S.st.turn; if(S.elim || !S.inGame || !tr || tr.cid !== S.cid || tr.phase !== "after") return; S.pickA = {}; sRenderAcc(); $("accModal").hidden = false; };
   $("accCancel").onclick = () => $("accModal").hidden = true;
-  armButton($("accGo"), "⚖️ Acusar", () => { if(!(S.pickA.s && S.pickA.d && S.pickA.e)) return; sSend({ t:"accuse", h:{ ...S.pickA } }); $("accModal").hidden = true; toast("Acusación enviada…"); }, "¿Seguro? Si falla queda fuera. Toque otra vez");
+  armButton($("accGo"), "⚖️ Firmar acusación", () => { if(!(S.pickA.s && S.pickA.d && S.pickA.e)) return; sSend({ t:"accuse", h:{ ...S.pickA } }); $("accModal").hidden = true; toast("Acusación enviada…"); }, "¿Seguro? Si falla queda fuera. Toque otra vez");
   $("logOpenBtn").onclick = () => { sRenderLog(); $("logModal").hidden = false; };
   $("logClose").onclick = () => $("logModal").hidden = true;
   clearInterval(S.ping);
@@ -1848,10 +1877,24 @@ function sRender(){
 }
 function sRenderAcc(){
   const deck = (S.st && S.st.deck) || { s:[], d:[], e:[] };
-  const t = id => tileHtml(id, (S.pickA[CARD[id].k] === id ? "sel" : "") + (isOut(id) ? " x" : ""));
-  $("aS").innerHTML = deck.s.map(t).join(""); $("aD").innerHTML = deck.d.map(t).join(""); $("aE").innerHTML = deck.e.map(t).join("");
-  document.querySelectorAll("#accModal .tile").forEach(b => b.onclick = () => { const id = b.dataset.id, k = CARD[id].k; S.pickA[k] = S.pickA[k] === id ? undefined : id; sRenderAcc(); });
-  $("accGo").disabled = !(S.pickA.s && S.pickA.d && S.pickA.e);
+  const isX = id => isOut(id) || S.marks[id] === "x";
+  const sink = arr => arr.slice().sort((a,b) => (isX(a) ? 1 : 0) - (isX(b) ? 1 : 0)); // las descartadas al final
+  const t = id => tileHtml(id, (S.pickA[CARD[id].k] === id ? "sel" : "") + (isX(id) ? " x" : ""));
+  $("aS").innerHTML = sink(deck.s).map(t).join(""); $("aD").innerHTML = sink(deck.d).map(t).join(""); $("aE").innerHTML = sink(deck.e).map(t).join("");
+  document.querySelectorAll("#accModal .tile").forEach(b => b.onclick = () => { const id = b.dataset.id, k = CARD[id].k; S.pickA[k] = S.pickA[k] === id ? undefined : id; SFX.tick(); sRenderAcc(); });
+  // tablero de corcho: una foto por cada cosa que acusa (con "?" mientras no la elija)
+  const ph = (k, cls, q) => { const id = S.pickA[k];
+    return id ? `<div class="polaroid ${cls}"><span class="ph">${artHtml(id)}</span><i>${esc(CARD[id].name)}</i></div>`
+              : `<div class="polaroid q ${cls}"><span class="ph">?</span><i>${q}</i></div>`; };
+  $("accBoard").innerHTML = ph("s","a","¿Quién?") + ph("d","b","¿Qué delito?") + ph("e","c","¿Dónde?") +
+    `<svg class="string" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M18 12 L50 26 L82 9" fill="none" stroke="#c1121f" vector-effect="non-scaling-stroke" style="stroke-width:2.2px"/></svg>` +
+    '<span class="pin" style="left:calc(18% - 6px);top:calc(12% - 6px)"></span><span class="pin" style="left:calc(50% - 6px);top:calc(26% - 6px)"></span><span class="pin" style="left:calc(82% - 6px);top:calc(9% - 6px)"></span>';
+  const b = k => S.pickA[k] ? `<b>${esc(CARD[S.pickA[k]].name)}</b>` : '<span class="blank">________</span>';
+  $("accLine").innerHTML = `Acuso a ${b("s")}, por ${b("d")}, en ${b("e")}.`;
+  $("accNo").textContent = (S.st && S.st.caseId) || S.caseId || "—";
+  const ready = !!(S.pickA.s && S.pickA.d && S.pickA.e);
+  $("accGo").disabled = !ready;
+  $("accBoard").classList.toggle("ready", ready);
 }
 function sRenderLog(){
   const d = S.st || {};
