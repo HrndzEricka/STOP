@@ -622,7 +622,28 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 .byline{position:relative;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-family:var(--type);font-size:13px;color:#6b5a36}
 .byline b{font-family:var(--head);letter-spacing:.16em;color:var(--paper-ink);font-size:14px}
 .fprint{font-size:28px;opacity:.55;filter:sepia(1)}
+/* ficha de ingreso del detective */
+#vJoin .panel.join{position:relative;background:linear-gradient(180deg,#f7f0dc,#ece0bf);color:var(--paper-ink);border:0;border-radius:6px;padding:26px 20px 20px;margin-top:22px;box-shadow:0 16px 34px rgba(0,0,0,.5);transform:rotate(.5deg)}
+#vJoin .panel.join::before{content:"";position:absolute;top:-14px;right:34px;width:22px;height:46px;border:4px solid #9aa3ad;border-bottom:0;border-radius:12px 12px 0 0;box-shadow:inset 0 0 0 2px #cfd6dd}
+#vJoin .panel.join::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,transparent 0 29px,rgba(120,95,50,.13) 29px 30px);pointer-events:none}
+#vJoin .panel.join h2{all:unset;display:none}
+.fichaHead{position:relative;display:flex;align-items:center;gap:12px;border-bottom:2px solid #2b2418;padding-bottom:10px;margin-bottom:12px}
+.fichaHead .badge{font-size:38px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+.fichaHead b{display:block;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:17px;color:var(--paper-ink)}
+.fichaHead small{font-family:var(--type);font-size:12px;color:#6b5a36}
+#vJoin .panel.join label{position:relative;display:block;font-family:var(--head);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:#5c4b2b;margin:12px 0 4px}
+#vJoin .panel.join input{position:relative;width:100%;background:rgba(255,255,255,.55);color:var(--paper-ink);font-family:var(--type);border:0;border-bottom:2px dashed #8a7650;border-radius:4px 4px 0 0;padding:10px 12px;font-size:19px;box-shadow:none}
+#vJoin .panel.join input::placeholder{color:#a8977a}
+#vJoin .panel.join input:focus{outline:none;background:#fffbe9;border-bottom-color:var(--stamp)}
+#vJoin .panel.join .codeIn{font-family:var(--type);font-size:34px;letter-spacing:.5em;text-align:center;color:var(--stamp);padding-left:.5em}
+#vJoin .panel.join .err{position:relative;color:var(--stamp);font-family:var(--type);font-weight:700}
+#vJoin .panel.join .err:not(:empty)::before{content:"⚠ "}
+#joinBtn{position:relative;background:var(--stamp)!important;color:#fff7e6!important;border:3px double #fff7e6!important;outline:3px solid var(--stamp);font-family:var(--head)!important;font-weight:700;letter-spacing:.16em;text-transform:uppercase;border-radius:8px;box-shadow:0 6px 14px rgba(140,20,30,.4);transform:rotate(-1deg);transition:transform .15s}
+#joinBtn:hover{transform:rotate(-1deg) scale(1.02);filter:brightness(1.08)}
+#joinBtn:disabled{opacity:.7}
+.fichaFoot{position:relative;display:flex;justify-content:space-between;margin-top:12px;font-family:var(--type);font-size:12px;color:#7a6840}
 .profLink{text-align:center;color:var(--ink-dim);font-size:14px;margin-top:14px}
+.profLink{font-family:var(--type)}
 .profLink a{color:var(--yel);font-weight:700}
 @media (max-width:380px){.polaroid{width:76px}.polaroid .ph{width:64px;height:64px}.board{height:160px}}
 </style>
@@ -645,14 +666,16 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
   </div>
   <div class="panel join">
     <h2>Entrar al caso</h2>
+    <div class="fichaHead"><span class="badge">🕵️</span><div><b>FICHA DE INGRESO</b><small>Complete sus datos para unirse a la investigación</small></div></div>
     <form id="joinForm" autocomplete="off">
-      <label for="inCode">PIN del caso</label>
+      <label for="inCode">Nº de caso (PIN)</label>
       <input id="inCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000" required>
-      <label for="inName">Su nombre y apellido</label>
+      <label for="inName">Nombre del detective</label>
       <input id="inName" maxlength="24" placeholder="Ej. Ana Mora" required>
       <p class="err" id="joinErr"></p>
-      <button class="go" style="width:100%;font-size:20px;padding:14px" id="joinBtn">Entrar como detective</button>
+      <button class="go" style="width:100%;font-size:20px;padding:14px" id="joinBtn">🔎 Ingresar al caso</button>
     </form>
+    <div class="fichaFoot"><span>Firma: ______________</span><span>Sello: 🔴</span></div>
   </div>
   <p class="profLink">¿Es docente? <a href="?profe">Abrir modo docente</a></p>
 </section>
@@ -1578,7 +1601,7 @@ function sJoinFx(on){
     S.typeT = setTimeout(tick, w); };
   tick();
 }
-function sJoinFail(msg){ clearTimeout(S.openT); $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "Entrar como detective"; show("vJoin"); }
+function sJoinFail(msg){ clearTimeout(S.openT); $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "🔎 Ingresar al caso"; show("vJoin"); }
 function sStart(){
   if(!NET.init()){ sJoinFail("No se pudo cargar el juego. Revise el internet."); return; }
   if(S.room){ try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} }
