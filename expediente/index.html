@@ -587,6 +587,11 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 @keyframes countPop{from{transform:scale(2.2);opacity:0}}
 #ovIntro .inSkip{font-size:14px;opacity:.55;margin-top:6px}
 @media (prefers-reduced-motion:reduce){#seenModal .mini,.inFile,.inCount,.inStamp.on{animation-duration:.01s}}
+.stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
+.accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
+.accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
+#accOpenBtn{background:transparent;border:2px solid var(--red);color:var(--red)}
+#accOpenBtn:disabled{border-color:var(--line);color:var(--faint)}
 .tableTitle{font-family:var(--head);font-weight:600;letter-spacing:.06em;margin:14px 0 6px}
 .tableTitle small{display:block;font-family:var(--mono);font-weight:500;letter-spacing:0;color:var(--ink-dim);font-size:12px}
 .tableRow{display:flex;gap:6px;flex-wrap:wrap}
@@ -742,12 +747,13 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
   <p class="rules center" style="margin:0">Ya quedó tachada en su tablero. <span class="timer" id="seenTimer"></span></p>
 </div></div>
 <div class="modal" id="accModal" hidden><div class="box big">
-  <h3>⚖️ Acusación formal</h3>
-  <p class="rules" style="margin:0 0 8px">Elija 1 persona, 1 arma y 1 lugar. Si acierta, <b>gana el caso</b>. Si falla, queda fuera (pero igual muestra sus cartas cuando le pregunten).</p>
+  <h3>⚖️ Acusación final</h3>
+  <p class="accWarn">⚠️ <b>Esto NO es una pregunta.</b> Es su respuesta final del caso. Si acierta, <b>gana</b>. Si se equivoca, <b>queda fuera del juego</b> (pero igual muestra sus cartas cuando le pregunten).</p>
+  <p class="rules" style="margin:0 0 8px">Elija 1 persona, 1 arma y 1 lugar.</p>
   <div class="secHd s">👤 Persona</div><div class="bgrid sm" id="aS"></div>
   <div class="secHd d">🗡️ Arma digital</div><div class="bgrid sm" id="aD"></div>
   <div class="secHd e">📍 Lugar</div><div class="bgrid sm" id="aE"></div>
-  <div class="row" style="margin-top:12px"><button id="accCancel" style="flex:1">Cancelar</button><button class="danger" id="accGo" style="flex:1" disabled>⚖️ Acusar</button></div>
+  <div class="row" style="margin-top:12px"><button class="go" id="accCancel" style="flex:1.4">← No, todavía no estoy seguro</button><button class="danger" id="accGo" style="flex:1" disabled>⚖️ Acusar</button></div>
 </div></div>
 <div class="modal" id="logModal" hidden><div class="box big">
   <h3>📜 Historial de la mesa</h3>
@@ -1566,7 +1572,7 @@ function studentInit(){
     sStart();
   };
   $("gSeg").querySelectorAll("button").forEach(b => b.onclick = () => { S.mode = b.dataset.m; S.modeTouched = true; sRender(); });
-  $("accOpenBtn").onclick = () => { const tr = S.st && S.st.turn; if(S.elim || !S.inGame || !tr || tr.cid !== S.cid || !(tr.phase === "after" || tr.phase === "suggest")) return; S.pickA = {}; sRenderAcc(); $("accModal").hidden = false; };
+  $("accOpenBtn").onclick = () => { const tr = S.st && S.st.turn; if(S.elim || !S.inGame || !tr || tr.cid !== S.cid || tr.phase !== "after") return; S.pickA = {}; sRenderAcc(); $("accModal").hidden = false; };
   $("accCancel").onclick = () => $("accModal").hidden = true;
   armButton($("accGo"), "⚖️ Acusar", () => { if(!(S.pickA.s && S.pickA.d && S.pickA.e)) return; sSend({ t:"accuse", h:{ ...S.pickA } }); $("accModal").hidden = true; toast("Acusación enviada…"); }, "¿Seguro? Si falla queda fuera. Toque otra vez");
   $("logOpenBtn").onclick = () => { sRenderLog(); $("logModal").hidden = false; };
@@ -1698,14 +1704,18 @@ function sRender(){
   else if(S.elim) act = `<div class="elimBox">✖ Su acusación falló. Ya no puede acusar, pero si le preguntan, debe mostrar sus cartas.</div>`;
   else if(asking){
     const done = S.pickQ.s && S.pickQ.d && S.pickQ.e;
-    act = `<div class="act me"><div class="row" style="margin:0"><button class="primary" id="askBtn" style="flex:1;font-size:17px;padding:12px" ${done ? "" : "disabled"}>🔎 Preguntar a la mesa</button></div>
-      <p class="rules" style="margin:8px 0 0">${done ? "¡Listo! Toque <b>Preguntar</b>." : "Faltan: " + [!S.pickQ.s && "1 persona", !S.pickQ.d && "1 arma", !S.pickQ.e && "1 lugar"].filter(Boolean).join(", ") + ". Tóquelas en el tablero."} Si ya sabe la respuesta, puede <b>⚖️ Acusar</b> sin preguntar.</p></div>`;
+    act = `<div class="act me"><p class="stepTag">PASO 1 de 2 · PREGUNTE</p><div class="row" style="margin:0"><button class="primary" id="askBtn" style="flex:1;font-size:17px;padding:12px" ${done ? "" : "disabled"}>🔎 Preguntar a la mesa</button></div>
+      <p class="rules" style="margin:8px 0 0">${done ? "¡Listo! Toque <b>Preguntar a la mesa</b>. Los demás le dirán si tienen alguna de esas cartas." : "Arme su pregunta: toque en el tablero <b>" + [!S.pickQ.s && "1 persona", !S.pickQ.d && "1 arma", !S.pickQ.e && "1 lugar"].filter(Boolean).join(", ") + "</b>."}</p></div>`;
   } else if(mine && tr.phase === "after"){
-    act = `<div class="act me"><h4>¿Qué hace ahora?</h4><p class="rules" style="margin:0">Si ya sabe la respuesta, toque <b>⚖️ Acusar</b>. Si no, termine su turno.</p><div class="row"><button class="go" id="endBtn" style="flex:1">✔ Terminar turno</button></div></div>`;
+    act = `<div class="act me"><p class="stepTag">PASO 2 de 2 · ¿YA SABE LA RESPUESTA?</p>
+      <p class="rules" style="margin:0">Marque en el tablero lo que acaba de descubrir. Lo normal es <b>terminar el turno</b> y seguir investigando.</p>
+      <div class="row"><button class="go" id="endBtn" style="flex:2;font-size:17px">✔ Terminar turno</button><button class="accLite" id="accBtn2" style="flex:1">⚖️ Acusación final</button></div>
+      <p class="rules" style="margin:6px 0 0;font-size:12px">⚖️ Solo acuse si está <b>seguro</b> de quién, qué delito y dónde: si falla, queda fuera del juego.</p></div>`;
   }
   if(S.lastAct !== act){ S.lastAct = act; $("gAct").innerHTML = act; }
   const ab = $("askBtn"); if(ab) ab.onclick = () => { if(!(S.pickQ.s && S.pickQ.d && S.pickQ.e)) return; sSend({ t:"suggest", h:{ ...S.pickQ } }); S.sentAsk = true; S.mode = "mark"; sRender(); };
   const eb = $("endBtn"); if(eb) eb.onclick = () => { sSend({ t:"endTurn" }); eb.disabled = true; };
+  const ab2 = $("accBtn2"); if(ab2) ab2.onclick = () => $("accOpenBtn").click();
   // tablero
   $("gSeg").hidden = !asking;
   $("gSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.m === S.mode));
@@ -1745,9 +1755,9 @@ function sRender(){
       h.addEventListener("mouseup", close); h.addEventListener("mouseleave", close); h.addEventListener("touchend", close);
     });
   }
-  const canAcc = mine && !S.elim && (tr.phase === "after" || (tr.phase === "suggest" && !S.sentAsk));
+  const canAcc = mine && !S.elim && tr.phase === "after";
   $("accOpenBtn").disabled = !canAcc;
-  $("accOpenBtn").textContent = canAcc ? "⚖️ Acusar" : "⚖️ Acusar (en su turno)";
+  $("accOpenBtn").textContent = canAcc ? "⚖️ Acusación final" : (mine && !S.elim ? "⚖️ Acusar (primero pregunte)" : "⚖️ Acusar (en su turno)");
   if(!$("logModal").hidden) sRenderLog();
 }
 function sRenderAcc(){
