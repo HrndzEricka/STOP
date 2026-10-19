@@ -671,6 +671,23 @@ h2::before{content:none!important}
 .accBack{flex:1.3;background:#2b2418!important;color:#f1e6c9!important;border:0!important;font-weight:700}
 .accSign{flex:1;background:var(--stamp)!important;color:#fff7e6!important;border:3px double #fff7e6!important;outline:3px solid var(--stamp);font-family:var(--head)!important;letter-spacing:.08em;text-transform:uppercase;transform:rotate(-1deg)}
 .accSign:disabled{opacity:.45;transform:none}
+/* ===== acusación con el panel de interrogatorio ===== */
+#accModal .box.accStand{padding:34px 14px 16px!important;max-height:calc(100vh - 40px);overflow-y:auto;text-align:center}
+#accModal .accStand::before{content:"⚖️ ACUSACIÓN FINAL · RESPUESTA DEL CASO"!important}
+#accModal .accCase{font-family:var(--type);font-size:12px;color:var(--ink-dim);margin-top:2px}
+#accModal .standQ .miniRow{justify-content:center;flex-wrap:nowrap;gap:8px}
+#accModal .standQ .mini{width:31%!important;max-width:120px;min-height:96px!important;padding:8px 4px!important;display:grid;align-content:center;justify-items:center}
+#accModal .standQ .mini .ti{font-size:30px!important}
+#accModal .standQ .mini .ti svg,#accModal .standQ .mini .ti .art{width:46px!important;height:46px!important}
+#accModal .standQ .mini .tn{font-size:13px!important}
+#accModal #accSlots.ready .mini{border-color:var(--red);box-shadow:0 0 0 2px rgba(255,93,115,.35)}
+#accModal .accLine{font-family:var(--type);font-size:16px;color:var(--ink);margin:8px 0 10px}
+#accModal .accLine b{color:var(--yel);font-family:var(--type);font-weight:400}
+#accModal .accLine .blank{color:var(--faint)}
+#accModal .accNote{background:rgba(255,93,115,.12);color:var(--ink);border:2px solid var(--red);border-radius:10px;transform:none;box-shadow:none;text-align:left}
+#accModal .accHow{color:var(--ink-dim);text-align:left}
+#accModal .accCols .bcol{background:rgba(255,255,255,.02);border-color:var(--tab)}
+#accModal .accBack{background:var(--tab)!important;color:var(--ink)!important;border:2px solid var(--line)!important}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -832,15 +849,13 @@ h2::before{content:none!important}
   <div id="seenCard" style="display:flex;justify-content:center;margin:10px 0"></div>
   <p class="rules center" style="margin:0">Ya quedó tachada en su tablero. <span class="timer" id="seenTimer"></span></p>
 </div></div>
-<div class="modal" id="accModal" hidden><div class="box big accFolder">
-  <div class="accTab">ACTA DE ACUSACIÓN · EXPEDIENTE Nº <span id="accNo"></span></div>
-  <div class="accStamp">ACUSACIÓN<br>FINAL</div>
-  <p class="agency">AGENCIA DE CIBERINVESTIGACIÓN</p>
-  <h3 class="accTitle">Yo acuso…</h3>
-  <div class="board accBoard" id="accBoard" aria-hidden="true"></div>
+<div class="modal" id="accModal" hidden><div class="box big stand accStand">
+  <div class="standTop">⚖️ <b>Acusación final</b></div>
+  <div class="accCase">Expediente Nº <span id="accNo"></span></div>
+  <div class="standQ"><div class="lbl">Usted acusa: ¿fue…?</div><div class="miniRow" id="accSlots"></div></div>
   <p class="accLine" id="accLine"></p>
   <div class="accNote">⚠️ <b>Esto NO es una pregunta.</b> Es su respuesta final del caso. Si acierta, <b>gana</b>. Si se equivoca, <b>queda fuera</b> (pero igual muestra sus cartas cuando le pregunten).</div>
-  <p class="accHow">Elija <b>1 persona</b>, <b>1 delito</b> y <b>1 lugar</b>:</p>
+  <p class="accHow">Toque <b>1 persona</b>, <b>1 delito</b> y <b>1 lugar</b>:</p>
   <div class="bcols accCols">
     <div class="bcol"><div class="secHd s">👤 Persona</div><div class="bgrid" id="aS"></div></div>
     <div class="bcol"><div class="secHd d">💻 Delito</div><div class="bgrid" id="aD"></div></div>
@@ -1882,11 +1897,11 @@ function sRenderAcc(){
   const t = id => tileHtml(id, (S.pickA[CARD[id].k] === id ? "sel" : "") + (isX(id) ? " x" : ""));
   $("aS").innerHTML = sink(deck.s).map(t).join(""); $("aD").innerHTML = sink(deck.d).map(t).join(""); $("aE").innerHTML = sink(deck.e).map(t).join("");
   document.querySelectorAll("#accModal .tile").forEach(b => b.onclick = () => { const id = b.dataset.id, k = CARD[id].k; S.pickA[k] = S.pickA[k] === id ? undefined : id; SFX.tick(); sRenderAcc(); });
-  // tablero de corcho: una foto por cada cosa que acusa (con "?" mientras no la elija)
+  $("accSlots").innerHTML = miniHtml(S.pickA.s) + miniHtml(S.pickA.d) + miniHtml(S.pickA.e);
   const ph = (k, cls, q) => { const id = S.pickA[k];
     return id ? `<div class="polaroid ${cls}"><span class="ph">${artHtml(id)}</span><i>${esc(CARD[id].name)}</i></div>`
               : `<div class="polaroid q ${cls}"><span class="ph">?</span><i>${q}</i></div>`; };
-  $("accBoard").innerHTML = ph("s","a","¿Quién?") + ph("d","b","¿Qué delito?") + ph("e","c","¿Dónde?") +
+  if($("accBoard")) $("accBoard").innerHTML = ph("s","a","¿Quién?") + ph("d","b","¿Qué delito?") + ph("e","c","¿Dónde?") +
     `<svg class="string" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M18 12 L50 26 L82 9" fill="none" stroke="#c1121f" vector-effect="non-scaling-stroke" style="stroke-width:2.2px"/></svg>` +
     '<span class="pin" style="left:calc(18% - 6px);top:calc(12% - 6px)"></span><span class="pin" style="left:calc(50% - 6px);top:calc(26% - 6px)"></span><span class="pin" style="left:calc(82% - 6px);top:calc(9% - 6px)"></span>';
   const b = k => S.pickA[k] ? `<b>${esc(CARD[S.pickA[k]].name)}</b>` : '<span class="blank">________</span>';
@@ -1894,7 +1909,7 @@ function sRenderAcc(){
   $("accNo").textContent = (S.st && S.st.caseId) || S.caseId || "—";
   const ready = !!(S.pickA.s && S.pickA.d && S.pickA.e);
   $("accGo").disabled = !ready;
-  $("accBoard").classList.toggle("ready", ready);
+  $("accSlots").classList.toggle("ready", ready);
 }
 function sRenderLog(){
   const d = S.st || {};
