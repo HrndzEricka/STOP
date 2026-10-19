@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EXPEDIENTE DIGITAL · PROFE ERICKA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Nunito:wght@500;700;800;900&family=Oswald:wght@500;600;700&family=Special+Elite&display=swap">
 <style>
 /* Editor de código: paneles tipo VS Code oscuro, colores de sintaxis suaves, todo en letra monoespaciada clara */
 :root{
@@ -634,6 +634,21 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 .restTitle{font-family:var(--head);font-weight:600;letter-spacing:.06em;margin:4px 0 6px;text-align:center}
 @keyframes winPop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
 @keyframes winBob{50%{transform:translateY(-6px)}}
+/* letra de lectura (no de programación) y sin flechitas de editor de código */
+:root{--mono:"Nunito","Segoe UI",system-ui,sans-serif}
+h2::before{content:none!important}
+.rules,.muted,.hint{font-family:var(--mono)}
+/* cartas secretas más pequeñas, en una fila */
+.handRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.hcard{width:78px!important;height:100px!important}
+.hcard .back{font-size:24px!important}
+.hcard .back .bk{font-size:26px;line-height:1}
+.hcard .back small{font-size:10px!important;letter-spacing:.1em}
+.hcard .back small.hold{opacity:.6;letter-spacing:.04em;font-weight:600}
+.hcard .front .ti{font-size:24px!important}.hcard .front .tn{font-size:11px!important;line-height:1.15}
+/* la barra fija de abajo no tapa lo último de la pantalla */
+#vGame{padding-bottom:96px}
+/* una línea suave antes de las cartas tachadas */
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -747,10 +762,6 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 <section id="vGame" class="narrow" hidden>
   <div class="stand" id="gStand"></div>
   <div id="gAct"></div>
-  <div class="panel handPanel">
-    <h2>🃏 Mis cartas secretas <span class="secret">· manténgalas presionadas para verlas</span></h2>
-    <div class="handRow" id="gHand"></div>
-  </div>
 
   <div class="panel boardPanel">
     <div class="row" style="justify-content:space-between;margin-bottom:8px">
@@ -763,6 +774,10 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
       <div class="bcol"><div class="secHd d">💻 Delitos</div><div class="bgrid" id="bD"></div></div>
       <div class="bcol"><div class="secHd e">📍 Lugares</div><div class="bgrid" id="bE"></div></div>
     </div>
+  </div>
+  <div class="panel handPanel">
+    <h2>🃏 Mis cartas secretas <span class="secret">· solo usted las ve: mantenga presionada una para verla</span></h2>
+    <div class="handRow" id="gHand"></div>
   </div>
 
 
@@ -1796,7 +1811,8 @@ function sRender(){
     if(S.toMark === id) cls += " toMark";
     return tileHtml(id, cls).replace('<span class="tm"></span>', `<span class="tm">${out || m === "x" ? "✗" : m === "q" ? "?" : m === "v" ? "✓" : ""}</span>`);
   };
-  const bh = [deck.s.map(tileFor).join(""), deck.d.map(tileFor).join(""), deck.e.map(tileFor).join("")];
+  const sinkX = arr => arr.slice().sort((a,b) => ((isOut(a) || S.marks[a] === "x") ? 1 : 0) - ((isOut(b) || S.marks[b] === "x") ? 1 : 0));
+  const bh = [sinkX(deck.s).map(tileFor).join(""), sinkX(deck.d).map(tileFor).join(""), sinkX(deck.e).map(tileFor).join("")];
   if(S.lastBoard !== bh.join("|")){ S.lastBoard = bh.join("|"); $("bS").innerHTML = bh[0]; $("bD").innerHTML = bh[1]; $("bE").innerHTML = bh[2]; }
   document.querySelectorAll(".boardPanel .tile").forEach(b => b.onclick = () => {
     const id = b.dataset.id, k = CARD[id].k;
@@ -1808,14 +1824,14 @@ function sRender(){
     ls.set("xv_marks_" + S.caseId, S.marks); sRender();
   });
   // pistas sobre la mesa (las ven todos; ninguna es la respuesta)
-  let tb = $("gTable"); if(!tb){ $("gHand").insertAdjacentHTML("afterend", '<div id="gTable"></div>'); tb = $("gTable"); }
+  let tb = $("gTable"); if(!tb){ $("gHand").insertAdjacentHTML("afterend", '<div id="gTable" hidden></div>'); tb = $("gTable"); } // ya se muestran arriba
   const tbl = d.table || [], tk = tbl.join();
   if(S.tableKey !== tk){ S.tableKey = tk; tb.innerHTML = tbl.length ? `<p class="tableTitle">🗂️ Pistas sobre la mesa <small>Todos las ven. Ninguna es la respuesta: ya salen tachadas.</small></p><div class="tableRow">${tbl.map(id => miniHtml(id, "x")).join("")}</div>` : ""; }
   // mano boca abajo
   const hk = S.hand.join();
   if(S.handKey !== hk){
     S.handKey = hk;
-    $("gHand").innerHTML = S.hand.length ? S.hand.map(id => { const c = CARD[id]; return `<div class="hcard k-${c.k}" data-id="${id}"><div class="face back">🕵️<small>TOQUE Y MANTENGA</small></div><div class="face front"><span class="ti">${artHtml(id)}</span><span class="tk">${KLBL[c.k]}</span><span class="tn">${esc(c.name)}</span></div></div>`; }).join("")
+    $("gHand").innerHTML = S.hand.length ? S.hand.map(id => { const c = CARD[id]; return `<div class="hcard k-${c.k}" data-id="${id}"><div class="face back"><span class="bk">${c.k === "s" ? "👤" : c.k === "d" ? "💻" : "📍"}</span><small>${c.k === "s" ? "PERSONA" : c.k === "d" ? "DELITO" : "LUGAR"}</small><small class="hold">mantenga</small></div><div class="face front"><span class="ti">${artHtml(id)}</span><span class="tk">${KLBL[c.k]}</span><span class="tn">${esc(c.name)}</span></div></div>`; }).join("")
       : '<p class="muted" style="margin:0">' + (S.inGame ? "No le tocaron cartas." : "Usted no tiene cartas en este caso.") + "</p>";
     document.querySelectorAll("#gHand .hcard").forEach(h => {
       let t;
