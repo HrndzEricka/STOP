@@ -587,15 +587,57 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 @keyframes countPop{from{transform:scale(2.2);opacity:0}}
 #ovIntro .inSkip{font-size:14px;opacity:.55;margin-top:6px}
 @media (prefers-reduced-motion:reduce){#seenModal .mini,.inFile,.inCount,.inStamp.on{animation-duration:.01s}}
+/* ===== Portada de sala de investigación ===== */
+.caseCover{position:relative;padding:34px 4px 6px}
+.tape{position:absolute;left:-30px;right:-30px;top:6px;z-index:3;transform:rotate(-4deg);background:repeating-linear-gradient(-45deg,#f5c518 0 22px,#e8b70f 22px 44px);color:#14110a;font-family:var(--head);font-weight:700;font-size:13px;letter-spacing:.18em;white-space:nowrap;overflow:hidden;padding:5px 0;box-shadow:0 6px 14px rgba(0,0,0,.45);text-align:center}
+.folder{position:relative;margin-top:50px;background:linear-gradient(180deg,#f1e6c9,#e3d2a8);color:var(--paper-ink);border-radius:4px 14px 14px 14px;padding:24px 18px 18px;box-shadow:0 18px 40px rgba(0,0,0,.55),inset 0 0 0 1px rgba(120,95,50,.25);transform:rotate(-.6deg)}
+.folder::before{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(120,95,50,.12) 27px 28px);pointer-events:none}
+.folderTab{position:absolute;top:-24px;left:0;background:#e3d2a8;border-radius:10px 10px 0 0;padding:4px 16px;font-family:var(--type);font-size:13px;color:#6b5a36;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.stampC{position:absolute;top:14px;right:12px;font-family:var(--type);font-size:clamp(14px,4vw,19px);color:var(--stamp);border:3px solid var(--stamp);border-radius:6px;padding:2px 10px;transform:rotate(9deg);opacity:.85;letter-spacing:.06em}
+.agency{position:relative;font-family:var(--head);font-weight:600;letter-spacing:.2em;font-size:12px;color:#7a6840;margin:0}
+.coverTitle{position:relative;font-family:var(--type)!important;font-weight:400;font-size:clamp(34px,10.5vw,52px);line-height:.95;color:var(--paper-ink)!important;margin:6px 0 12px;text-shadow:none!important;letter-spacing:.02em}
+.coverTitle span{color:var(--stamp)}
+.board{position:relative;height:178px;border-radius:10px;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 0 2px,transparent 3px) 0 0/14px 14px,radial-gradient(circle at 70% 60%,rgba(0,0,0,.12) 0 2px,transparent 3px) 0 0/18px 18px,linear-gradient(135deg,#b98b57,#9d7244);box-shadow:inset 0 0 0 6px #6e4c2a,inset 0 0 22px rgba(0,0,0,.45);overflow:hidden}
+.board svg.string{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.polaroid{position:absolute;z-index:1;background:#fbf8f1;padding:6px 6px 4px;border-radius:2px;box-shadow:0 6px 12px rgba(0,0,0,.45);width:88px;text-align:center}
+.polaroid .ph{display:block;width:76px;height:76px;background:#2a3352;overflow:hidden;border-radius:1px}
+.polaroid .ph svg{width:100%;height:100%;display:block}
+.polaroid i{display:block;font-style:normal;font-family:var(--type);font-size:11px;color:#2b2418;line-height:1.15;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.polaroid.q .ph{display:grid;place-items:center;font-family:var(--head);font-size:48px;color:#f5c518;background:#1b2238}
+.polaroid.a{left:5%;top:14px;transform:rotate(-7deg)}
+.polaroid.b{left:calc(50% - 44px);top:34px;transform:rotate(3deg)}
+.polaroid.c{right:5%;top:10px;transform:rotate(8deg)}
+.pin{position:absolute;z-index:3;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a8a,#c1121f);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.board .tag{position:absolute;z-index:3;bottom:10px;left:50%;transform:translateX(-50%) rotate(-2deg);background:#fff7c2;color:#2b2418;font-family:var(--type);font-size:12px;padding:4px 10px;box-shadow:0 3px 6px rgba(0,0,0,.35);white-space:nowrap}
+.note{position:relative;font-family:var(--type);font-size:15px;color:#4a3d24;margin:14px 0 8px;min-height:1.5em}
+.note .caret{color:var(--stamp);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.clues{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.clues span{background:rgba(255,255,255,.45);border:1.5px dashed #9b8758;border-radius:8px;padding:6px 4px;text-align:center;font-family:var(--head);font-weight:600;font-size:13px;letter-spacing:.04em;color:#3b311e}
+.clues b{display:block;font-size:20px;line-height:1.1}
+.byline{position:relative;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-family:var(--type);font-size:13px;color:#6b5a36}
+.byline b{font-family:var(--head);letter-spacing:.16em;color:var(--paper-ink);font-size:14px}
+.fprint{font-size:28px;opacity:.55;filter:sepia(1)}
+.profLink{text-align:center;color:var(--ink-dim);font-size:14px;margin-top:14px}
+.profLink a{color:var(--yel);font-weight:700}
+@media (max-width:380px){.polaroid{width:76px}.polaroid .ph{width:64px;height:64px}.board{height:160px}}
 </style>
 </head>
 <body>
 <!-- ================= UNIRSE ================= -->
 <section id="vJoin" class="narrow" hidden>
-  <div class="hero">
-    <div class="tiles" aria-label="CASO"><span>C</span><span>A</span><span>S</span><span>O</span></div>
-    <div class="heroSub">EXPEDIENTE DIGITAL · PROFE ERICKA</div>
-    <div class="typeLine"><span class="prompt">$</span> <span id="typeTxt"></span><span class="caret">▌</span></div>
+  <div class="caseCover">
+    <div class="tape" aria-hidden="true">ESCENA DEL CRIMEN · NO PASAR · ESCENA DEL CRIMEN · NO PASAR · ESCENA DEL CRIMEN · NO PASAR</div>
+    <div class="folder">
+      <div class="folderTab">EXPEDIENTE Nº <span id="coverNo">2026-117</span></div>
+      <div class="stampC">CONFIDENCIAL</div>
+      <p class="agency">AGENCIA DE CIBERINVESTIGACIÓN</p>
+      <h1 class="coverTitle">EXPEDIENTE<br><span>DIGITAL</span></h1>
+      <div class="board" id="coverBoard" aria-hidden="true"></div>
+      <p class="note"><span>✎</span> <span id="typeTxt"></span><span class="caret">▌</span></p>
+      <div class="clues"><span><b>🕵️</b>¿Quién?</span><span><b>💻</b>¿Qué delito?</span><span><b>📍</b>¿Dónde?</span></div>
+      <div class="byline"><span>Investigación a cargo de:</span><b>PROFE ERICKA</b><span class="fprint">🔍</span></div>
+    </div>
   </div>
   <div class="panel join">
     <h2>Entrar al caso</h2>
@@ -608,6 +650,7 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
       <button class="go" style="width:100%;font-size:20px;padding:14px" id="joinBtn">Entrar como detective</button>
     </form>
   </div>
+  <p class="profLink">¿Es docente? <a href="?profe">Abrir modo docente</a></p>
 </section>
 
 <!-- ================= ESPERA ================= -->
@@ -1493,18 +1536,27 @@ function studentInit(){
   }, 4000);
   setInterval(() => { if(S.st && S.st.turn) sRenderStand(); }, 1000);
 }
+// tablero de corcho de la portada: fotos de sospechosos unidas con hilo rojo
+function coverBoard(){
+  const b = $("coverBoard"); if(!b) return;
+  const three = shuffle(SUSPECTS).slice(0, 2);
+  const photo = (x, cls) => `<div class="polaroid ${cls}"><span class="ph">${portraitSVG(x.id)}</span><i>¿${esc(x.alias)}?</i></div>`;
+  b.innerHTML = photo(three[0], "a") + `<div class="polaroid q b"><span class="ph">?</span><i>¿Culpable?</i></div>` + photo(three[1], "c") +
+    `<svg class="string" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M18 12 L50 26 L82 9" fill="none" stroke="#c1121f" stroke-width="1.1" vector-effect="non-scaling-stroke" style="stroke-width:2.2px"/><path d="M18 12 Q40 70 50 26" fill="none" stroke="#c1121f" stroke-width="1" vector-effect="non-scaling-stroke" style="stroke-width:1.6px" opacity=".7"/></svg>` +
+    '<span class="pin" style="left:calc(18% - 6px);top:calc(12% - 6px)"></span><span class="pin" style="left:calc(50% - 6px);top:calc(26% - 6px)"></span><span class="pin" style="left:calc(82% - 6px);top:calc(9% - 6px)"></span>' +
+    '<span class="tag">3 pistas · 1 culpable</span>';
+  const n = $("coverNo"); if(n) n.textContent = new Date().getFullYear() + "-" + String(Math.floor(100 + Math.random()*900));
+}
 function sJoinFx(on){
   clearTimeout(S.typeT);
   if(!on){ if(S.rain) S.rain.stop(); $("sRain").hidden = true; return; }
-  const msgs = ["escriba el PIN y su nombre","se busca: detective informático","¿quién? ¿con qué arma? ¿dónde?","guarde bien sus cartas…"];
+  coverBoard();
+  const msgs = ["anote el PIN y su nombre, detective","se busca: detective informático","¿quién fue? ¿qué delito? ¿dónde?","guarde bien sus cartas…","nadie es inocente hasta descartarlo"];
   let m = 0, i = 0, del = false;
   const tick = () => { const full = msgs[m]; i += del ? -1 : 1; $("typeTxt").textContent = full.slice(0,i);
     let w = del ? 28 : 70; if(!del && i >= full.length){ del = true; w = 1800; } else if(del && i <= 0){ del = false; m = (m+1)%msgs.length; w = 400; }
     S.typeT = setTimeout(tick, w); };
   tick();
-  if(!S.rain) S.rain = makeRain($("sRain"), 14);
-  S.rain.setWords(["0","1","01","10","{ }","</>","#","$","@","404","IP","SQL","DNS","SSH","LOG"]);
-  $("sRain").hidden = false; requestAnimationFrame(() => S.rain.start());
 }
 function sJoinFail(msg){ clearTimeout(S.openT); $("joinErr").textContent = msg; $("joinBtn").disabled = false; $("joinBtn").textContent = "Entrar como detective"; show("vJoin"); }
 function sStart(){
