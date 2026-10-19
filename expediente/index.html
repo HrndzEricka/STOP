@@ -621,6 +621,19 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
 /* en la pantalla de la profe, un poco más grande para proyectar */
 #tBoardPanel .bcols .tile .tn{font-size:15px!important}
 #tBoardPanel .bcols .tile .por{width:36px!important;height:36px!important}
+.winCard{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;margin:10px auto;max-width:520px;background:linear-gradient(180deg,#3a2a06,#141b2d 80%);border:3px solid var(--yel);border-radius:24px;padding:26px 22px;box-shadow:0 0 50px rgba(245,197,24,.3);animation:winPop .7s cubic-bezier(.2,.9,.3,1.3) both}
+.winCard.none{border-color:var(--line);background:var(--bg);box-shadow:none}
+.winCard .crown{font-size:56px;line-height:1;animation:winBob 1.2s ease-in-out infinite}
+.winCard .wName{margin:0;font-family:var(--head);font-weight:700;font-size:clamp(30px,5vw,48px);color:var(--yel);overflow-wrap:anywhere;line-height:1.1}
+.winCard.none .wName{color:var(--ink)}
+.winCard .wSub{margin:0;color:var(--ink-dim);font-size:16px}
+.winCard .wSol{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.winCard .wTag{margin:6px 0 0;font-family:var(--type);font-size:13px;color:#d9c48a}
+.podTitle::before,.podTitle::after{content:none!important}
+#ovPod .podTitle{font-family:var(--type)!important;font-size:clamp(26px,4vw,40px)!important;color:var(--paper)!important;letter-spacing:.04em}
+.restTitle{font-family:var(--head);font-weight:600;letter-spacing:.06em;margin:4px 0 6px;text-align:center}
+@keyframes winPop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes winBob{50%{transform:translateY(-6px)}}
 .stepTag{margin:0 0 8px;font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--yel)}
 .accWarn{margin:0 0 10px;background:rgba(255,93,115,.14);border:2px solid var(--red);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45}
 .accLite{background:transparent!important;border:2px solid var(--red)!important;color:var(--red)!important;font-weight:700}
@@ -767,7 +780,7 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
     <div class="revealGrid" id="eSol"></div>
     <div class="learn" id="eLearn"></div>
   </div>
-  <div class="panel"><h2>Ranking de detectives</h2><div class="board" id="eBoard"></div></div>
+  <div class="panel" id="eBoardPanel"><h2>📁 Casos resueltos hoy</h2><div class="board" id="eBoard"></div></div>
 </section>
 
 <!-- modales del estudiante -->
@@ -831,7 +844,7 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
         <button class="go" id="tStart">🃏 Repartir e iniciar</button>
         <button id="tSkip">⏭ Saltar turno</button>
         <button class="danger" id="tEnd">⏹ Terminar y revelar</button>
-        <button id="tPodium">🏆 Podio</button>
+        <button id="tPodium">🏆 Ganador</button>
       </div>
       <div class="row" style="margin-top:12px">
         <label class="check" for="tTurnSecs">Tiempo por turno</label>
@@ -881,11 +894,11 @@ button{font-family:var(--head);letter-spacing:.04em;font-weight:600}
   <p class="muted" id="rvSub" style="font-size:18px"></p>
   <div class="revealGrid" id="rvSol"></div>
   <div class="learn" id="rvLearn"></div>
-  <div class="row podBtns"><button id="rvClose">Cerrar</button><button class="primary" id="rvPodium">🏆 Ver podio</button></div>
+  <div class="row podBtns"><button id="rvClose">Cerrar</button><button class="primary" id="rvPodium">🏆 Ver al ganador</button></div>
 </div></div>
 <div class="overlay" id="ovPod" hidden><div class="podWrap">
-  <p class="podTitle">"Mejores detectives"</p>
-  <div class="podium" id="podCols"></div>
+  <p class="podTitle">🏆 Detective del caso</p>
+  <div id="podCols"></div>
   <div class="podRest board" id="podRest"></div>
   <div class="row podBtns"><button id="podClose">Cerrar</button></div>
 </div></div>
@@ -1581,17 +1594,20 @@ function tShowReveal(){
   $("ovReveal").hidden = false;
   SFX.siren(); setTimeout(() => SFX.stamp(), 1300);
 }
+// gana uno solo: placa de honor del que resolvió el caso; si jugaron varios casos, cuántos resolvió cada uno
 function tShowPodium(){
-  const L = Object.values(T.s.players).map(p => ({ name:p.name, total:p.total })).sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
-  if(!L.length){ toast("Todavía no hay detectives"); return; }
-  const col = (k, cls) => { const x = L[k];
-    return x ? `<div class="podCol ${cls}"><div class="who">${esc(x.name)}</div><div class="sc">${x.total} pts</div><div class="blk">${k+1}</div></div>` : `<div class="podCol ${cls} empty"><div class="blk">${k+1}</div></div>`; };
-  $("podCols").innerHTML = col(1,"g2") + col(0,"g1") + col(2,"g3");
-  const rest = L.slice(3, 12);
-  $("podRest").innerHTML = rest.map((x,i) => `<div class="bRow"><span class="pos">${i+4}°</span><span class="nm">${esc(x.name)}</span><span class="tt">${x.total}</span></div>`).join("");
-  $("podRest").hidden = !rest.length;
+  const g = G(), win = g.status === "ended" && g.winner ? pname(g.winner) : "";
+  $("podCols").innerHTML = win
+    ? `<div class="winCard"><span class="crown">🏆</span>${avatarHtml(win, 110)}<p class="wName">${esc(win)}</p>
+        <p class="wSub">Resolvió el expediente <b>#${esc(g.caseId)}</b></p>${g.sol ? `<div class="wSol">${miniHtml(g.sol.s)}${miniHtml(g.sol.d)}${miniHtml(g.sol.e)}</div>` : ""}
+        <p class="wTag">🎖️ Placa de honor · Agencia de Ciberinvestigación</p></div>`
+    : `<div class="winCard none"><span class="crown">🕵️</span><p class="wName">${g.status === "ended" ? "Nadie resolvió el caso" : "El caso sigue abierto"}</p><p class="wSub">${g.status === "ended" ? "El culpable se salió con la suya… esta vez." : "Todavía nadie ha acusado correctamente."}</p></div>`;
+  const solved = Object.values(T.s.players).map(p => ({ name:p.name, n:Math.round((p.total || 0) / 1000) })).filter(x => x.n > 0).sort((a,b) => b.n - a.n || a.name.localeCompare(b.name));
+  $("podRest").innerHTML = solved.length > 1 || (solved[0] && solved[0].n > 1)
+    ? `<p class="restTitle">📁 Casos resueltos hoy</p>` + solved.map(x => `<div class="bRow"><span class="nm">${esc(x.name)}</span><span class="tt">🏆 ${x.n} ${x.n === 1 ? "caso" : "casos"}</span></div>`).join("") : "";
+  $("podRest").hidden = !$("podRest").innerHTML;
   $("ovPod").hidden = false;
-  [523,659,784,1047].forEach((f,i) => setTimeout(() => beep(f,160), 1300 + i*140));
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => beep(f,160), 400 + i*140));
 }
 
 /* ============================================================
@@ -1858,10 +1874,10 @@ function sShowEnd(d){
   $("eSol").innerHTML = solCardsHtml(d.sol);
   $("eLearn").innerHTML = learnHtml(d.sol);
   $("eMine").innerHTML = d.winner ? (d.winner === S.name ? `🏆 ¡Usted resolvió el caso! <span style="color:var(--num)">+1000</span>` : `🏆 Lo resolvió <span style="color:var(--yel)">${esc(d.winner)}</span>`) : "Nadie resolvió el caso";
-  const list = (d.players||[]).slice().sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
-  const meI = list.findIndex(p => p.name === S.name);
-  $("eBoard").innerHTML = list.slice(0,10).map((p,i) => `<div class="bRow p${i+1} ${i===meI?"me":""}"><span class="pos">${i+1}°</span><span class="nm">${esc(p.name)}</span><span class="tt">${p.total}</span></div>`).join("")
-    + (meI >= 10 ? `<div class="gap">⋯</div><div class="bRow me"><span class="pos">${meI+1}°</span><span class="nm">${esc(list[meI].name)}</span><span class="tt">${list[meI].total}</span></div>` : "");
+  // en el Clue gana uno solo: aquí solo se muestra quién ha resuelto casos en la clase
+  const solved = (d.players||[]).map(p => ({ name:p.name, n:Math.round((p.total || 0) / 1000) })).filter(x => x.n > 0).sort((a,b) => b.n - a.n || a.name.localeCompare(b.name));
+  $("eBoard").innerHTML = solved.map(x => `<div class="bRow ${x.name === S.name ? "me" : ""}"><span class="nm">${esc(x.name)}</span><span class="tt">🏆 ${x.n} ${x.n === 1 ? "caso" : "casos"}</span></div>`).join("");
+  $("eBoardPanel").hidden = !solved.length;
   if(!already){ show("vEnd"); SFX.siren(); }
 }
 
