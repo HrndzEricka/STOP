@@ -434,6 +434,7 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
       <button type="button" class="iconB" id="gRules" title="Cómo se juega">📖 Reglas</button>
       <button type="button" class="iconB" id="gLog" title="Lo que ha pasado">📜</button>
       <button type="button" class="iconB" id="gSound" title="Sonido">🔊</button>
+      <button type="button" class="iconB" id="gLeave" title="Salir del juego">🚪 Salir</button>
     </div>
     <div class="stageWrap" id="gStageWrap"></div>
     <section class="handBox" id="gHandBox">
@@ -1079,6 +1080,7 @@ function introInit(){
    MODO DOCENTE: varias salas a la vez. La compu de la profe es la que manda:
    guarda cada partida, revisa las jugadas y le avisa a cada estudiante.
    ============================================================ */
+const LEAVE_MS = 45000; // desconectado más de esto = se salió
 const DEF_MS = 15000, QUIZ_MS = 20000, PAY_MS = 40000, LOSE_MS = 25000, DISC_MS = 25000, ONLINE_MS = 15000;
 const H = { rooms:{}, token:null, cur:null, def:{ secs:60, quiz:true }, fx:{} };
 const isOn = p => !!p && !p.gone && !!p.seen && (Date.now() - p.seen) < ONLINE_MS;
@@ -1189,6 +1191,7 @@ function hOnData(room, cid, d){
   if(!p || p.gone){ if(d.t !== "ping") hSend(room, cid, { t:"rejected", msg:"Vuelva a entrar con el PIN." }); return; }
   const g = room.g;
   if(d.t === "ping") return;
+  if(d.t === "leave") return hRemove(room, cid, "left");
   if(g.status !== "playing" || !g.order.includes(cid)) return;
   if(room.paused) return hErr(room, cid, "⏸ La profe pausó la partida.");
   if(d.t === "play") return gPlay(room, cid, d);
@@ -1209,7 +1212,7 @@ function hJoin(room, cid, d){
     let base = name, k = 2; while(taken.has(name.toLowerCase())) name = base + " " + (k++);
     room.players[cid] = { name, av, seen:Date.now() }; room.joinOrder.push(cid);
     if(room.g.status === "playing") addLog(room, "👀 " + esc(name) + " entró a mirar. Jugará en la próxima partida.");
-  } else { if(ex.gone) return hSend(room, cid, { t:"rejected", msg:"La profe lo sacó de esta sala." }); ex.av = av; ex.seen = Date.now(); }
+  } else { if(ex.gone) return hSend(room, cid, { t:"rejected", msg: ex.why === "kick" ? "La profe lo sacó de esta sala." : "Usted se salió de esta sala. Pídale a la profe un PIN nuevo." }); ex.av = av; ex.seen = Date.now(); }
   room.sent[cid] = null;
   hSend(room, cid, { t:"welcome", name:room.players[cid].name, n:room.n, code:room.code });
   hDirty(room);
@@ -1478,6 +1481,7 @@ function hTick(){
   const now = Date.now();
   Object.values(H.rooms).forEach(room => {
     if(H.onTick) H.onTick(room);
+    Object.entries(room.players).forEach(([cid, p]) => { if(!p.gone && p.seen && now - p.seen > LEAVE_MS && !room.paused) hRemove(room, cid, "lost"); });
     const g = room.g; if(g.status !== "playing" || room.paused) return;
     const p = g.pend;
     if(p && p.cur && now > p.cur.deadline){
@@ -1513,15 +1517,19 @@ function hEndGame(room){
   else { g.status = "ended"; g.winner = null; g.pend = null; g.turn = null; }
   hDirty(room);
 }
-function hKick(room, cid){
-  const g = room.g, p = room.players[cid]; if(!p) return;
-  p.gone = true; hSend(room, cid, { t:"kicked" });
+function hKick(room, cid){ hRemove(room, cid, "kick"); }
+// saca a un jugador para siempre. why = "kick" (la profe) | "left" (tocó Salir) | "lost" (se desconectó)
+function hRemove(room, cid, why){
+  const g = room.g, p = room.players[cid]; if(!p || p.gone) return;
+  p.gone = true; p.why = why;
+  if(why === "kick") hSend(room, cid, { t:"kicked" });
   if(g.status === "playing" && g.order.includes(cid)){
     const wasTurn = g.turn && g.turn.cid === cid, i = g.order.indexOf(cid);
     g.disc.push(...g.hands[cid], ...g.bank[cid], ...FIDS.flatMap(f => bldFix(g, cid)[f]));
     g.order.splice(i, 1); delete g.hands[cid]; delete g.bank[cid]; delete g.bld[cid];
-    addLog(room, "🚪 La profe sacó a " + esc(p.name));
-    if(g.order.length < 2){ g.status = "ended"; g.winner = g.order[0] || null; g.pend = null; g.turn = null; }
+    addLog(room, why === "kick" ? "🚪 La profe sacó a " + esc(p.name) : "🚪 " + esc(p.name) + (why === "left" ? " se salió del juego" : " se desconectó y quedó fuera") + ". Sus cartas fueron a la basura.");
+    fx(room, { k:"attack", txt:"🚪 " + p.name.toUpperCase() + " SALIÓ" });
+    if(g.order.length < 2){ const w = g.order[0] || null; g.pend = null; if(w){ gWin(room, w); g.log[g.log.length - 1].h = "🏆 <b>" + nm(room, w) + "</b> gana: los demás se salieron"; } else { g.status = "ended"; g.winner = null; g.turn = null; } }
     else if(g.pend && (g.pend.by === cid)){ g.pend = null; if(wasTurn){ g.turn.cid = g.order[(i - 1 + g.order.length) % g.order.length]; gAdvance(room); } }
     else if(g.pend){ g.pend.queue = g.pend.queue.filter(c => c !== cid); if(g.pend.cur && g.pend.cur.cid === cid) g.pend.cur = null; gNext(room); }
     else if(wasTurn){ g.turn.cid = g.order[(i - 1 + g.order.length) % g.order.length]; gAdvance(room); }
@@ -1546,7 +1554,7 @@ function hRenderDash(){
   $("hDash").hidden = false; $("hRoom").hidden = true; $("hBack").hidden = true;
   const rooms = Object.values(H.rooms).sort((a, b) => a.n - b.n);
   $("hRooms").innerHTML = rooms.map(r => {
-    const ps = Object.entries(r.players).filter(([, p]) => !p.gone), g = r.g;
+    const ps = Object.entries(r.players).filter(([, p]) => !p.gone), g = r.g; // los que se salieron ya no cuentan
     const leader = g.status !== "lobby" && g.order ? g.order.slice().sort((a, b) => litCount(bldFix(g, b)) - litCount(bldFix(g, a)))[0] : null;
     return '<article class="rCard ' + g.status + '"><div class="rTop"><h3>Sala ' + r.n + '</h3><button type="button" class="pinBig" data-pin="' + r.code + '" title="Mostrar el PIN en grande">PIN <b>' + r.code + '</b></button></div>' +
       '<p class="rSt">' + statusTxt(r) + '</p>' +
@@ -1642,6 +1650,12 @@ function studentInit(){
   $("gSound").onclick = () => { const m = SFX.toggle(); $("gSound").textContent = m ? "🔇" : "🔊"; };
   $("gSound").textContent = SFX.muted ? "🔇" : "🔊";
   $("gEnd").onclick = () => { sSend({ t:"end" }); S.sel = null; };
+  $("gLeave").onclick = () => {
+    const b = $("gLeave");
+    if(!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "¿Seguro? Ya no podrá volver"; setTimeout(() => { b.classList.remove("armed"); b.textContent = "🚪 Salir"; }, 3500); return; }
+    sSend({ t:"leave" }); S.joined = false;
+    setTimeout(() => { try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; S.cid = Math.random().toString(36).slice(2) + Date.now().toString(36); ss.set("dc_cid", S.cid); sJoinFail("Usted salió del juego. Si quiere jugar otra vez, pídale a la profe un PIN."); }, 400);
+  };
   document.addEventListener("click", sGlobalClick);
   window.addEventListener("resize", () => fitStage($("gStageWrap")));
   setInterval(() => { if(S.joined) sSend({ t:"ping" }); }, 5000);
