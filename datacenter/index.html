@@ -1275,7 +1275,7 @@ function gPlay(room, cid, d){
   if(d.how === "bank"){
     if(c.t !== "m" && c.t !== "a") return hErr(room, cid, "Las piezas no van al banco: póngalas en su edificio.");
     use(); g.bank[cid].push(id); fx(room, { k:"bank", to:cid, amt:c.v }); addLog(room, "🏦 " + nm(room, cid) + " guardó " + M(c.v) + " en el banco");
-    return hDirty(room);
+    gAutoEnd(room); return hDirty(room);
   }
   if(d.how === "place"){
     if(!["p","d","w"].includes(c.t)) return;
@@ -1283,7 +1283,7 @@ function gPlay(room, cid, d){
     if(!canPlace(b, id, f)) return hErr(room, cid, "Esa pieza no cabe en ese piso.");
     withLit(room, [cid], () => { use(); b[f].push(id); });
     fx(room, { k:"place", to:cid }); addLog(room, "🧩 " + nm(room, cid) + " puso " + cn(id) + " en " + FX[f].e + " " + FX[f].n);
-    return hDirty(room);
+    gAutoEnd(room); return hDirty(room);
   }
   if(d.how !== "act" || c.t !== "a") return;
   const a = c.a, others = g.order.filter(x => x !== cid), tgt = d.target, okT = others.includes(tgt);
@@ -1325,7 +1325,14 @@ function gPlay(room, cid, d){
       gPend(room, { a, by:cid, card:id, queue:others.slice() }); break;
     default: return;
   }
-  hDirty(room);
+  gAutoEnd(room); hDirty(room);
+}
+// si ya usó sus 3 jugadas (y nadie tiene que responder nada), el turno se termina solo
+function gAutoEnd(room){
+  const g = room.g; if(g.status !== "playing" || !g.turn || g.pend || g.turn.plays < PLAYS) return;
+  const no = g.turn.no;
+  clearTimeout(room.autoT);
+  room.autoT = setTimeout(() => { const g2 = room.g; if(g2.status === "playing" && g2.turn && g2.turn.no === no && !g2.pend && !room.paused){ addLog(room, "✅ " + nm(room, g2.turn.cid) + " usó sus 3 jugadas"); gEndTurn(room); } }, 1600);
 }
 function gMove(room, cid, d){
   const g = room.g; if(!myTurn(g, cid) || g.pend) return;
@@ -1367,7 +1374,7 @@ function gFinish(room){
   const g = room.g, p = g.pend; g.pend = null;
   if(g.status === "playing" && g.turn && g.turn.deadline) g.turn.deadline = Math.max(g.turn.deadline, Date.now() + 15000);
   if(p && p.a === "discard") return gAdvance(room);
-  hDirty(room);
+  gAutoEnd(room); hDirty(room);
 }
 // aplica el efecto a un jugador; true = hay que esperar que él escoja algo
 function gApply(room, cid){
@@ -1738,7 +1745,7 @@ function sActsHtml(){
   if(m.pend && m.pend.cur && m.pend.cur.cid !== S.cid) return '<p class="tip">⏳ Esperando a otro jugador…</p>';
   if(!isMyTurn()) return '<p class="tip">Todavía no es su turno. Puede ir pensando qué va a jugar.</p>';
   if(m.pend) return '<p class="tip">⏳ Esperando que los demás respondan…</p>';
-  if((m.turn.plays || 0) >= PLAYS) return '<p class="tip">✅ Ya usó sus 3 jugadas. Toque <b>Terminar turno</b>.</p>';
+  if((m.turn.plays || 0) >= PLAYS) return '<p class="tip">✅ Ya usó sus 3 jugadas: su turno se termina solo.</p>';
   if(S.sel == null) return '<p class="tip">👆 Toque una carta de su mano para ver qué puede hacer con ella.</p>';
   const id = S.sel, c = CARD(id), b = myB();
   if(c.t === "m") return '<p class="tip">💰 <b>' + M(c.v) + '</b> va a su banco. Sirve para pagar cuando le cobren.</p><div class="ab"><button type="button" class="a2" data-do="bank">🏦 Guardar en el banco</button></div>';
