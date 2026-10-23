@@ -807,7 +807,7 @@ function bldSVG(b, name, o){
   ["ci","sv","rd","ac","fr"].forEach((id, k) => {
     const y = top + k * fh, lit = Math.round(cols * have(id) / NEED[id]), full = on(id), c = HEX(id);
     g += '<rect x="0" y="' + (y + fh - fh*.16) + '" width="' + w + '" height="' + (fh*.16) + '" style="fill:' + (full ? c : "#25324d") + (full ? ";filter:drop-shadow(0 0 5px " + c + ")" : "") + '"/>';
-    const isLobby = id === "fr", mx = w * .07, gap = w * .025, ww = (w - mx*2 - gap*(cols-1)) / cols, wh = fh * .6, wy = y + fh * .1;
+    const named = fh >= 34, isLobby = id === "fr", mx = w * .07, gap = w * .025, ww = (w - mx*2 - gap*(cols-1)) / cols, wh = fh * (named ? .5 : .6), wy = y + fh * (named ? .08 : .1);
     for(let i = 0; i < cols; i++){
       if(isLobby && i === Math.floor(cols/2)) continue;
       const x = mx + i * (ww + gap), isLit = full || i < lit, fill = full ? "url(#warm" + n + ")" : isLit ? c : "url(#glass" + n + ")";
@@ -817,6 +817,9 @@ function bldSVG(b, name, o){
     for(let i = 0; i < 2; i++){ const sx = w + d * (.18 + i * .42), sy = wy - skew * (.18 + i * .42) + 1, isLit = full || (lit > cols - 2 + i);
       g += '<polygon points="' + sx + ',' + sy + ' ' + (sx + d*.3) + ',' + (sy - skew*.3) + ' ' + (sx + d*.3) + ',' + (sy - skew*.3 + wh) + ' ' + sx + ',' + (sy + wh) + '" style="fill:' + (full ? "#ffe9a8" : isLit ? c : "#16213a") + ';opacity:' + (isLit ? .75 : .9) + '"/>'; }
     g += '<rect x="0" y="' + y + '" width="' + w + '" height="1.5" fill="#0a1020" opacity=".6"/>';
+    if(named){ const by2 = y + fh * .62, bh = fh * .3, tx = isLobby ? w * .24 : w / 2, fs2 = Math.min(fh * .21, isLobby ? 9.5 : 13.5);
+      g += '<rect x="' + (w * .04) + '" y="' + by2 + '" width="' + (isLobby ? w * .4 : w * .92) + '" height="' + bh + '" rx="3" style="fill:' + (full ? c : "rgba(5,10,22,.88)") + ';stroke:' + c + ';stroke-width:1.2' + (full ? ";filter:drop-shadow(0 0 5px " + c + ")" : "") + '"/>';
+      g += '<text x="' + tx + '" y="' + (by2 + bh * .72) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + fs2 + '" fill="' + (full ? "#03140d" : "#fff") + '">' + FX[id].e + ' ' + esc(FX[id].n.toUpperCase()) + '</text>'; }
   });
   // entrada con toldo, acera y plantas
   const dw = (w - w*.14 - w*.025*(cols-1)) / cols, dx = w*.07 + Math.floor(cols/2) * (dw + w*.025), dy = top + 4 * fh;
@@ -842,8 +845,11 @@ function bldSVG(b, name, o){
     const ys = { az: top - skew - roof*.35, ci: top + fh*.5, sv: top + fh*1.5, rd: top + fh*2.5, ac: top + fh*3.5, fr: top + fh*4.5, el: ground + 8 + fh*.5 };
     FLOORS.forEach(f => { const lit = on(f.id), c = f.hex;
       lab += '<g transform="translate(' + (-L) + ' 0)"><rect x="0" y="' + (ys[f.id] - fh*.42) + '" width="' + (L - 6) + '" height="' + (fh*.84) + '" rx="3" style="fill:' + (lit ? c : "rgba(5,12,26,.85)") + ';stroke:' + c + ';stroke-width:1' + (lit ? ";filter:drop-shadow(0 0 4px " + c + ")" : "") + '"/>' +
-        '<text x="5" y="' + (ys[f.id] + fh*.2) + '" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(10.5, fh*.5) + '" fill="' + (lit ? "#03140d" : "#dbe7ff") + '">' + f.e + ' ' + f.short + ' ' + have(f.id) + '/' + NEED[f.id] + '</text>' +
+        '<text x="5" y="' + (ys[f.id] + fh*.2) + '" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(12, fh*.54) + '" fill="' + (lit ? "#03140d" : "#dbe7ff") + '">' + f.e + ' ' + f.short + ' ' + have(f.id) + '/' + NEED[f.id] + '</text>' +
         '<line x1="' + (L - 6) + '" y1="' + ys[f.id] + '" x2="' + (L + 2) + '" y2="' + ys[f.id] + '" stroke="' + c + '" stroke-width="1" stroke-dasharray="2 2"/></g>'; }); }
+  if(fh >= 34){
+    g += '<text x="' + (w / 2) + '" y="' + (top - 4) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(fh * .2, 12) + '" fill="' + (azOn ? "#fff" : FX.az.hex) + '" style="filter:drop-shadow(0 0 3px ' + FX.az.hex + ')">🛰️ AZOTEA · INTERNET</text>';
+    g += '<text x="' + (w / 2) + '" y="' + (by + fh * .14) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(fh * .2, 12) + '" fill="' + FX.el.hex + '">⚡ SÓTANO · CUARTO ELÉCTRICO</text>'; }
   const sign = o.sign ? '<text x="' + (w/2 + d/2) + '" y="' + (ry - 4) + '" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="' + (roof*.17) + '" fill="#39ff9c" style="filter:drop-shadow(0 0 4px #39ff9c)">' + esc(o.sign) + '</text>' : "";
   const defs = '<defs><linearGradient id="fac' + n + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f3e5c"/><stop offset=".5" stop-color="#3a4b6d"/><stop offset="1" stop-color="#2c3a57"/></linearGradient>' +
     '<linearGradient id="side' + n + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2740"/><stop offset="1" stop-color="#141d31"/></linearGradient>' +
@@ -910,7 +916,7 @@ function bankHtml(m, cid){
 }
 function miniHtml(m, cid, big){
   const b = bldOf(m, cid), names = nameMap(m);
-  const svg = bldSVG(b, names[cid], big ? { w:130, fh:24, roof:34, cols:5, labels:96 } : { w:100, fh:20, roof:28, cols:4, labels:100 });
+  const svg = bldSVG(b, names[cid], big ? { w:130, fh:26, roof:34, cols:5, labels:124 } : { w:100, fh:22, roof:28, cols:4, labels:122 });
   return big ? '<div class="tw2">' + svg + '</div>' : '<button type="button" class="tw2" data-peek="' + cid + '" title="Ver las piezas de ' + esc(names[cid]) + '">' + svg + '<span class="peek">🔍 Ver piezas</span></button>';
 }
 // lo que está pasando ahora (para el centro de la mesa)
