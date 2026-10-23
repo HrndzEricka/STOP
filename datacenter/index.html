@@ -169,6 +169,21 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
 .hc.dual{border-image:linear-gradient(90deg,var(--k) 50%,var(--k2) 50%) 1;border-radius:0}
 .hc.dual .b{background:linear-gradient(90deg,var(--k) 50%,var(--k2) 50%)}
 .hc.wild{--k:#b36bff}.hc.wild .b{background:linear-gradient(90deg,#22d3ee,#ff3b5c,#3d8bff,#22e07a,#ffd23f,#7dd3fc,#ff8a1f)}
+/* comodines: fondo arcoíris (Ingeniero) o de sus dos colores (2 en 1) y rótulo grande COMODÍN */
+.hc.wild,.hc.dual{border:4px solid #fff;border-image:none;border-radius:12px;position:relative}
+.hc.wild{background:linear-gradient(160deg,#4a1a7a,#14204a 45%,#5a1240);box-shadow:0 0 0 2px #b36bff,0 0 22px rgba(179,107,255,.8)}
+.hc.dual{background:linear-gradient(135deg,color-mix(in srgb,var(--k) 45%,#0b1428) 0 50%,color-mix(in srgb,var(--k2) 45%,#0b1428) 50% 100%);box-shadow:0 0 0 2px var(--k),0 0 18px color-mix(in srgb,var(--k2) 70%,transparent)}
+.hc .ctag{display:block;width:100%;font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:.12em;color:#fff;padding:5px 0 3px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 10px rgba(255,255,255,.5);
+  background:linear-gradient(90deg,#ff3b5c,#ff8a1f,#ffd23f,#22e07a,#22d3ee,#3d8bff,#b36bff);background-size:200% 100%;animation:rainbow 3s linear infinite}
+.hc.dual .ctag{background:linear-gradient(90deg,var(--k) 50%,var(--k2) 50%);animation:none}
+.hc .csub{font-size:11px;font-weight:900;color:#fff;background:rgba(0,0,0,.35);border-radius:999px;padding:2px 8px;margin-top:2px}
+.hc.wild .n,.hc.dual .n{color:#fff}
+.hc.dual .r b{color:#fff!important;text-shadow:0 1px 3px #000,0 0 6px rgba(0,0,0,.8)}.hc.wild .r,.hc.dual .r{color:#e6ecff}
+@keyframes rainbow{to{background-position:200% 0}}
+.pc .cmini{position:absolute;top:-8px;right:-6px;font-style:normal;font-family:var(--display);font-size:8.5px;font-weight:700;letter-spacing:.06em;background:linear-gradient(90deg,#ff3b5c,#ffd23f,#22e07a,#22d3ee,#b36bff);color:#05060b;border-radius:4px;padding:0 4px;box-shadow:0 0 6px rgba(255,255,255,.5)}
+.pc{position:relative}
+.pc.wild{background:linear-gradient(160deg,#4a1a7a,#14204a);border:2px solid #fff;box-shadow:0 0 10px rgba(179,107,255,.8)}
+.pc.dual{background:linear-gradient(135deg,color-mix(in srgb,var(--k) 40%,#0b1428) 0 50%,color-mix(in srgb,var(--k2) 40%,#0b1428) 50% 100%);border-image:none;border:2px solid #fff;border-radius:6px}
 .hc.sel{transform:translateY(-12px);box-shadow:0 0 0 3px var(--warn),0 0 22px rgba(255,210,63,.6)}
 .hc.wait{opacity:.92}
 .acts{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
@@ -322,6 +337,9 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
 #ovPin p{margin:0;font-size:20px}
 
 /* ---------- introducción animada (misma mesa del juego) ---------- */
+#vIntro .iFollowTag{display:none}
+#vIntro.follow .iFollowTag{display:inline-block;background:var(--warn);color:#1a1400;font-weight:900;border-radius:999px;padding:4px 12px;font-size:14px}
+#vIntro.follow #iPrev,#vIntro.follow #iNext,#vIntro.follow #iGo,#vIntro.follow #iSkip,#vIntro.follow #iReplay{display:none!important}
 .intro{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .iHead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .iHead .brand{font-size:clamp(28px,4.5vw,44px);flex:1}
@@ -418,7 +436,7 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
 <!-- ================= INTRODUCCIÓN ================= -->
 <section id="vIntro" hidden>
   <div class="intro">
-    <div class="iHead"><span class="iKick">CÓMO SE JUEGA</span><h1 class="brand" id="iTitle"></h1><button type="button" class="iconB" id="iSkip">Saltar ⏭</button></div>
+    <div class="iHead"><span class="iKick">CÓMO SE JUEGA</span><span class="iFollowTag" id="iFollow"></span><h1 class="brand" id="iTitle"></h1><button type="button" class="iconB" id="iSkip">Saltar ⏭</button></div>
     <div class="iStage" id="iStage"></div>
     <div class="iTalk"><div class="ada" aria-hidden="true"><span>👩🏽‍💻</span></div><div class="iBub"><small>INGENIERA ADA · JEFA DE TI</small><p id="iSay"></p></div></div>
     <div class="iNav"><button type="button" class="a3" id="iPrev">← Anterior</button><button type="button" class="iconB" id="iReplay" title="Ver otra vez">↻</button><div class="iDots" id="iDots"></div><button type="button" class="a1" id="iNext">Siguiente →</button><button type="button" class="a1" id="iGo">¡A JUGAR! ▶</button></div>
@@ -839,8 +857,8 @@ function bldSVG(b, name, o){
 // pieza pequeña (dentro del edificio)
 function chipHtml(id, extra){
   const c = CARD(id);
-  if(c.t === "d") return '<div class="pc dual" style="--k:' + FX[c.f[0]].hex + ';--k2:' + FX[c.f[1]].hex + '" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>' + esc(c.n) + '</div>';
-  if(c.t === "w") return '<div class="pc wild" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>Ingeniero</div>';
+  if(c.t === "d") return '<div class="pc dual" style="--k:' + FX[c.f[0]].hex + ';--k2:' + FX[c.f[1]].hex + '" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>' + esc(c.n) + '<em class="cmini">COMODÍN</em></div>';
+  if(c.t === "w") return '<div class="pc wild" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>Ingeniero<em class="cmini">COMODÍN</em></div>';
   if(c.t === "m") return '<div class="pc cashc" data-card="' + id + '"' + (extra||"") + '><i>💰</i>' + M(c.v) + '</div>';
   if(c.t === "a") return '<div class="pc actc" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>' + esc(c.n) + '</div>';
   return '<div class="pc" style="--k:' + FX[c.f].hex + '" data-card="' + id + '"' + (extra||"") + '><i>' + c.e + '</i>' + esc(c.n) + '</div>';
@@ -851,8 +869,8 @@ function cardHtml(id, cls){
   if(c.t === "m") return '<button type="button" class="hc cash ' + (cls||"") + '" data-card="' + id + '"><span class="b">💰 Presupuesto</span><span class="e">' + M(c.v) + '</span><span class="r">Va a su banco</span></button>';
   if(c.t === "a"){ const a = ACTIONS[c.a];
     return '<button type="button" class="hc act ' + (cls||"") + '" data-card="' + id + '"><span class="b">&lt;/&gt; ACCIÓN · ' + M(c.v) + '</span><span class="whom" style="--wc:' + KIND_COLOR[a.kind] + '">' + a.whom + '</span><span class="e">' + c.e + '</span><span class="n">' + esc(c.n) + '</span>' + (a.sub ? '<span class="sub">"' + a.sub + '"</span>' : "") + '<span class="r">' + esc(a.r) + '</span></button>'; }
-  if(c.t === "d") return '<button type="button" class="hc dual ' + (cls||"") + '" data-card="' + id + '" style="--k:' + FX[c.f[0]].hex + ';--k2:' + FX[c.f[1]].hex + '"><span class="b">🔀 2 en 1 · ' + M(c.v) + '</span><span class="e">' + c.e + '</span><span class="n">' + esc(c.n) + '</span><span class="r">' + FX[c.f[0]].n + ' o ' + FX[c.f[1]].n + '</span></button>';
-  if(c.t === "w") return '<button type="button" class="hc wild ' + (cls||"") + '" data-card="' + id + '"><span class="b">🌟 Comodín · ' + M(c.v) + '</span><span class="e">🧠</span><span class="n">Ingeniero en Sistemas</span><span class="r">Sirve en cualquier piso</span></button>';
+  if(c.t === "d") return '<button type="button" class="hc dual ' + (cls||"") + '" data-card="' + id + '" style="--k:' + FX[c.f[0]].hex + ';--k2:' + FX[c.f[1]].hex + '"><span class="ctag">COMODÍN</span><span class="csub">🔀 sirve en 2 pisos · ' + M(c.v) + '</span><span class="e">' + c.e + '</span><span class="n">' + esc(c.n) + '</span><span class="r"><b style="color:' + FX[c.f[0]].hex + '">' + FX[c.f[0]].e + " " + FX[c.f[0]].n + '</b> o <b style="color:' + FX[c.f[1]].hex + '">' + FX[c.f[1]].e + " " + FX[c.f[1]].n + '</b></span></button>';
+  if(c.t === "w") return '<button type="button" class="hc wild ' + (cls||"") + '" data-card="' + id + '"><span class="ctag">COMODÍN</span><span class="csub">🌟 sirve en TODOS los pisos · ' + M(c.v) + '</span><span class="e">🧠</span><span class="n">Ingeniero en Sistemas</span><span class="r">Póngalo en el piso que quiera</span></button>';
   const f = FX[c.f];
   return '<button type="button" class="hc ' + (cls||"") + '" data-card="' + id + '" style="--k:' + f.hex + '"><span class="b">' + f.e + ' ' + f.lvl + ' · ' + M(c.v) + '</span><span class="e">' + c.e + '</span><span class="n">' + esc(c.n) + '</span><span class="r">' + esc(f.n) + '</span></button>';
 }
@@ -1046,9 +1064,11 @@ const SCENES = [
     run(){ } }
 ];
 
-function introOpen(onDone, label){
-  IN.onDone = onDone; IN.i = 0; $("iGo").textContent = label || "¡A JUGAR! ▶";
-  show("vIntro"); introScene(0); SFX.ac();
+// opts.onStep(i): la profe cambió de paso · opts.onCancel(): la profe volvió sin empezar · opts.follow: el estudiante solo mira
+function introOpen(onDone, label, opts){
+  IN.onDone = onDone; IN.opts = opts || {}; IN.i = 0; $("iGo").textContent = label || "¡A JUGAR! ▶";
+  $("vIntro").classList.toggle("follow", !!IN.opts.follow);
+  show("vIntro"); introScene(IN.opts.start || 0); SFX.ac();
 }
 function introScene(i){
   inClear(); IN.i = Math.max(0, Math.min(SCENES.length - 1, i));
@@ -1063,6 +1083,8 @@ function introScene(i){
   const type = () => { k += 2; el.textContent = txt.slice(0, k); if(k < txt.length) IN.t.push(setTimeout(type, 22)); };
   type(); el.onclick = () => { k = txt.length; el.textContent = txt; };
   inAt(400, () => sc.run());
+  $("iFollow").textContent = "👀 La profe está explicando · paso " + (IN.i + 1) + " de " + SCENES.length;
+  if(IN.opts && IN.opts.onStep) IN.opts.onStep(IN.i);
 }
 function introInit(){
   $("iPrev").onclick = () => introScene(IN.i - 1);
@@ -1070,7 +1092,8 @@ function introInit(){
   $("iReplay").onclick = () => introScene(IN.i);
   $("iDots").onclick = e => { const b = e.target.closest("[data-sc]"); if(b) introScene(+b.dataset.sc); };
   $("iGo").onclick = () => { inClear(); if(IN.onDone) IN.onDone(); };
-  $("iSkip").onclick = () => { inClear(); if(IN.onDone) IN.onDone(); };
+  $("iDots").addEventListener("click", e => { if(IN.opts && IN.opts.follow) e.stopImmediatePropagation(); }, true);
+  $("iSkip").onclick = () => { inClear(); if(IN.opts && IN.opts.onCancel) IN.opts.onCancel(); else if(IN.onDone) IN.onDone(); };
   // la profe puede proyectarla: el botón de saltar dice "volver"
   $("iSkip").textContent = new URLSearchParams(location.search).has("profe") ? "← Volver" : "Saltar ⏭";
   document.addEventListener("keydown", e => { if($("vIntro").hidden) return; if(e.key === "ArrowRight") introScene(IN.i + 1); if(e.key === "ArrowLeft") introScene(IN.i - 1); });
@@ -1090,7 +1113,7 @@ function newCode(){ let c; do c = String(Math.floor(1000 + Math.random() * 9000)
 function hInit(){
   show("vTeacher");
   const saved = ls.get("dc_host", null);
-  if(saved){ H.def = Object.assign(H.def, saved.def || {}); Object.values(saved.rooms || {}).forEach(r => { r.sent = {}; H.rooms[r.code] = r; }); }
+  if(saved){ H.def = Object.assign(H.def, saved.def || {}); Object.values(saved.rooms || {}).forEach(r => { r.sent = {}; r.intro = null; H.rooms[r.code] = r; }); }
   H.token = ls.get("dc_token", null) || (Math.random().toString(36).slice(2) + Date.now().toString(36)); ls.set("dc_token", H.token);
   if(!Object.keys(H.rooms).length) hNewRoom(true);
   Object.values(H.rooms).forEach(hNet);
@@ -1100,7 +1123,8 @@ function hInit(){
   $("hSound").onclick = () => { const m = SFX.toggle(); $("hSound").textContent = m ? "🔇" : "🔊"; };
   $("hSound").textContent = SFX.muted ? "🔇" : "🔊";
   $("hBack").onclick = () => { H.cur = null; hRender(); };
-  $("hIntro").onclick = () => introOpen(() => { show("vTeacher"); hRender(); }, "← Volver a las salas");
+  // si está viendo una sala que no ha empezado, la introducción también sale en las pantallas de esa sala
+  $("hIntro").onclick = () => { const room = H.cur && H.rooms[H.cur]; if(room && room.g.status !== "playing") return hIntroRoom(room); introOpen(() => { show("vTeacher"); hRender(); }, "← Volver a las salas"); };
   $("ovPin").onclick = () => $("ovPin").hidden = true;
   $("winClose").onclick = () => $("ovWin").hidden = true;
   document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("ovPin").hidden = true; $("ovWin").hidden = true; } });
@@ -1169,7 +1193,7 @@ function hPrivates(room){
 function hStateMsg(room){
   const g = room.g, now = Date.now();
   const ps = Object.entries(room.players).filter(([, p]) => !p.gone).map(([cid, p]) => ({ cid, name:p.name, av:p.av, on:isOn(p), inG: !!(g.order && g.order.includes(cid)), wins:(room.wins && room.wins[cid]) || 0 }));
-  const m = { t:"state", game:GAME, n:room.n, code:room.code, status:g.status, players:ps, set:room.settings, paused:!!room.paused };
+  const m = { t:"state", game:GAME, n:room.n, code:room.code, status:g.status, players:ps, set:room.settings, paused:!!room.paused, intro: room.intro && g.status !== "playing" ? { step:room.intro.step, key:room.intro.key } : null };
   if(g.status !== "lobby"){
     Object.assign(m, { order:g.order, bld:g.bld, bank:g.bank, deckN:g.deck.length, discTop:g.disc.length ? g.disc[g.disc.length - 1] : null, log:g.log.slice(-14), fx:g.fx.slice(-25), winner:g.winner || null });
     m.handN = Object.fromEntries(g.order.map(c => [c, (g.hands[c] || []).length]));
@@ -1496,6 +1520,17 @@ function hTick(){
 }
 
 /* ---------- controles de la profe ---------- */
+// la primera vez que se empieza una sala, la introducción sale en todas las pantallas; la profe avanza los pasos
+function hStartFlow(room){
+  if(room.introDone || !Object.values(room.players).some(p => !p.gone)) return gStart(room);
+  hIntroRoom(room);
+}
+function hIntroRoom(room){
+  H.cur = room.code; room.intro = { step:0, key:Date.now() }; hDirty(room);
+  introOpen(() => { room.intro = null; room.introDone = true; show("vTeacher"); gStart(room); hDirty(room); hRender(); }, "▶ ¡EMPEZAR LA PARTIDA!", {
+    onStep: i => { if(room.intro){ room.intro.step = i; hDirty(room); } },
+    onCancel: () => { room.intro = null; hDirty(room); show("vTeacher"); hRender(); } });
+}
 function hPause(room){
   const g = room.g; if(g.status !== "playing") return;
   if(room.paused){ const dt = Date.now() - room.paused; if(g.turn && g.turn.deadline) g.turn.deadline += dt; if(g.pend && g.pend.cur) g.pend.cur.deadline += dt; room.paused = 0; addLog(room, "▶ La profe reanudó la partida"); }
@@ -1564,7 +1599,7 @@ function hRenderDash(){
   $("hRooms").onclick = e => {
     const b = e.target.closest("button"); if(!b) return;
     if(b.dataset.pin) return hShowPin(H.rooms[b.dataset.pin]);
-    if(b.dataset.start){ gStart(H.rooms[b.dataset.start]); return; }
+    if(b.dataset.start){ hStartFlow(H.rooms[b.dataset.start]); return; }
     if(b.dataset.open){ H.cur = b.dataset.open; hRender(); }
   };
 }
@@ -1586,10 +1621,10 @@ function hRenderRoom(){
   $("hRoomTitle").innerHTML = "Sala " + room.n + ' · <button type="button" class="pinBig" id="hRoomPin">PIN <b>' + room.code + '</b></button>';
   $("hRoomSt").innerHTML = statusTxt(room) + (m.turn && m.turn.left != null && g.status === "playing" ? ' <span class="tmr" data-left="' + m.turn.left + '"></span>' : "");
   $("hRoomPin").onclick = () => hShowPin(room);
-  $("hStart").hidden = g.status === "playing"; $("hStart").textContent = g.status === "lobby" ? "▶ Empezar partida" : "▶ Otra partida";
+  $("hStart").hidden = g.status === "playing"; $("hStart").textContent = g.status === "lobby" ? (room.introDone ? "▶ Empezar partida" : "▶ Empezar (con introducción)") : "▶ Otra partida";
   ["hPause","hSkip","hEnd"].forEach(id => $(id).hidden = g.status !== "playing");
   $("hPause").textContent = room.paused ? "▶ Reanudar" : "⏸ Pausar";
-  $("hStart").onclick = () => gStart(room);
+  $("hStart").onclick = () => hStartFlow(room);
   $("hPause").onclick = () => hPause(room);
   armButton($("hSkip"), "⏭ Saltar turno", () => hSkip(room), "¿Saltar el turno? Toque otra vez");
   armButton($("hEnd"), "⏹ Terminar partida", () => hEndGame(room), "¿Terminar ya? Toque otra vez");
@@ -1694,7 +1729,7 @@ function sOnData(d){
   if(!d || typeof d !== "object") return;
   switch(d.t){
     case "welcome": if(typeof pvMark === "function") pvMark(); clearTimeout(S.openT); S.joined = true; S.name = d.name; $("jBtn").disabled = false; $("jBtn").textContent = "🏢 Entrar al Data Center"; $("wSala").textContent = "Sala " + d.n + " · PIN " + d.code;
-      if(!S.comicSeen) sIntro("¡A JUGAR! ▶"); else sRoute(); return;
+      if(window.DC_SOLO_INTRO && !S.comicSeen) sIntro("¡A JUGAR! ▶"); else sRoute(); return;
     case "rejected": return sJoinFail(d.msg || "No se pudo entrar.");
     case "kicked": S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; return sJoinFail("La profe lo sacó de la sala.");
     case "private": S.hand = arr(d.hand); S.q = d.q || null; if(S.sel != null && !S.hand.includes(S.sel)) S.sel = null; return sRender();
@@ -1704,6 +1739,12 @@ function sOnData(d){
       const was = S.st; S.st = d; TMR.at = Date.now();
       if(!was || was.status !== d.status || (was.turn && d.turn && was.turn.no !== d.turn.no)){ S.sel = null; S.flow = null; }
       if(!(d.pend && d.pend.cur && d.pend.cur.cid === S.cid)){ S.paySel = []; S.discSel = []; }
+      // la profe está mostrando la introducción a todos
+      if(d.intro && d.status !== "playing"){
+        if(S.introKey !== d.intro.key){ S.introKey = d.intro.key; S.introStep = d.intro.step; S.view = "comic"; introOpen(null, "", { follow:true, start:d.intro.step }); }
+        else if(S.introStep !== d.intro.step){ S.introStep = d.intro.step; introScene(d.intro.step); }
+        return; }
+      if(S.introKey){ S.introKey = null; inClear(); $("vIntro").classList.remove("follow"); S.view = ""; }
       if(S.view !== "comic") sRoute(); return; }
   }
 }
