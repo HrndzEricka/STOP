@@ -1080,7 +1080,6 @@ function introInit(){
    MODO DOCENTE: varias salas a la vez. La compu de la profe es la que manda:
    guarda cada partida, revisa las jugadas y le avisa a cada estudiante.
    ============================================================ */
-const LEAVE_MS = 45000; // desconectado más de esto = se salió
 const DEF_MS = 15000, QUIZ_MS = 20000, PAY_MS = 40000, LOSE_MS = 25000, DISC_MS = 25000, ONLINE_MS = 15000;
 const H = { rooms:{}, token:null, cur:null, def:{ secs:60, quiz:true }, fx:{} };
 const isOn = p => !!p && !p.gone && !!p.seen && (Date.now() - p.seen) < ONLINE_MS;
@@ -1481,7 +1480,6 @@ function hTick(){
   const now = Date.now();
   Object.values(H.rooms).forEach(room => {
     if(H.onTick) H.onTick(room);
-    Object.entries(room.players).forEach(([cid, p]) => { if(!p.gone && p.seen && now - p.seen > LEAVE_MS && !room.paused) hRemove(room, cid, "lost"); });
     const g = room.g; if(g.status !== "playing" || room.paused) return;
     const p = g.pend;
     if(p && p.cur && now > p.cur.deadline){
