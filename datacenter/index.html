@@ -457,6 +457,7 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
       <div class="tSet">
         <label>⏱ Turno <select id="hSecs"><option value="45">45 s</option><option value="60">60 s</option><option value="90">90 s</option><option value="120">2 min</option><option value="0">Sin límite</option></select></label>
         <label><input type="checkbox" id="hQuiz"> 🛡️ Preguntas al defenderse</label>
+        <button type="button" class="iconB" id="hIntro" title="Proyectar la introducción para toda la clase">📖 Introducción</button>
         <button type="button" class="a1" id="hNew">＋ Nueva sala</button>
         <button type="button" class="iconB" id="hSound" title="Sonido">🔊</button>
       </div>
@@ -1069,6 +1070,8 @@ function introInit(){
   $("iDots").onclick = e => { const b = e.target.closest("[data-sc]"); if(b) introScene(+b.dataset.sc); };
   $("iGo").onclick = () => { inClear(); if(IN.onDone) IN.onDone(); };
   $("iSkip").onclick = () => { inClear(); if(IN.onDone) IN.onDone(); };
+  // la profe puede proyectarla: el botón de saltar dice "volver"
+  $("iSkip").textContent = new URLSearchParams(location.search).has("profe") ? "← Volver" : "Saltar ⏭";
   document.addEventListener("keydown", e => { if($("vIntro").hidden) return; if(e.key === "ArrowRight") introScene(IN.i + 1); if(e.key === "ArrowLeft") introScene(IN.i - 1); });
 }
 
@@ -1096,6 +1099,7 @@ function hInit(){
   $("hSound").onclick = () => { const m = SFX.toggle(); $("hSound").textContent = m ? "🔇" : "🔊"; };
   $("hSound").textContent = SFX.muted ? "🔇" : "🔊";
   $("hBack").onclick = () => { H.cur = null; hRender(); };
+  $("hIntro").onclick = () => introOpen(() => { show("vTeacher"); hRender(); }, "← Volver a las salas");
   $("ovPin").onclick = () => $("ovPin").hidden = true;
   $("winClose").onclick = () => $("ovWin").hidden = true;
   document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("ovPin").hidden = true; $("ovWin").hidden = true; } });
