@@ -76,7 +76,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 /* ---------- la mesa ---------- */
 .stageWrap{position:relative;width:100%;overflow:hidden}
-.stage{position:relative;width:1240px;height:1080px;margin:0}
+.stage{position:relative;width:1240px;height:1120px;margin:0}
 .stage.prof{height:900px}
 .table{position:absolute;inset:30px 16px;border-radius:22px;border:20px solid #1a2233;
   box-shadow:inset 0 0 0 2px #2b3a55,inset 0 0 50px rgba(0,0,0,.7),0 0 40px rgba(34,211,238,.18),0 20px 50px rgba(0,0,0,.7);
@@ -86,7 +86,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:radial-gradient(circle,#39ff9c 0 2.5px,transparent 3.5px) 12px 4px/40px 20px repeat-x,radial-gradient(circle,#22d3ee 0 2.5px,transparent 3.5px) 32px calc(100% - 4px)/40px 20px repeat-x}
 .blackout .stage{animation:flicker 1.6s steps(1) both}
 @keyframes flicker{0%{filter:brightness(.25)}10%{filter:brightness(.9)}15%{filter:brightness(.2)}30%{filter:brightness(.6)}35%{filter:brightness(.15)}100%{filter:none}}
-.center{position:absolute;left:50%;top:250px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;z-index:2}
+.center{position:absolute;left:50%;top:300px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;z-index:2}
 .stage.prof .center{top:50%;transform:translate(-50%,-50%);flex-direction:column}
 .piles{display:flex;gap:18px;align-items:flex-end}
 .deck{display:grid;justify-items:center;gap:4px}
@@ -525,19 +525,19 @@ const MAX_PLAYERS = 7, HAND_MAX = 7, PLAYS = 3, START_HAND = 5, WIN_FLOORS = 3;
 
 // pisos del edificio, de arriba hacia abajo
 const FLOORS = [
-  { id:"az", lvl:"Azotea", e:"🛰️", n:"Conexión a internet", short:"Internet", hex:"#22d3ee", v:2, rent:[1,3,5],
+  { id:"az", lvl:"Piso 7", e:"🛰️", n:"Conexión a internet", short:"Internet", hex:"#22d3ee", v:2, rent:[1,3,5],
     p:{ antena:["📡","Antena satelital","Recibe internet por satélite."], fibra:["🌈","Fibra óptica","Cable que lleva internet con luz, muy rápido."], modem:["📟","Módem","Convierte la señal en internet para el edificio."] } },
-  { id:"ci", lvl:"Piso 5", e:"🛡️", n:"Ciberseguridad", short:"Ciberseg.", hex:"#ff3b5c", v:3, rent:[2,3,6],
+  { id:"ci", lvl:"Piso 6", e:"🛡️", n:"Ciberseguridad", short:"Ciberseg.", hex:"#ff3b5c", v:3, rent:[2,3,6],
     p:{ firewall:["🧱","Firewall","Revisa lo que entra de internet y bloquea lo peligroso."], antivirus:["🧬","Antivirus","Detecta y elimina programas maliciosos."], alertas:["🚨","Monitor de alertas","Avisa cuando hay un ataque."] } },
-  { id:"sv", lvl:"Piso 4", e:"🗄️", n:"Sala de servidores", short:"Servidores", hex:"#3d8bff", v:4, rent:[2,4,7],
+  { id:"sv", lvl:"Piso 5", e:"🗄️", n:"Sala de servidores", short:"Servidores", hex:"#3d8bff", v:4, rent:[2,4,7],
     p:{ servidor:["🗄️","Servidor","Computadora potente que guarda páginas y datos."], rack:["🧰","Rack","El mueble metálico donde se montan los servidores."], disco:["💽","Disco de almacenamiento","Guarda toda la información."] } },
-  { id:"rd", lvl:"Piso 3", e:"🌐", n:"Cuarto de red", short:"Red", hex:"#22e07a", v:2, rent:[1,2,4],
+  { id:"rd", lvl:"Piso 4", e:"🌐", n:"Cuarto de red", short:"Red", hex:"#22e07a", v:2, rent:[1,2,4],
     p:{ router:["📶","Router","Conecta la red del edificio con internet."], switch:["🔀","Switch","Conecta los equipos entre sí."], cable:["🔌","Cableado","Los cables de red que unen todo."] } },
-  { id:"ac", lvl:"Piso 2", e:"🚪", n:"Control de acceso", short:"Acceso", hex:"#ffd23f", v:2, rent:[1,3],
+  { id:"ac", lvl:"Piso 3", e:"🚪", n:"Control de acceso", short:"Acceso", hex:"#ffd23f", v:2, rent:[1,3],
     p:{ huella:["☝️","Lector de huella","Solo abre la puerta con su huella."], camara:["📹","Cámara de seguridad","Graba quién entra y sale."] } },
-  { id:"fr", lvl:"Piso 1", e:"❄️", n:"Enfriamiento", short:"Enfriam.", hex:"#7dd3fc", v:1, rent:[1,2],
+  { id:"fr", lvl:"Piso 2", e:"❄️", n:"Enfriamiento", short:"Enfriam.", hex:"#7dd3fc", v:1, rent:[1,2],
     p:{ aire:["❄️","Aire de precisión","Mantiene fríos los servidores."], sensor:["🌡️","Sensor de temperatura","Mide el calor de la sala."] } },
-  { id:"el", lvl:"Sótano", e:"⚡", n:"Cuarto eléctrico", short:"Eléctrico", hex:"#ff8a1f", v:3, rent:[2,5],
+  { id:"el", lvl:"Piso 1", e:"⚡", n:"Cuarto eléctrico", short:"Eléctrico", hex:"#ff8a1f", v:3, rent:[2,5],
     p:{ ups:["🔋","UPS","Batería que mantiene todo encendido cuando se va la luz. ¡Lo protege del Apagón!"], planta:["🏭","Planta eléctrica","Genera electricidad si se va la luz mucho rato."] } }
 ];
 const FX = Object.fromEntries(FLOORS.map(f => [f.id, f]));
@@ -789,25 +789,20 @@ let bldN = 0;
 // edificio dibujado. b = { piso:[cartas] }. o = { w, fh, roof, cols, labels, sign }
 function bldSVG(b, name, o){
   const n = ++bldN, w = o.w, d = Math.round(w * .16), fh = o.fh, roof = o.roof, cols = o.cols || 5, skew = Math.round(d * .55);
-  const top = roof + skew, ground = top + fh * 5, H = ground + 8 + fh + 6, W = w + d + 8;
-  const have = id => (b[id] || []).length, on = id => isLit(b, id), HEX = id => FX[id].hex;
+  const NF = FIDS.length, top = roof + skew, ground = top + fh * NF, H = ground + 10, W = w + d + 8;
+  const have = id => (b[id] || []).length, on = id => isLit(b, id);
+  const named = fh >= 34;
   let g = "";
-  g += '<ellipse cx="' + (w/2 + d/2) + '" cy="' + (ground + 6) + '" rx="' + (w*.62) + '" ry="' + (fh*.22) + '" fill="rgba(0,0,0,.45)"/>';
-  // sótano (bajo tierra, en corte)
-  const by = ground + 8, elN = have("el"), elOn = on("el");
-  g += '<rect x="4" y="' + by + '" width="' + (w - 8) + '" height="' + fh + '" rx="3" fill="#0a1020" stroke="#2b3a55" stroke-dasharray="4 3"/>';
-  for(let i = 0; i < 2; i++){ const bx = 10 + i * ((w - 20) / 2) + 4, bw = (w - 20) / 2 - 8, lit = i < elN;
-    g += '<rect x="' + bx + '" y="' + (by + fh*.22) + '" width="' + bw + '" height="' + (fh*.56) + '" rx="2" style="fill:' + (lit ? (elOn ? "#ffe9c2" : HEX("el")) : "#151f36") + ';stroke:' + (lit ? HEX("el") : "#2b3a55") + (lit ? ";filter:drop-shadow(0 0 4px " + HEX("el") + ")" : "") + '"/>';
-    g += '<rect x="' + (bx + bw*.12) + '" y="' + (by + fh*.32) + '" width="' + (bw*.18) + '" height="' + (fh*.36) + '" fill="' + (lit ? "rgba(0,0,0,.35)" : "#0d1528") + '"/>'; }
-  // volumen: costado y techo
+  g += '<ellipse cx="' + (w/2 + d/2) + '" cy="' + (ground + 4) + '" rx="' + (w*.62) + '" ry="' + (fh*.22) + '" fill="rgba(0,0,0,.45)"/>';
+  // volumen: costado, techo y fachada
   g += '<polygon points="' + w + ',' + top + ' ' + (w+d) + ',' + (top-skew) + ' ' + (w+d) + ',' + (ground-skew) + ' ' + w + ',' + ground + '" fill="url(#side' + n + ')"/>';
   g += '<polygon points="0,' + top + ' ' + d + ',' + (top-skew) + ' ' + (w+d) + ',' + (top-skew) + ' ' + w + ',' + top + '" fill="#3c4d6e"/>';
   g += '<rect x="0" y="' + top + '" width="' + w + '" height="' + (ground - top) + '" fill="url(#fac' + n + ')"/>';
-  // pisos 5 a 1
-  ["ci","sv","rd","ac","fr"].forEach((id, k) => {
-    const y = top + k * fh, lit = Math.round(cols * have(id) / NEED[id]), full = on(id), c = HEX(id);
-    g += '<rect x="0" y="' + (y + fh - fh*.16) + '" width="' + w + '" height="' + (fh*.16) + '" style="fill:' + (full ? c : "#25324d") + (full ? ";filter:drop-shadow(0 0 5px " + c + ")" : "") + '"/>';
-    const named = fh >= 34, isLobby = id === "fr", mx = w * .07, gap = w * .025, ww = (w - mx*2 - gap*(cols-1)) / cols, wh = fh * (named ? .5 : .6), wy = y + fh * (named ? .08 : .1);
+  // los 7 pisos, de arriba (Piso 7) hacia abajo (Piso 1, con la entrada)
+  FIDS.forEach((id, k) => {
+    const f = FX[id], y = top + k * fh, lit = Math.round(cols * have(id) / NEED[id]), full = on(id), c = f.hex, isLobby = k === NF - 1;
+    g += '<rect x="0" y="' + (y + fh - fh*.14) + '" width="' + w + '" height="' + (fh*.14) + '" style="fill:' + (full ? c : "#25324d") + (full ? ";filter:drop-shadow(0 0 5px " + c + ")" : "") + '"/>';
+    const mx = w * .07, gap = w * .025, ww = (w - mx*2 - gap*(cols-1)) / cols, wh = fh * (named ? .48 : .58), wy = y + fh * (named ? .08 : .12);
     for(let i = 0; i < cols; i++){
       if(isLobby && i === Math.floor(cols/2)) continue;
       const x = mx + i * (ww + gap), isLit = full || i < lit, fill = full ? "url(#warm" + n + ")" : isLit ? c : "url(#glass" + n + ")";
@@ -817,46 +812,39 @@ function bldSVG(b, name, o){
     for(let i = 0; i < 2; i++){ const sx = w + d * (.18 + i * .42), sy = wy - skew * (.18 + i * .42) + 1, isLit = full || (lit > cols - 2 + i);
       g += '<polygon points="' + sx + ',' + sy + ' ' + (sx + d*.3) + ',' + (sy - skew*.3) + ' ' + (sx + d*.3) + ',' + (sy - skew*.3 + wh) + ' ' + sx + ',' + (sy + wh) + '" style="fill:' + (full ? "#ffe9a8" : isLit ? c : "#16213a") + ';opacity:' + (isLit ? .75 : .9) + '"/>'; }
     g += '<rect x="0" y="' + y + '" width="' + w + '" height="1.5" fill="#0a1020" opacity=".6"/>';
-    if(named){ const by2 = y + fh * .62, bh = fh * .3, tx = isLobby ? w * .24 : w / 2, fs2 = Math.min(fh * .21, isLobby ? 9.5 : 13.5);
+    // número del piso en la columna izquierda
+    if(fh >= 18) g += '<text x="' + (-2) + '" y="' + (y + fh * .62) + '" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="' + Math.min(fh * .36, 13) + '" fill="' + c + '">' + (NF - k) + '</text>';
+    if(named){ const by2 = y + fh * .6, bh = fh * .28, tx = isLobby ? w * .24 : w / 2, fs2 = Math.min(fh * .2, isLobby ? 9.5 : 13);
       g += '<rect x="' + (w * .04) + '" y="' + by2 + '" width="' + (isLobby ? w * .4 : w * .92) + '" height="' + bh + '" rx="3" style="fill:' + (full ? c : "rgba(5,10,22,.88)") + ';stroke:' + c + ';stroke-width:1.2' + (full ? ";filter:drop-shadow(0 0 5px " + c + ")" : "") + '"/>';
-      g += '<text x="' + tx + '" y="' + (by2 + bh * .72) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + fs2 + '" fill="' + (full ? "#03140d" : "#fff") + '">' + FX[id].e + ' ' + esc(FX[id].n.toUpperCase()) + '</text>'; }
+      g += '<text x="' + tx + '" y="' + (by2 + bh * .74) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + fs2 + '" fill="' + (full ? "#03140d" : "#fff") + '">' + (isLobby ? "P1 · " + f.e + " " + esc(f.short.toUpperCase()) : f.lvl.toUpperCase() + " · " + f.e + " " + esc(f.n.toUpperCase())) + '</text>'; }
   });
-  // entrada con toldo, acera y plantas
-  const dw = (w - w*.14 - w*.025*(cols-1)) / cols, dx = w*.07 + Math.floor(cols/2) * (dw + w*.025), dy = top + 4 * fh;
+  // entrada en el Piso 1, con toldo; acera y plantas
+  const dw = (w - w*.14 - w*.025*(cols-1)) / cols, dx = w*.07 + Math.floor(cols/2) * (dw + w*.025), dy = top + (NF - 1) * fh;
   g += '<rect x="' + dx + '" y="' + (dy + fh*.18) + '" width="' + dw + '" height="' + (fh*.82) + '" fill="#06101f" stroke="#22d3ee" stroke-width="1.2" style="filter:drop-shadow(0 0 3px #22d3ee)"/>';
   g += '<line x1="' + (dx + dw/2) + '" y1="' + (dy + fh*.18) + '" x2="' + (dx + dw/2) + '" y2="' + ground + '" stroke="#22d3ee" stroke-width="1"/>';
   g += '<polygon points="' + (dx - dw*.3) + ',' + (dy + fh*.18) + ' ' + (dx + dw*1.3) + ',' + (dy + fh*.18) + ' ' + (dx + dw*1.15) + ',' + (dy + fh*.02) + ' ' + (dx - dw*.15) + ',' + (dy + fh*.02) + '" fill="#39ff9c" opacity=".85"/>';
   g += '<rect x="-4" y="' + ground + '" width="' + (w + d + 8) + '" height="6" rx="2" fill="#3a4a6a"/>';
-  [w*.04, w*.86].forEach(x => { g += '<circle cx="' + (x + w*.05) + '" cy="' + (ground - fh*.16) + '" r="' + (fh*.17) + '" fill="#1f9d55"/><rect x="' + (x + w*.025) + '" y="' + (ground - fh*.08) + '" width="' + (w*.05) + '" height="' + (fh*.1) + '" fill="#5a3a1a"/>'; });
-  // azotea: cada pieza de internet enciende un equipo
-  const az = have("az"), azOn = on("az"), ry = top - skew, ca = HEX("az");
-  const st = k => k < az ? 'style="fill:' + (azOn ? "#e6fbff" : ca) + ';stroke:' + ca + ';filter:drop-shadow(0 0 4px ' + ca + ')"' : 'style="fill:#24324f;stroke:#41557a"';
-  const sx = w*.2, sy = ry - roof*.3;
-  g += '<path d="M' + (sx - roof*.28) + ',' + (sy - roof*.18) + ' A' + (roof*.34) + ',' + (roof*.34) + ' 0 0 0 ' + (sx + roof*.28) + ',' + (sy + roof*.18) + ' Z" ' + st(0) + '/>';
-  g += '<line x1="' + sx + '" y1="' + sy + '" x2="' + sx + '" y2="' + ry + '" stroke="#8fa8c8" stroke-width="1.5"/>';
-  g += '<rect x="' + (w*.42) + '" y="' + (ry - roof*.36) + '" width="' + (w*.16) + '" height="' + (roof*.36) + '" rx="2" ' + st(1) + '/>';
-  const tx = w*.78;
-  g += '<rect x="' + (tx - w*.06) + '" y="' + (ry - roof*.26) + '" width="' + (w*.12) + '" height="' + (roof*.26) + '" rx="2" ' + st(2) + '/>';
-  g += '<line x1="' + (tx + w*.1) + '" y1="' + ry + '" x2="' + (tx + w*.1) + '" y2="' + (ry - roof*.95) + '" stroke="#8fa8c8" stroke-width="1.6"/>';
-  g += '<circle class="blink" cx="' + (tx + w*.1) + '" cy="' + (ry - roof*.95) + '" r="' + Math.max(2, roof*.06) + '" fill="#ff3b5c" style="filter:drop-shadow(0 0 4px #ff3b5c)"/>';
-  // nombres de los pisos a la izquierda
+  [w*.78, w*.92].forEach(x => { g += '<circle cx="' + x + '" cy="' + (ground - fh*.16) + '" r="' + (fh*.17) + '" fill="#1f9d55"/>'; });
+  // techo: antena con luz y equipos (decoración)
+  const ry = top - skew, tx = w*.78;
+  g += '<rect x="' + (w*.12) + '" y="' + (ry - roof*.22) + '" width="' + (w*.16) + '" height="' + (roof*.22) + '" rx="2" fill="#24324f" stroke="#41557a"/>';
+  g += '<rect x="' + (w*.34) + '" y="' + (ry - roof*.16) + '" width="' + (w*.12) + '" height="' + (roof*.16) + '" rx="2" fill="#24324f" stroke="#41557a"/>';
+  g += '<line x1="' + tx + '" y1="' + ry + '" x2="' + tx + '" y2="' + (ry - roof*.9) + '" stroke="#8fa8c8" stroke-width="1.6"/>';
+  g += '<circle class="blink" cx="' + tx + '" cy="' + (ry - roof*.9) + '" r="' + Math.max(2, roof*.06) + '" fill="#ff3b5c" style="filter:drop-shadow(0 0 4px #ff3b5c)"/>';
+  // nombres de los pisos a la izquierda (edificios pequeños)
   let L = 0, lab = "";
   if(o.labels){ L = o.labels;
-    const ys = { az: top - skew - roof*.35, ci: top + fh*.5, sv: top + fh*1.5, rd: top + fh*2.5, ac: top + fh*3.5, fr: top + fh*4.5, el: ground + 8 + fh*.5 };
-    FLOORS.forEach(f => { const lit = on(f.id), c = f.hex;
-      lab += '<g transform="translate(' + (-L) + ' 0)"><rect x="0" y="' + (ys[f.id] - fh*.42) + '" width="' + (L - 6) + '" height="' + (fh*.84) + '" rx="3" style="fill:' + (lit ? c : "rgba(5,12,26,.85)") + ';stroke:' + c + ';stroke-width:1' + (lit ? ";filter:drop-shadow(0 0 4px " + c + ")" : "") + '"/>' +
-        '<text x="5" y="' + (ys[f.id] + fh*.2) + '" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(12, fh*.54) + '" fill="' + (lit ? "#03140d" : "#dbe7ff") + '">' + f.e + ' ' + f.short + ' ' + have(f.id) + '/' + NEED[f.id] + '</text>' +
-        '<line x1="' + (L - 6) + '" y1="' + ys[f.id] + '" x2="' + (L + 2) + '" y2="' + ys[f.id] + '" stroke="' + c + '" stroke-width="1" stroke-dasharray="2 2"/></g>'; }); }
-  if(fh >= 34){
-    g += '<text x="' + (w / 2) + '" y="' + (top - 4) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(fh * .2, 12) + '" fill="' + (azOn ? "#fff" : FX.az.hex) + '" style="filter:drop-shadow(0 0 3px ' + FX.az.hex + ')">🛰️ AZOTEA · INTERNET</text>';
-    g += '<text x="' + (w / 2) + '" y="' + (by + fh * .14) + '" text-anchor="middle" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(fh * .2, 12) + '" fill="' + FX.el.hex + '">⚡ SÓTANO · CUARTO ELÉCTRICO</text>'; }
-  const sign = o.sign ? '<text x="' + (w/2 + d/2) + '" y="' + (ry - 4) + '" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="' + (roof*.17) + '" fill="#39ff9c" style="filter:drop-shadow(0 0 4px #39ff9c)">' + esc(o.sign) + '</text>' : "";
+    FLOORS.forEach((f, k) => { const lit = on(f.id), c = f.hex, yc = top + fh * (k + .5);
+      lab += '<g transform="translate(' + (-L) + ' 0)"><rect x="0" y="' + (yc - fh*.44) + '" width="' + (L - 6) + '" height="' + (fh*.88) + '" rx="3" style="fill:' + (lit ? c : "rgba(5,12,26,.85)") + ';stroke:' + c + ';stroke-width:1' + (lit ? ";filter:drop-shadow(0 0 4px " + c + ")" : "") + '"/>' +
+        '<text x="5" y="' + (yc + fh*.2) + '" font-family="Nunito,Segoe UI,sans-serif" font-weight="900" font-size="' + Math.min(12, fh*.54) + '" fill="' + (lit ? "#03140d" : "#dbe7ff") + '">' + f.e + ' ' + f.short + ' ' + have(f.id) + '/' + NEED[f.id] + '</text>' +
+        '<line x1="' + (L - 6) + '" y1="' + yc + '" x2="' + (L + 2) + '" y2="' + yc + '" stroke="' + c + '" stroke-width="1" stroke-dasharray="2 2"/></g>'; }); }
+  const sign = o.sign ? '<text x="' + (w/2 + d/2) + '" y="' + (ry - roof*.4) + '" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="' + (roof*.17) + '" fill="#39ff9c" style="filter:drop-shadow(0 0 4px #39ff9c)">' + esc(o.sign) + '</text>' : "";
   const defs = '<defs><linearGradient id="fac' + n + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f3e5c"/><stop offset=".5" stop-color="#3a4b6d"/><stop offset="1" stop-color="#2c3a57"/></linearGradient>' +
     '<linearGradient id="side' + n + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2740"/><stop offset="1" stop-color="#141d31"/></linearGradient>' +
     '<linearGradient id="glass' + n + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16294d"/><stop offset=".45" stop-color="#0c1a36"/><stop offset=".5" stop-color="#1d3563"/><stop offset=".56" stop-color="#0c1a36"/><stop offset="1" stop-color="#0a1530"/></linearGradient>' +
     '<linearGradient id="warm' + n + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d6"/><stop offset="1" stop-color="#ffd98a"/></linearGradient></defs>';
-  const st4 = o.signTop || 4;
-  return '<svg class="bsvg" viewBox="' + (-6 - L) + ' -' + st4 + ' ' + (W + 6 + L) + ' ' + (H + st4) + '" width="' + (W + 6 + L) + '" height="' + (H + st4) + '" role="img" aria-label="Edificio de ' + esc(name) + ': ' + litCount(b) + ' de 3 pisos encendidos">' + defs + lab + g + sign + '</svg>';
+  const st4 = o.signTop || 4, LL = L + (fh >= 18 ? 14 : 0);
+  return '<svg class="bsvg" viewBox="' + (-6 - LL) + ' -' + st4 + ' ' + (W + 6 + LL) + ' ' + (H + st4) + '" width="' + (W + 6 + LL) + '" height="' + (H + st4) + '" role="img" aria-label="Edificio de ' + esc(name) + ': ' + litCount(b) + ' de 3 pisos encendidos">' + defs + lab + g + sign + '</svg>';
 }
 
 /* ---------- cartas ---------- */
@@ -895,18 +883,18 @@ function plateHtml(m, cid, me){
     (m.winner === cid ? '<span class="sc hot">🏆</span>' : "") + '</div>';
 }
 // mi edificio grande con la fila de piezas al lado de cada piso
-const BIG = { w:220, fh:58, roof:74, cols:5 };
+const BIG = { w:230, fh:54, roof:60, cols:5 };
 function bigHtml(m, cid, opts){
   const b = bldOf(m, cid), names = nameMap(m);
-  const d = Math.round(BIG.w * .16), skew = Math.round(d * .55), top = BIG.roof + skew, ground = top + BIG.fh * 5, off = 4;
-  const rowY = { az: off + top - BIG.roof + 4, ci: off + top, sv: off + top + BIG.fh, rd: off + top + BIG.fh*2, ac: off + top + BIG.fh*3, fr: off + top + BIG.fh*4, el: off + ground + 8 };
+  const d = Math.round(BIG.w * .16), skew = Math.round(d * .55), top = BIG.roof + skew, off = 4;
+  const rowY = Object.fromEntries(FIDS.map((f, k) => [f, off + top + BIG.fh * k]));
   const rows = FLOORS.map(f => { const ids = b[f.id], lit = isLit(b, f.id), miss = missing(b, f.id);
     const pcs = ids.map(id => { const c = CARD(id), movable = opts && opts.canMove && (c.t === "d" || c.t === "w");
       return chipHtml(id, movable ? ' role="button" tabindex="0" title="Mover a otro piso" data-move="' + id + '"' : ""); }).join("") +
       Array.from({ length:Math.max(0, NEED[f.id] - ids.length) }, () => '<div class="pc slot">＋ falta</div>').join("");
-    return '<div class="dr ' + (lit ? "lit" : "") + '" style="--k:' + f.hex + ';top:' + rowY[f.id] + 'px;height:' + (f.id === "az" ? BIG.roof - 8 : BIG.fh - 4) + 'px" data-floor="' + f.id + '">' +
+    return '<div class="dr ' + (lit ? "lit" : "") + '" style="--k:' + f.hex + ';top:' + rowY[f.id] + 'px;height:' + (BIG.fh - 4) + 'px" data-floor="' + f.id + '">' +
       '<span class="lead"></span><div class="plq"><small>' + f.lvl + '</small><b>' + f.e + ' ' + f.n + '</b></div><div class="pcs">' + pcs + '</div>' +
-      '<div class="st3">' + (lit ? '<span class="neon">● ENCENDIDO</span>' : '<b>' + ids.length + ' de ' + NEED[f.id] + '</b>' + (ids.length && miss.length ? '<em>Falta: ' + esc(miss.slice(0, NEED[f.id] - ids.length + 1).join(" o ")) + '</em>' : "")) +
+      '<div class="st3">' + (lit ? '<span class="neon">● ENCENDIDO</span>' : '<b>' + ids.length + ' de ' + NEED[f.id] + '</b>' + (ids.length && miss.length ? '<em>Falta: ' + esc(miss[0] + (miss.length > 1 ? "…" : "")) + '</em>' : "")) +
       (ids.length ? '<em class="rent">Cobra ' + M(rentFor(b, f.id)) + '</em>' : "") + '</div></div>'; }).join("");
   return '<div class="bigWrap">' + bldSVG(b, names[cid], Object.assign({ sign:"DATA CENTER · " + String(names[cid] || "").toUpperCase(), signTop:4 }, BIG)) + '<div class="dir">' + rows + '</div></div>';
 }
@@ -1012,7 +1000,7 @@ const SCENES = [
     html:() => '<div class="inCity">' + ["Usted","Diego","Valeria","Andrés","Camila","Mateo","Luis"].map((n, i) => '<figure style="--d:' + (i * .15) + 's" class="' + (i ? "" : "me") + '">' + bHtml(emptyB(), n, { w:84, fh:17, roof:24, cols:3 }) + '<figcaption>' + n + '</figcaption></figure>').join("") + '</div>',
     run(){ } },
   { t:"Su edificio tiene 7 pisos",
-    say:"Cada piso es una parte real de un data center: arriba, la azotea con las antenas de internet; en el medio, la ciberseguridad, los servidores y la red; y abajo, el cuarto eléctrico en el sótano.",
+    say:"Cada piso es una parte real de un data center: del Piso 7 con la conexión a internet hasta el Piso 1 con el cuarto eléctrico. En el medio están la ciberseguridad, los servidores, la red, el control de acceso y el enfriamiento.",
     html:() => '<div class="inRow"><div id="inB">' + bHtml(emptyB(), "Usted", { labels:110, w:170, fh:36, roof:46 }) + '</div><ul class="inFloors" id="inFl">' + FLOORS.map(f => '<li style="--k:' + f.hex + '"><b>' + f.e + " " + f.lvl + ' · ' + f.n + '</b><span>' + esc(Object.values(f.p).map(x => x[1]).join(" · ")) + '</span></li>').join("") + '</ul></div>',
     run(){ document.querySelectorAll("#inFl li").forEach((li, i) => inAt(300 + i * 520, () => { li.classList.add("on"); SFX.tick(); })); } },
   { t:"Las piezas encienden ventanas",
@@ -1058,7 +1046,7 @@ const SCENES = [
       inAt(4400, () => { $("inMid").innerHTML = cardHtml(aid("plan")); $("inQ").hidden = false; SFX.turn(); });
       inAt(6200, () => { burst($("inYou"), "🛡️ ¡BLOQUEADO!", "#39ff9c", true); SFX.shield(); }); } },
   { t:"¡Apagón!",
-    say:"A veces alguien provoca un apagón: todos los que no tengan UPS pierden una pieza. Por eso el cuarto eléctrico del sótano es tan importante.",
+    say:"A veces alguien provoca un apagón: todos los que no tengan UPS pierden una pieza. Por eso el cuarto eléctrico del Piso 1 es tan importante.",
     html:() => '<div class="inDuo"><figure id="inYou">' + bHtml(fillB({ el:["ups"], sv:["servidor"] }), "Usted") + '<figcaption>Usted · 🔋 tiene UPS</figcaption></figure><div class="inMid" id="inMid">' + cardHtml(aid("apagon")) + '</div><figure id="inHim">' + bHtml(fillB({ sv:["servidor","rack"] }), "Diego") + '<figcaption>Diego · sin UPS</figcaption></figure></div>',
     run(){ inAt(800, () => { blackout($("vIntro")); burst(null, "¡APAGÓN!", "#ffd23f", true); SFX.blackout(); });
       inAt(2700, () => { floatText($("inYou"), "🔋 ¡Protegido!", "#ffd23f"); SFX.good(); });
