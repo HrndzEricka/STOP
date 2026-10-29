@@ -1721,7 +1721,7 @@ function studentInit(){
   S.cid = (ss.get("dc_cid") || (Math.random().toString(36).slice(2) + Date.now().toString(36))).replace(/[^a-z0-9]/gi, ""); ss.set("dc_cid", S.cid);
   const last = ls.get("dc_last", {}) || {};
   $("jName").value = last.name || ""; S.av = last.av || pick(AVATARS);
-  const q = new URLSearchParams(location.search).get("pin"); if(q && /^\d{4}$/.test(q)) $("jPin").value = q;
+  const qs = new URLSearchParams(location.search), q = qs.get("pin") || qs.get("sala"); if(q && /^\d{4}$/.test(q)) $("jPin").value = q;
   $("jAv").innerHTML = AVATARS.map(a => '<button type="button" class="avb ' + (a === S.av ? "on" : "") + '" data-av="' + a + '" aria-label="Avatar ' + a + '">' + a + '</button>').join("");
   $("jAv").onclick = e => { const b = e.target.closest("[data-av]"); if(!b) return; S.av = b.dataset.av; $("jAv").querySelectorAll(".avb").forEach(x => x.classList.toggle("on", x === b)); };
   $("jForm").onsubmit = e => { e.preventDefault(); sJoin(); };

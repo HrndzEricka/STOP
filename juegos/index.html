@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juegos de la Profe Ericka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Nunito:wght@600;800;900&family=Share+Tech+Mono&display=swap">
+<style>
+/* Una sola entrada para todos los juegos: el estudiante escribe el PIN y la página lo lleva al juego correcto. */
+:root{
+  color-scheme:dark;
+  --bg:#070b16; --panel:#0e1629; --line:#22304d; --ink:#eef3ff; --dim:#93a4c4; --led:#39ff9c; --cyan:#22d3ee; --warn:#ffd23f; --red:#ff5d73;
+  --display:"Chakra Petch","Segoe UI",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif; --mono:"Share Tech Mono","Consolas",monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% -10%,#13306a 0,transparent 50%),radial-gradient(ellipse at 90% 110%,#3a1060 0,transparent 45%),var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 50px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+header{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.kick{font-family:var(--mono);color:var(--led);letter-spacing:.2em;font-size:13px;text-transform:uppercase}
+h1{font-family:var(--display);font-size:clamp(38px,7vw,64px);margin:0;line-height:1;background:linear-gradient(90deg,#39ff9c,#22d3ee 45%,#b36bff 75%,#ff5d73);-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{margin:0;color:var(--dim);font-size:17px}
+.icons{font-size:30px;letter-spacing:.2em}
+/* entrada con PIN */
+.join{background:var(--panel);border:2px solid var(--cyan);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:12px;align-items:center;box-shadow:0 0 40px rgba(34,211,238,.18);max-width:560px;width:100%;margin:0 auto}
+.join label{font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#9fd8ff;font-size:13px}
+.join input{width:100%;max-width:320px;font-family:var(--mono);font-size:48px;letter-spacing:.35em;text-align:center;background:#081022;color:var(--ink);border:2px solid #2b3a55;border-radius:14px;padding:10px 0 10px .35em}
+.join input:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.go{font:inherit;font-weight:900;font-size:20px;border:0;border-radius:14px;padding:14px 28px;cursor:pointer;background:linear-gradient(90deg,#39ff9c,#22d3ee);color:#03140d;box-shadow:0 0 20px rgba(57,255,156,.4)}
+.go:disabled{opacity:.5;cursor:wait}
+.go:focus-visible{outline:3px solid var(--warn);outline-offset:3px}
+#msg{margin:0;min-height:1.4em;font-weight:800;text-align:center}
+#msg.bad{color:#ff9aa8}#msg.ok{color:var(--led)}
+.tip{margin:0;color:var(--dim);font-size:14px;text-align:center}
+/* juegos */
+h2{font-family:var(--display);font-size:24px;margin:0 0 10px}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.g{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.g .t{display:flex;align-items:center;gap:10px}
+.g .e{font-size:34px;line-height:1}
+.g b{font-family:var(--display);font-size:20px}
+.g p{margin:0;color:var(--dim);font-size:14.5px}
+.g .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.g a{font-weight:900;font-size:14px;text-decoration:none;border-radius:10px;padding:8px 12px;color:#06101f;background:var(--c)}
+.g a.alt{background:transparent;color:var(--ink);border:1px solid #2b3a55}
+.g a:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.teach{display:flex;flex-direction:column;gap:12px}
+.note{background:#0b1222;border:1px solid var(--line);border-radius:14px;padding:12px 16px;color:#cfe0ff;margin:0}
+.note b{color:#fff}
+.profLink{text-align:center;margin:0;color:var(--dim)}
+.profLink button{font:inherit;font-weight:800;color:var(--cyan);background:none;border:0;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="kick">Informática · Profe Ericka</span>
+    <h1>Juegos de la Profe</h1>
+    <p>Escriba el PIN que la profe puso en la pizarra y entre a su juego.</p>
+    <div class="icons" aria-hidden="true">🛑🏎️💀🗳️🕵️🏢</div>
+  </header>
+
+  <form class="join" id="joinForm" autocomplete="off">
+    <label for="pin">PIN de la profe</label>
+    <input id="pin" inputmode="numeric" maxlength="4" placeholder="0000" aria-describedby="msg">
+    <button type="submit" class="go" id="goBtn">▶ Entrar al juego</button>
+    <p id="msg" role="status"></p>
+    <p class="tip">Si no le sirve, revise el PIN o pregúntele a la profe si ya abrió el juego.</p>
+  </form>
+
+  <p class="profLink">¿Es la profe? <button type="button" id="showProf">Abrir los juegos en modo profe</button></p>
+
+  <section class="teach" id="teach" hidden>
+    <h2>🧑‍🏫 Modo profe</h2>
+    <p class="note">Abra aquí el juego que va a usar (en <b>una sola</b> pestaña). Le aparecerá el PIN; póngalo en la pizarra. Los chicos <b>siempre entran a esta misma página</b> y el PIN los lleva solos al juego correcto.</p>
+    <div class="games" id="games"></div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBkALD5JhwPaACsuUAJ2pfqOoVTPEqm2xI",
+  authDomain: "stop-profe-ericka.firebaseapp.com",
+  databaseURL: "https://stop-profe-ericka-default-rtdb.firebaseio.com",
+  projectId: "stop-profe-ericka",
+  storageBucket: "stop-profe-ericka.firebasestorage.app",
+  messagingSenderId: "816670586894",
+  appId: "1:816670586894:web:1bfc34b4447d9507f6645f"
+};
+const BASE = "https://hrndzericka.github.io/";
+// cada juego: dónde vive y cómo guarda sus salas (prefijo del PIN en la base de datos y nombre del juego)
+const GAMES = [
+  { id:"stop",       e:"🛑", n:"STOP",                       c:"#ff5d73", url:BASE + "STOP/",            prefix:"",  tag:null,         d:"El clásico Basta: letra, categorías y puntos." },
+  { id:"quiz",       e:"🏎️", n:"La Carrera del Conocimiento", c:"#ffd23f", url:BASE + "CARRERA/",         prefix:"",  tag:"quiz",       d:"Preguntas tipo Kahoot y una carrera de carros." },
+  { id:"ultimo",     e:"💀", n:"El Último en Pie",            c:"#b36bff", url:BASE + "JUEGO/",           prefix:"",  tag:"ultimo",     d:"Preguntas de eliminación: gana el que quede." },
+  { id:"coeval",     e:"🗳️", n:"Coevaluación",                c:"#39ff9c", url:BASE + "VOTACI-N/",        prefix:"",  tag:"coeval",     d:"Los grupos ordenan los proyectos por rubro." },
+  { id:"expediente", e:"🕵️", n:"Expediente Digital",          c:"#22d3ee", url:BASE + "STOP/expediente/", prefix:"X", tag:null,         d:"Clue de ciberseguridad: quién, con qué y dónde." },
+  { id:"datacenter", e:"🏢", n:"Data Center",                 c:"#3d8bff", url:BASE + "STOP/datacenter/", prefix:"D", tag:"datacenter", d:"Tipo Monopoly Deal: encienda 3 pisos de su edificio." }
+];
+const $ = id => document.getElementById(id);
+$("games").innerHTML = GAMES.map(g => `<article class="g" style="--c:${g.c}"><div class="t"><span class="e">${g.e}</span><b>${g.n}</b></div><p>${g.d}</p>
+  <div class="btns"><a href="${g.url}?profe" target="_blank" rel="noopener">🧑‍🏫 Abrir modo profe</a><a class="alt" href="${g.url}" target="_blank" rel="noopener">👀 Ver como estudiante</a></div></article>`).join("");
+$("showProf").onclick = () => { $("teach").hidden = !$("teach").hidden; if(!$("teach").hidden) $("teach").scrollIntoView({ behavior:"smooth" }); };
+if(new URLSearchParams(location.search).has("profe")) $("teach").hidden = false;
+
+const say = (t, cls) => { $("msg").textContent = t; $("msg").className = cls || ""; };
+let db = null;
+try{ if(typeof firebase !== "undefined"){ firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database(); } }catch(e){ console.error(e); }
+// busca en qué juego está abierto ese PIN y lleva al estudiante ahí (con el PIN ya escrito)
+async function findGame(pin){
+  const read = path => db.ref(path).once("value").then(s => s.val()).catch(() => null);
+  const [plain, x, d] = await Promise.all([read("rooms/" + pin + "/host"), read("rooms/X" + pin + "/host"), read("rooms/D" + pin + "/host")]);
+  const found = [];
+  if(plain){ const g = GAMES.find(g => g.prefix === "" && g.tag && g.tag === plain.game) || GAMES[0]; found.push({ g, t:plain.t || 0 }); }
+  if(x) found.push({ g:GAMES.find(g => g.id === "expediente"), t:x.t || 0 });
+  if(d) found.push({ g:GAMES.find(g => g.id === "datacenter"), t:d.t || 0 });
+  found.sort((a, b) => b.t - a.t);
+  return found[0] ? found[0].g : null;
+}
+$("pin").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4); });
+$("joinForm").onsubmit = async e => {
+  e.preventDefault();
+  const pin = $("pin").value.replace(/\D/g, "");
+  if(pin.length !== 4) return say("El PIN tiene 4 números.", "bad");
+  if(!db) return say("No se pudo conectar. Revise el internet y recargue la página.", "bad");
+  $("goBtn").disabled = true; say("Buscando su juego…");
+  const t = setTimeout(() => { $("goBtn").disabled = false; say("Está tardando mucho. Revise el internet e intente otra vez.", "bad"); }, 12000);
+  const g = await findGame(pin);
+  clearTimeout(t);
+  if(!g){ $("goBtn").disabled = false; return say("No hay ningún juego abierto con el PIN " + pin + ". Revíselo o pregúntele a la profe.", "bad"); }
+  say("¡Listo! Entrando a " + g.e + " " + g.n + "…", "ok");
+  location.href = g.url + "?sala=" + pin;
+};
+$("pin").focus();
+</script>
+</body>
+</html>

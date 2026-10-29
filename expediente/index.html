@@ -1746,7 +1746,8 @@ function studentInit(){
   S.cid = (ss.get("xv_cid") || (Math.random().toString(36).slice(2) + Date.now().toString(36))).replace(/[^a-z0-9]/gi,"");
   ss.set("xv_cid", S.cid);
   $("inName").value = ls.get("xv_name", "");
-  $("inCode").focus();
+  const sala = new URLSearchParams(location.search).get("sala"); if(sala) $("inCode").value = sala.replace(/D/g,"").slice(0,4);
+  ($("inCode").value ? $("inName") : $("inCode")).focus();
   $("joinForm").onsubmit = e => {
     e.preventDefault();
     const code = $("inCode").value.replace(/\D/g,""), name = $("inName").value.replace(/\s+/g," ").trim();
