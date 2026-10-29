@@ -512,6 +512,7 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
       </div>
     </div>
   </div>
+  <div class="ovl" id="ovLost" hidden><div class="pinCard"><h2>⚠️ El modo profe se abrió en otra pantalla</h2><p>Para que no se pierdan cartas ni dinero, <b>solo una pantalla</b> puede manejar las salas.</p><p>Siga usando la otra pestaña o compu. Puede cerrar esta.</p></div></div>
   <div class="ovl" id="ovPin" hidden><div class="pinCard"><h2 id="pinSala"></h2><p>Entren a <b id="pinLink"></b></p><div class="pinHuge" id="pinNum"></div><p class="muted">Toque para cerrar</p></div></div>
 </section>
 
@@ -746,6 +747,7 @@ function playFx(list, holder, root, me, names, ended){
   holder.fxN = Math.max(holder.fxN, maxN);
 }
 function oneFx(e, root, me, names, holder){
+  if(me && !(holder && holder.ended)) mineNotice(e, me, names);
   const from = seatEl(root, e.from), to = seatEl(root, e.to), deck = root && root.querySelector(".deckPile"), disc = root && root.querySelector(".discPile");
   const nm = c => (names && names[c]) || "";
   switch(e.k){
@@ -775,6 +777,15 @@ function oneFx(e, root, me, names, holder){
     case "turn": if(e.to === me && !(holder && holder.ended)){ SFX.turn(); stamp("🔔 ¡Es su turno!", "Robó " + (e.n || 2) + " cartas · juegue hasta 3"); } break;
     case "win": SFX.win(); confetti(); break;
   }
+}
+// aviso personal: explica por qué le cambió la plata o el edificio
+function mineNotice(e, me, names){
+  const nm = c => esc((names && names[c]) || "alguien"), card = e.card != null ? CARD(e.card).e + " " + CARD(e.card).n : "";
+  if(e.k === "pay" && e.from === me) return stamp("💸 Usted pagó " + M(e.amt), "a " + ((names && names[e.to]) || "otro jugador") + " · con dinero o piezas, sin vuelto", 2600);
+  if(e.k === "pay" && e.to === me) return stamp("🤑 ¡Le pagaron " + M(e.amt) + "!", "de " + ((names && names[e.from]) || "otro jugador"), 2200);
+  if(e.k === "steal" && e.from === me) return stamp(e.floor ? "🏴‍☠️ ¡Le robaron un piso!" : "🦠 ¡Le robaron una pieza!", (e.floor ? FX[e.floor].n : card) + " · se lo llevó " + ((names && names[e.to]) || "otro jugador"), 2800);
+  if(e.k === "swap" && e.from === me) return stamp("🔄 Le cambiaron una pieza", "con " + ((names && names[e.to]) || "otro jugador"), 2400);
+  if(e.k === "lose" && e.to === me) return stamp("🔥 El apagón le dañó una pieza", card + " · no tenía UPS", 2600);
 }
 // sello grande en el centro (avisos importantes)
 function stamp(text, sub, ms){
@@ -1103,8 +1114,8 @@ function introInit(){
    MODO DOCENTE: varias salas a la vez. La compu de la profe es la que manda:
    guarda cada partida, revisa las jugadas y le avisa a cada estudiante.
    ============================================================ */
-const DEF_MS = 15000, QUIZ_MS = 20000, PAY_MS = 40000, LOSE_MS = 25000, DISC_MS = 25000, ONLINE_MS = 15000;
-const H = { rooms:{}, token:null, cur:null, def:{ secs:60, quiz:true }, fx:{} };
+const DEF_MS = 15000, QUIZ_MS = 20000, PAY_MS = 60000, LOSE_MS = 25000, DISC_MS = 25000, ONLINE_MS = 15000;
+const H = { sid: Math.random().toString(36).slice(2) + Date.now().toString(36), lost:false, rooms:{}, token:null, cur:null, def:{ secs:60, quiz:true }, fx:{} };
 const isOn = p => !!p && !p.gone && !!p.seen && (Date.now() - p.seen) < ONLINE_MS;
 const nm = (room, cid) => esc((room.players[cid] && room.players[cid].name) || "Alguien");
 const cn = id => CARD(id).e + " " + esc(CARD(id).n);
@@ -1140,6 +1151,7 @@ function hNewRoom(){
   H.rooms[code] = r; hSave(); return r;
 }
 function hSave(){
+  if(H.lost) return;
   clearTimeout(H.saveT);
   H.saveT = setTimeout(() => {
     const o = { def:H.def, rooms:{} };
@@ -1161,8 +1173,12 @@ function hNet(room){
     const h = snap.val();
     if(h && h.token !== H.token){ delete H.rooms[room.code]; room.code = newCode(); H.rooms[room.code] = room; hSave(); hNet(room); return; }
     room.ref = ref;
-    ref.child("host").set({ token:H.token, t:firebase.database.ServerValue.TIMESTAMP, game:GAME });
+    ref.child("host").set({ token:H.token, sid:H.sid, t:firebase.database.ServerValue.TIMESTAMP, game:GAME });
     ref.child("host").onDisconnect().remove();
+    // si otra pestaña (u otra compu con este mismo modo profe) toma la sala, esta deja de mandar
+    ref.child("host").on("value", s3 => { const v = s3.val(); if(H.lost) return;
+      if(v && v.sid && v.sid !== H.sid) return hLost();
+      if(!v && room.ref) ref.child("host").set({ token:H.token, sid:H.sid, t:firebase.database.ServerValue.TIMESTAMP, game:GAME }); });
     ref.child("toHost").on("child_added", s2 => {
       const m = s2.val(); s2.ref.remove();
       if(!m || !m.cid || !m.d) return;
@@ -1170,6 +1186,12 @@ function hNet(room){
     });
     room.sent = {}; hDirty(room);
   }).catch(err => { console.error(err); room.netErr = "Firebase rechazó la conexión."; hRender(); });
+}
+function hLost(){
+  H.lost = true;
+  Object.values(H.rooms).forEach(r => { try{ r.ref && r.ref.child("toHost").off(); r.ref && r.ref.child("host").off(); }catch(e){} r.ref = null; });
+  clearTimeout(H.saveT); H.saveT = 1e9; // ya no guarda: la otra pantalla es la que manda
+  $("ovLost").hidden = false;
 }
 function hSend(room, cid, d){ if(!room.ref) return; try{ room.ref.child("inbox/" + cid).push(clean(d)); }catch(e){ console.error(e); } }
 function hBroadcast(room){ if(!room.ref) return; const m = hStateMsg(room); m.hb = Date.now(); try{ room.ref.child("state").set(clean(m)); }catch(e){ console.error(e); } }
@@ -1422,7 +1444,9 @@ function gApply(room, cid){
     case "total": {
       const b = bldFix(g, cid); if(!isLit(b, p.floor)){ addLog(room, "Ese piso ya no está encendido."); return false; }
       const ids = b[p.floor].splice(0);
-      withLit(room, [by, cid], () => { const mb = bldFix(g, by); g.hands[by].push(...mb[p.floor].splice(0)); ids.forEach(id => { if(canPlace(mb, id, p.floor)) mb[p.floor].push(id); else receivePiece(g, by, id); }); });
+      withLit(room, [by, cid], () => { const mb = bldFix(g, by), mine = mb[p.floor].splice(0);
+        ids.forEach(id => { if(canPlace(mb, id, p.floor)) mb[p.floor].push(id); else receivePiece(g, by, id); });
+        mine.forEach(id => receivePiece(g, by, id, p.floor)); });
       fx(room, { k:"steal", from:cid, to:by, floor:p.floor }); addLog(room, "🏴‍☠️ " + nm(room, by) + " se llevó el piso completo " + FX[p.floor].e + " " + FX[p.floor].n + " de " + nm(room, cid) + "!");
       return false; }
     case "migra": {
@@ -1501,6 +1525,7 @@ function autoPay(g, cid, amount){
   return out;
 }
 function hTick(){
+  if(H.lost) return;
   const now = Date.now();
   Object.values(H.rooms).forEach(room => {
     if(H.onTick) H.onTick(room);
