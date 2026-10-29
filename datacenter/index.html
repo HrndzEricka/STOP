@@ -103,6 +103,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .plate{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#0f1d38,#081226);border:1.5px solid #22d3ee;border-radius:999px;padding:3px 10px 3px 3px;box-shadow:0 0 12px rgba(34,211,238,.35);white-space:nowrap;font-size:14px}
 .plate.on{border-color:var(--led);box-shadow:0 0 0 2px var(--led),0 0 24px rgba(57,255,156,.6)}
 .plate.off{opacity:.6}.plate.off::after{content:"desconectado";font-size:10px;color:var(--dim)}
+.plate .tnum{font-family:var(--mono);font-size:12px;font-weight:700;background:#ffd23f;color:#1a1400;border-radius:999px;padding:1px 7px;margin-left:2px}
+.plate.on .tnum{background:var(--led);color:#03140d}
 .plate .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#162a4d;font-size:15px}
 .plate .sm{font-family:var(--mono);font-size:12px;color:#9fd8ff}
 .plate .sc{font-family:var(--mono);font-size:12px;background:#162a4d;border-radius:999px;padding:0 7px}
@@ -878,7 +880,8 @@ const onOf = (m, cid) => { const p = arr(m.players).find(x => x.cid === cid); re
 
 function plateHtml(m, cid, me){
   const b = bldOf(m, cid), lc = litCount(b), names = nameMap(m), avs = avMap(m), turn = m.turn && m.turn.cid === cid && m.status === "playing";
-  return '<div class="plate ' + (turn ? "on" : "") + (onOf(m, cid) ? "" : " off") + '"><span class="av">' + avs[cid] + '</span><b>' + (me ? "Usted (" + esc(names[cid]) + ")" : esc(names[cid] || "—")) + '</b>' +
+  const tn = arr(m.order).indexOf(cid) + 1;
+  return '<div class="plate ' + (turn ? "on" : "") + (onOf(m, cid) ? "" : " off") + '">' + (tn ? '<span class="tnum" title="Orden de turno">' + tn + 'º</span>' : "") + '<span class="av">' + avs[cid] + '</span><b>' + (me ? "Usted (" + esc(names[cid]) + ")" : esc(names[cid] || "—")) + '</b>' +
     (me ? "" : '<span class="sm" title="Cartas en la mano">✋' + handNOf(m, cid) + '</span>') + '<span class="sm" title="Dinero en el banco">🏦' + M(moneyOf(m, cid)) + '</span><span class="sc ' + (lc >= 2 ? "hot" : "") + '">' + lc + '/3 pisos</span>' +
     (m.winner === cid ? '<span class="sc hot">🏆</span>' : "") + '</div>';
 }
@@ -925,14 +928,17 @@ function centerHtml(m, me){
 const SEATS_STU = { 1:["left:50%;top:4px;transform:translateX(-50%)"], 2:["left:30%;top:4px;transform:translateX(-50%)","left:70%;top:4px;transform:translateX(-50%)"],
   3:["left:18%;top:4px;transform:translateX(-50%)","left:50%;top:4px;transform:translateX(-50%)","left:82%;top:4px;transform:translateX(-50%)"],
   4:["left:12%;top:4px;transform:translateX(-50%)","left:37%;top:4px;transform:translateX(-50%)","left:63%;top:4px;transform:translateX(-50%)","left:88%;top:4px;transform:translateX(-50%)"] };
-SEATS_STU[5] = SEATS_STU[4].concat(["right:22px;top:300px"]);
-SEATS_STU[6] = SEATS_STU[4].concat(["right:22px;top:300px","left:22px;top:300px"]);
+// después de uno sigue el de su izquierda, luego los de arriba (de izquierda a derecha) y por último el de la derecha
+SEATS_STU[5] = ["left:22px;top:300px"].concat(SEATS_STU[4]);
+SEATS_STU[6] = ["left:22px;top:300px"].concat(SEATS_STU[4], ["right:22px;top:300px"]);
 const P_TOP = n => n === 1 ? ["left:50%;top:4px;transform:translateX(-50%)"] : n === 2 ? ["left:30%;top:4px;transform:translateX(-50%)","left:70%;top:4px;transform:translateX(-50%)"] : ["left:16%;top:4px;transform:translateX(-50%)","left:50%;top:4px;transform:translateX(-50%)","left:84%;top:4px;transform:translateX(-50%)"];
 const P_BOT = n => n === 1 ? ["left:50%;bottom:4px;transform:translateX(-50%)"] : ["left:30%;bottom:4px;transform:translateX(-50%)","left:70%;bottom:4px;transform:translateX(-50%)"];
+// en la pantalla de la profe los turnos dan la vuelta a la mesa: arriba →, derecha, abajo ←, izquierda
 function profSeats(n){
   const top = Math.min(3, Math.ceil(n / 2)), bot = Math.min(2, n - top), side = n - top - bot;
-  const s = P_TOP(top).map(x => [x, "t"]).concat(P_BOT(bot).map(x => [x, "b"]));
+  const s = P_TOP(top).map(x => [x, "t"]);
   if(side >= 1) s.push(["right:30px;top:50%;transform:translateY(-50%)", "t"]);
+  s.push(...P_BOT(bot).reverse().map(x => [x, "b"]));
   if(side >= 2) s.push(["left:30px;top:50%;transform:translateY(-50%)", "t"]);
   return s;
 }
@@ -1247,7 +1253,7 @@ function gStart(room){
   const ids = room.joinOrder.filter(cid => room.players[cid] && !room.players[cid].gone && isOn(room.players[cid])).slice(0, MAX_PLAYERS);
   if(ids.length < 2) return toast("Se necesitan al menos 2 jugadores conectados.", true);
   const old = room.g || {};
-  const g = room.g = { status:"playing", order:shuffle(ids), hands:{}, bank:{}, bld:{}, deck:shuffle(CARDS.map(c => c.id)), disc:[], turn:null, pend:null, winner:null, log:[], fx:[], fxN:old.fxN || 0, no:0, startedAt:Date.now() };
+  const g = room.g = { status:"playing", order:ids.slice(), hands:{}, bank:{}, bld:{}, deck:shuffle(CARDS.map(c => c.id)), disc:[], turn:null, pend:null, winner:null, log:[], fx:[], fxN:old.fxN || 0, no:0, startedAt:Date.now() };
   g.order.forEach(cid => { g.hands[cid] = drawN(g, START_HAND); g.bank[cid] = []; bldFix(g, cid); });
   room.paused = 0; room.qUsed = [];
   addLog(room, "🎬 ¡Empieza la partida con " + g.order.length + " jugadores! Gana quien encienda 3 pisos.");
@@ -1575,7 +1581,8 @@ function statusTxt(room){
   if(g.status === "lobby") return "🟡 Esperando jugadores";
   if(g.status === "ended") return g.winner ? "🏆 Ganó " + esc(names[g.winner] || "") : "⏹ Terminada";
   if(room.paused) return "⏸ En pausa";
-  return "🟢 Jugando · turno de " + esc(names[g.turn && g.turn.cid] || "—");
+  const o = g.order || [], nx = g.turn ? o[(o.indexOf(g.turn.cid) + 1) % o.length] : null;
+  return "🟢 Jugando · turno de " + esc(names[g.turn && g.turn.cid] || "—") + (nx ? " · después sigue " + esc(names[nx] || "") : "");
 }
 function hRenderDash(){
   $("hDash").hidden = false; $("hRoom").hidden = true; $("hBack").hidden = true;
@@ -1770,6 +1777,7 @@ function sRender(){
   else if(t && t.cid === S.cid){ const used = t.plays || 0;
     top = '<b class="tb">🎲 ¡Es su turno, ' + esc(S.name) + '!</b><span class="plays">' + [0,1,2].map(i => '<i class="' + (i < used ? "used" : "") + '"></i>').join("") + ' Le quedan <b>' + (PLAYS - used) + ' jugada' + (PLAYS - used === 1 ? "" : "s") + '</b></span>' + (t.double ? '<span class="dbl">⚡ Hora pico activa: su próxima factura cobra el doble</span>' : "") + (t.left != null && !m.pend ? '<span class="tmr" data-left="' + t.left + '"></span>' : "") + '<span class="hint">⬇️ Sus cartas están abajo</span>'; }
   else if(t) top = 'Turno de <b>' + esc(names[t.cid] || "—") + '</b>' + (t.left != null && !m.pend ? ' <span class="tmr" data-left="' + t.left + '"></span>' : "") + '<span class="hint">Mientras tanto, mire los edificios: toque 🔍 para ver sus piezas</span>';
+  if(t && m.status === "playing"){ const o = arr(m.order), nx = o[(o.indexOf(t.cid) + 1) % o.length]; if(nx) top += '<span class="hint">· Después sigue: <b style="color:#fff">' + (nx === S.cid ? "¡usted!" : esc(names[nx] || "")) + '</b></span>'; }
   $("gTop").innerHTML = top; $("gTop").className = "turn" + (isMyTurn() ? " mine" : "");
   $("gEnd").hidden = !(isMyTurn() && !m.pend); $("gEnd").classList.toggle("pulse", !!(isMyTurn() && (t.plays || 0) >= PLAYS));
   // la mesa
