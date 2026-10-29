@@ -337,6 +337,7 @@ button.tw2:hover,button.tw2:focus-visible{outline:2px solid var(--warn);outline-
 #ovPin .pinCard{background:#0b1428;border:3px solid var(--warn);border-radius:22px;padding:30px 40px;text-align:center;display:flex;flex-direction:column;gap:8px}
 #ovPin h2{margin:0;font-family:var(--display);font-size:30px}
 #ovPin p{margin:0;font-size:20px}
+.rBtns .del{margin-left:auto;color:#ff9aa8;border-color:#5a2433}
 
 /* ---------- introducción animada (misma mesa del juego) ---------- */
 #vIntro .iFollowTag{display:none}
@@ -1612,6 +1613,7 @@ function hRemove(room, cid, why){
   hDirty(room);
 }
 function hCloseRoom(room){
+  if(!H.rooms[room.code]) return;
   // primero se les avisa a los chicos de esa sala; después se borra
   const ref = room.ref;
   Object.keys(room.players).forEach(cid => hSend(room, cid, { t:"closed" }));
@@ -1641,13 +1643,15 @@ function hRenderDash(){
       '<div class="rPl">' + (ps.length ? ps.map(([cid, p]) => '<span class="chip ' + (isOn(p) ? "" : "off") + '">' + (p.av || "🙂") + " " + esc(p.name) + (g.order && g.order.includes(cid) ? " · " + litCount(bldFix(g, cid)) + "/3" : "") + '</span>').join("") : '<span class="muted">Nadie todavía. Los chicos entran con el PIN.</span>') + '</div>' +
       '<p class="rMeta">' + ps.length + ' / ' + MAX_PLAYERS + ' jugadores' + (leader ? " · va ganando " + esc(r.players[leader].name) : "") + (r.netErr ? ' · <span class="bad">' + esc(r.netErr) + '</span>' : "") + '</p>' +
       '<div class="rBtns">' + (g.status === "playing" ? "" : '<button type="button" class="go" data-start="' + r.code + '">▶ ' + (g.status === "lobby" ? "Empezar" : "Otra partida") + '</button>') +
-      '<button type="button" data-open="' + r.code + '">🖥️ Ver en grande</button></div></article>';
+      '<button type="button" data-open="' + r.code + '">🖥️ Ver en grande</button>' +
+      '<button type="button" class="del' + (armed("del:" + r.code) ? " armed" : "") + '" data-del="' + r.code + '">' + (armed("del:" + r.code) ? "¿Borrar? Toque otra vez" : "🗑 Borrar sala") + '</button></div></article>';
   }).join("");
   $("hRooms").onclick = e => {
     const b = e.target.closest("button"); if(!b) return;
     if(b.dataset.pin) return hShowPin(H.rooms[b.dataset.pin]);
     if(b.dataset.start){ hStartFlow(H.rooms[b.dataset.start]); return; }
     if(b.dataset.open){ H.cur = b.dataset.open; hRender(); }
+    if(b.dataset.del){ const k = "del:" + b.dataset.del; if(armed(k)){ ARM[k] = 0; const room = H.rooms[b.dataset.del]; if(room){ hCloseRoom(room); toast("🗑 Sala " + room.n + " borrada"); } } else { ARM[k] = Date.now(); b.classList.add("armed"); b.textContent = "¿Borrar? Toque otra vez"; setTimeout(() => { if(!armed(k)) hRenderDash(); }, ARM_MS + 50); } }
   };
 }
 function hShowPin(room){
@@ -1659,7 +1663,7 @@ function hRenderPeople(){
   const g = room.g;
   $("hPeople").innerHTML = Object.entries(room.players).filter(([, p]) => !p.gone).map(([cid, p]) => '<div class="pRow ' + (isOn(p) ? "" : "off") + '"><span>' + (p.av || "🙂") + " <b>" + esc(p.name) + '</b>' +
     (g.order && g.order.includes(cid) ? ' · ' + litCount(bldFix(g, cid)) + '/3 pisos · ✋' + g.hands[cid].length : g.status === "playing" ? " · mirando" : "") + ((room.wins || {})[cid] ? " · 🏆" + room.wins[cid] : "") + '</span>' +
-    '<button type="button" class="kick" data-kick="' + cid + '" title="Sacar de la sala">✖</button></div>').join("") || '<p class="muted">Nadie todavía.</p>';
+    '<button type="button" class="kick' + (armed("kick:" + cid) ? " armed" : "") + '" data-kick="' + cid + '" title="Sacar de la sala">' + (armed("kick:" + cid) ? "¿Sacar?" : "✖") + '</button></div>').join("") || '<p class="muted">Nadie todavía.</p>';
 }
 function hRenderRoom(){
   const room = H.rooms[H.cur]; if(!room) return hRenderDash();
@@ -1694,12 +1698,19 @@ function hRenderRoom(){
   TMR.at = Date.now(); paintTimers();
   if(g.status === "ended" && g.winner && room.shownWin !== g.startedAt){ room.shownWin = g.startedAt; showWin(m, $("ovWin"), $("winBody")); }
 }
-// botón que pide confirmación (se toca dos veces)
-function armButton(btn, label, fn, ask){
-  btn.textContent = label; btn.classList.remove("armed");
-  btn.onclick = () => { if(btn.classList.contains("armed")){ btn.classList.remove("armed"); btn.textContent = label; fn(); } else { btn.classList.add("armed"); btn.textContent = ask; setTimeout(() => { btn.classList.remove("armed"); btn.textContent = label; }, 3000); } };
+// botones que piden confirmación (se tocan dos veces). Se acuerdan del primer toque aunque la pantalla se redibuje.
+const ARM = {}, ARM_MS = 4000;
+const armed = k => ARM[k] && Date.now() - ARM[k] < ARM_MS;
+function armButton(btn, label, fn, ask, key){
+  const k = key || btn.id;
+  btn.classList.toggle("armed", !!armed(k)); btn.textContent = armed(k) ? ask : label;
+  btn.onclick = () => {
+    if(armed(k)){ ARM[k] = 0; btn.classList.remove("armed"); btn.textContent = label; fn(); return; }
+    ARM[k] = Date.now(); btn.classList.add("armed"); btn.textContent = ask;
+    setTimeout(() => { if(!armed(k) && btn.isConnected){ btn.classList.remove("armed"); btn.textContent = label; } }, ARM_MS + 50);
+  };
 }
-function armOnce(btn, fn){ if(btn.classList.contains("armed")) return fn(); btn.classList.add("armed"); btn.textContent = "¿Sacar?"; setTimeout(() => { btn.classList.remove("armed"); btn.textContent = "✖"; }, 3000); }
+function armOnce(btn, fn){ const k = "kick:" + btn.dataset.kick; if(armed(k)){ ARM[k] = 0; return fn(); } ARM[k] = Date.now(); btn.classList.add("armed"); btn.textContent = "¿Sacar?"; }
 // pantalla del ganador (la usan la profe y los estudiantes)
 function showWin(m, ov, body){
   const names = nameMap(m), w = m.winner, b = bldOf(m, w);
