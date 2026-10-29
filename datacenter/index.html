@@ -1612,7 +1612,11 @@ function hRemove(room, cid, why){
   hDirty(room);
 }
 function hCloseRoom(room){
-  try{ if(room.ref){ room.ref.child("toHost").off(); room.ref.remove(); } }catch(e){}
+  // primero se les avisa a los chicos de esa sala; después se borra
+  const ref = room.ref;
+  Object.keys(room.players).forEach(cid => hSend(room, cid, { t:"closed" }));
+  try{ if(ref){ ref.child("toHost").off(); ref.child("host").off(); setTimeout(() => { try{ ref.remove(); }catch(e){} }, 2500); } }catch(e){}
+  room.ref = null;
   delete H.rooms[room.code]; if(H.cur === room.code) H.cur = null; hSave(); hRender();
 }
 
@@ -1774,6 +1778,7 @@ function sOnData(d){
     case "welcome": if(typeof pvMark === "function") pvMark(); clearTimeout(S.openT); S.joined = true; S.name = d.name; $("jBtn").disabled = false; $("jBtn").textContent = "🏢 Entrar al Data Center"; $("wSala").textContent = "Sala " + d.n + " · PIN " + d.code;
       if(window.DC_SOLO_INTRO && !S.comicSeen) sIntro("¡A JUGAR! ▶"); else sRoute(); return;
     case "rejected": return sJoinFail(d.msg || "No se pudo entrar.");
+    case "closed": S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; $("ovPrompt").hidden = true; $("ovModal").hidden = true; $("ovWin").hidden = true; return sJoinFail("🗑 La profe cerró esta sala. Si hay otra sala, pídale el PIN nuevo.");
     case "kicked": S.joined = false; try{ S.room.child("state").off(); S.room.child("inbox/" + S.cid).off(); }catch(e){} S.room = null; return sJoinFail("La profe lo sacó de la sala.");
     case "private": S.hand = arr(d.hand); S.q = d.q || null; if(S.sel != null && !S.hand.includes(S.sel)) S.sel = null; return sRender();
     case "err": toast(d.msg, true); SFX.bad(); return;
