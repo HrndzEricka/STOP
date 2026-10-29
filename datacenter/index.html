@@ -1244,12 +1244,29 @@ function hOnData(room, cid, d){
   if(d.t === "end") return gEndTurnReq(room, cid);
   if(d.t === "respond") return gRespond(room, cid, d);
 }
+// pasa todo lo de un jugador (cid viejo) a su nueva conexión (cid nuevo)
+function hRekey(room, a, b){
+  const sw = c => c === a ? b : c, mv = o => { if(o && Object.prototype.hasOwnProperty.call(o, a)){ o[b] = o[a]; delete o[a]; } };
+  mv(room.players); mv(room.wins); if(room.sent) delete room.sent[a];
+  room.joinOrder = room.joinOrder.map(sw);
+  const g = room.g;
+  if(g.order) g.order = g.order.map(sw);
+  mv(g.hands); mv(g.bank); mv(g.bld);
+  if(g.turn) g.turn.cid = sw(g.turn.cid);
+  if(g.winner) g.winner = sw(g.winner);
+  if(g.pend){ g.pend.by = sw(g.pend.by); g.pend.queue = g.pend.queue.map(sw); if(g.pend.cur) g.pend.cur.cid = sw(g.pend.cur.cid); mv(g.pend.done); }
+}
 function hErr(room, cid, msg){ hSend(room, cid, { t:"err", msg }); }
 function hJoin(room, cid, d){
   let name = String(d.name || "").replace(/\s+/g, " ").trim().slice(0, 18);
   if(!name) return hSend(room, cid, { t:"rejected", msg:"Escriba su nombre." });
   const av = AVATARS.includes(d.av) ? d.av : pick(AVATARS);
-  const ex = room.players[cid];
+  let ex = room.players[cid];
+  if(!ex){
+    // ¿vuelve alguien que estaba (mismo nombre) y se desconectó? recupera su lugar con todo lo que tenía
+    const lc = name.toLowerCase(), old = Object.keys(room.players).find(c => { const q = room.players[c]; return !q.gone && q.name.toLowerCase() === lc && !isOn(q); });
+    if(old){ hRekey(room, old, cid); ex = room.players[cid]; addLog(room, "🔁 " + esc(ex.name) + " volvió a entrar y recuperó su edificio"); }
+  }
   if(!ex){
     const active = Object.values(room.players).filter(p => !p.gone).length;
     if(active >= MAX_PLAYERS) return hSend(room, cid, { t:"rejected", msg:"Esta sala ya tiene " + MAX_PLAYERS + " jugadores. Pídale a la profe el PIN de otra sala." });
@@ -1819,8 +1836,8 @@ function sRender(){
     $("gActs").innerHTML = sActsHtml();
   }
   sRenderPrompt();
-  if(m.status === "ended" && m.winner && S.shownWin !== m.fx && $("ovWin").hidden){ S.shownWin = m.fx; showWin(m, $("ovWin"), $("winBody")); $("winSub").textContent = "Espere a que la profe empiece otra partida."; }
-  if(m.status === "playing") $("ovWin").hidden = true;
+  if(m.status === "ended" && m.winner && S.shownWin !== m.winner + ":" + arr(m.order).join(",") && $("ovWin").hidden){ S.shownWin = m.winner + ":" + arr(m.order).join(","); showWin(m, $("ovWin"), $("winBody")); $("winSub").textContent = "Espere a que la profe empiece otra partida."; }
+  if(m.status === "playing"){ $("ovWin").hidden = true; S.shownWin = null; }
   paintTimers();
 }
 // qué se puede hacer con la carta escogida
